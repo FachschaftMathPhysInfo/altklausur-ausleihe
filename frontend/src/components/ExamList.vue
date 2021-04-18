@@ -1,24 +1,7 @@
 <template>
   <div>
-    <v-app-bar color="primary" dense dark>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Altklausurausleihe</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-
-      <v-text-field
-        v-model="search"
-        prepend-inner-icon="mdi-magnify"
-        label="Filter Altklausuren, z.B. nach Prüfenden oder Veranstaltungen"
-        single-line
-        hide-details
-        clearable
-      ></v-text-field>
-    </v-app-bar>
     <v-container>
-      <v-row v-if="search">
+      <v-row v-if="this.$parent.search">
         <v-col sm="2">
           <v-text-field
             v-model="moduleName"
@@ -97,7 +80,7 @@
         :headers="headers"
         :items="exams"
         :items-per-page="-1"
-        :search="search"
+        :search="this.$parent.search"
         :hide-default-footer="true"
         show-expand
         show-select
@@ -169,7 +152,6 @@ export default {
     const self = this;
     return {
       selected: [],
-      search: "",
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
