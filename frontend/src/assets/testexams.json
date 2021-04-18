@@ -1,0 +1,56 @@
+[
+    {
+        "id": 0,
+        "moduleName": "Betriebssysteme und Netzwerke",
+        "alternativeModuleName": "IBN, BeNe",
+        "examiners": "Artur Andrzejak",
+        "semester": "SoSe 2016",
+        "subject": "Info",
+        "path": "https://www.informatik.uni-heidelberg.de/images/pruef_modul/MHB_Informatik_MSc_WS202021.pdf"
+    },
+    {
+        "id": 1,
+        "moduleName": "Betriebssysteme und Netzwerke",
+        "alternativeModuleName": "IBN, BeNe",
+        "examiners": "Artur Andrzejak",
+        "semester": "SoSe 2017",
+        "subject": "Info",
+        "path": "https://www.informatik.uni-heidelberg.de/images/pruef_modul/MHB_Informatik_MSc_WS202021.pdf"
+    },
+    {
+        "id": 2,
+        "moduleName": "Analysis 1",
+        "alternativeModuleName": "Ana1",
+        "examiners": "Rainer Weissauer",
+        "semester": "WiSe 2016",
+        "subject": "Mathe",
+        "path": "https://www.mathinf.uni-heidelberg.de/2021/HiWiAushangSS_21.pdf"
+    },
+    {
+        "id": 3,
+        "moduleName": "Lineare Algebra 1",
+        "alternativeModuleName": "LA 1",
+        "examiners": "Gebhard Böckle",
+        "semester": "WiSe 2016",
+        "subject": "Mathe",
+        "path": "https://www.mathinf.uni-heidelberg.de/2021/HiWiAushangSS_21.pdf"
+    },
+    {
+        "id": 4,
+        "moduleName": "Einführung in die Numerik",
+        "alternativeModuleName": "Num 0",
+        "examiners": "Peter Bastian",
+        "semester": "WiSe 2017",
+        "subject": "Mathe",
+        "path": "https://www.mathinf.uni-heidelberg.de/2021/HiWiAushangSS_21.pdf"
+    },
+    {
+        "id": 5,
+        "moduleName": "Quantum Dynamics",
+        "alternativeModuleName": "",
+        "examiners": "Albert Einstein, Marie Curie",
+        "semester": "SoSe 1994",
+        "subject": "Physik",
+        "path": "https://www.informatik.uni-heidelberg.de/images/pruef_modul/MHB_Informatik_MSc_WS202021.pdf"
+    }
+]
