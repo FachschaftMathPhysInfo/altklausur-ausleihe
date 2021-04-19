@@ -1,0 +1,44 @@
+---
+version: '3.0'
+
+services:
+  # altklausur_ausleihe-db:
+  #   image: postgres:13.0
+  #   environment:
+  #     POSTGRES_PASSWORD: randomtest1
+  #     POSTGRES_USER: altklausur_ausleihe
+  #     POSTGRES_DB: altklausur_ausleihe
+  #   volumes:
+  #     - db:/var/lib/postgresql/data
+  #   networks:
+  #     - internal
+
+  # altklausur_ausleihe-backend:
+  #   build: server
+  #   image: "altklausur_ausleihe-backend:latest"
+  #   ports:
+  #     - "127.0.0.1:8081:8081"
+  #   env_file:
+  #     - server/altklausur_ausleihe-backend.env
+  #   networks:
+  #     - internal
+  #   depends_on:
+  #     - altklausur_ausleihe-db
+
+  altklausur_ausleihe-frontend:
+    build:
+      context: frontend
+      args:
+        SERVER_HTTP: http://localhost:8081/query
+        SERVER_WS: ws://localhost:8081/query
+    image: "altklausur_ausleihe-frontend:latest"
+    ports:
+      - "127.0.0.1:8080:80"
+    # depends_on:
+    #   - altklausur_ausleihe-backend
+
+# networks:
+#   internal: {}
+
+volumes:
+  db: {}
