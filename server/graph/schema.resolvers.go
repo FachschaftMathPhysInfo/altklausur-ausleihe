@@ -11,11 +11,19 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *mutationResolver) CreateLecturer(ctx context.Context, input model.NewLecturer) (*model.Lecturer, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) LinkExamAndLecturer(ctx context.Context, input *model.LinkInput) (*model.Exam, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

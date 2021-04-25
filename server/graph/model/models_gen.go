@@ -2,19 +2,31 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Exam struct {
+	ID       string      `json:"id"`
+	Subject  string      `json:"subject"`
+	URL      string      `json:"url"`
+	Examiner []*Lecturer `json:"examiner"`
+	Semester *string     `json:"semester"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Lecturer struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type LinkInput struct {
+	LecturerID string `json:"lecturer_id"`
+	ExamID     string `json:"exam_id"`
+}
+
+type NewExam struct {
+	Subject  string  `json:"subject"`
+	Semester *string `json:"semester"`
+}
+
+type NewLecturer struct {
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
 }

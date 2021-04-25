@@ -2,27 +2,41 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
+type Exam {
   id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+  subject: String!
+  url: String!
+  examiner: [Lecturer]
+  semester: String
 }
 
-type User {
+type Lecturer {
   id: ID!
   name: String!
+  surname: String!
 }
 
 type Query {
-  todos: [Todo!]!
+  exams: [Exam!]!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+input NewExam {
+  subject: String!
+  semester: String
+}
+
+input NewLecturer {
+  name: String!
+  surname: String!
+}
+
+input LinkInput {
+  lecturer_id: ID!
+  exam_id: ID!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createExam(input: NewExam!): Exam!
+  createLecturer(input: NewLecturer!): Lecturer!
+  linkExamAndLecturer(input: LinkInput): Exam
 }
