@@ -11,7 +11,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 )
 
-const defaultPort = "8080"
+const defaultPort = "8081"
 
 func main() {
 	port := os.Getenv("PORT")

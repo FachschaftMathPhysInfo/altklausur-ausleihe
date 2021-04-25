@@ -13,17 +13,17 @@ services:
   #   networks:
   #     - internal
 
-  # altklausur_ausleihe-backend:
-  #   build: server
-  #   image: "altklausur_ausleihe-backend:latest"
-  #   ports:
-  #     - "127.0.0.1:8081:8081"
-  #   env_file:
-  #     - server/altklausur_ausleihe-backend.env
-  #   networks:
-  #     - internal
-  #   depends_on:
-  #     - altklausur_ausleihe-db
+  altklausur_ausleihe-backend:
+    build: server
+    image: "altklausur_ausleihe-backend:latest"
+    ports:
+      - "127.0.0.1:8081:8081"
+    # env_file:
+    #   - server/altklausur_ausleihe-backend.env
+    networks:
+      - internal
+    # depends_on:
+    #   - altklausur_ausleihe-db
 
   altklausur_ausleihe-frontend:
     build:
@@ -37,8 +37,8 @@ services:
     # depends_on:
     #   - altklausur_ausleihe-backend
 
-# networks:
-#   internal: {}
+networks:
+  internal: {}
 
 volumes:
   db: {}
