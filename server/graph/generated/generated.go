@@ -44,7 +44,6 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Exam struct {
-		Examiner func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Semester func(childComplexity int) int
 		Subject  func(childComplexity int) int
@@ -92,14 +91,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Exam.examiner":
-		if e.complexity.Exam.Examiner == nil {
-			break
-		}
-
-		return e.complexity.Exam.Examiner(childComplexity), true
-
-	case "Exam.id":
+	case "Exam.ID":
 		if e.complexity.Exam.ID == nil {
 			break
 		}
@@ -127,7 +119,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Exam.URL(childComplexity), true
 
-	case "Lecturer.id":
+	case "Lecturer.ID":
 		if e.complexity.Lecturer.ID == nil {
 			break
 		}
@@ -259,18 +251,19 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
-type Exam {
-  id: ID!
-  subject: String!
-  url: String!
-  examiner: [Lecturer]
-  semester: String
-}
 
 type Lecturer {
-  id: ID!
+  ID: Int!
   name: String!
   surname: String!
+}
+
+type Exam {
+  ID: Int!
+  subject: String!
+  url: String!
+  # examiner: [Lecturer]
+  semester: String
 }
 
 type Query {
@@ -288,8 +281,8 @@ input NewLecturer {
 }
 
 input LinkInput {
-  lecturer_id: ID!
-  exam_id: ID!
+  lecturer_id: Int!
+  exam_id: Int!
 }
 
 type Mutation {
@@ -403,7 +396,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Exam_id(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
+func (ec *executionContext) _Exam_ID(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -433,9 +426,9 @@ func (ec *executionContext) _Exam_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Exam_subject(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
@@ -508,38 +501,6 @@ func (ec *executionContext) _Exam_url(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Exam_examiner(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Exam",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Examiner, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Lecturer)
-	fc.Result = res
-	return ec.marshalOLecturer2ᚕᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐLecturer(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Exam_semester(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -572,7 +533,7 @@ func (ec *executionContext) _Exam_semester(ctx context.Context, field graphql.Co
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Lecturer_id(ctx context.Context, field graphql.CollectedField, obj *model.Lecturer) (ret graphql.Marshaler) {
+func (ec *executionContext) _Lecturer_ID(ctx context.Context, field graphql.CollectedField, obj *model.Lecturer) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -602,9 +563,9 @@ func (ec *executionContext) _Lecturer_id(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Lecturer_name(ctx context.Context, field graphql.CollectedField, obj *model.Lecturer) (ret graphql.Marshaler) {
@@ -2003,7 +1964,7 @@ func (ec *executionContext) unmarshalInputLinkInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lecturer_id"))
-			it.LecturerID, err = ec.unmarshalNID2string(ctx, v)
+			it.LecturerID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2011,7 +1972,7 @@ func (ec *executionContext) unmarshalInputLinkInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("exam_id"))
-			it.ExamID, err = ec.unmarshalNID2string(ctx, v)
+			it.ExamID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2096,8 +2057,8 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Exam")
-		case "id":
-			out.Values[i] = ec._Exam_id(ctx, field, obj)
+		case "ID":
+			out.Values[i] = ec._Exam_ID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2111,8 +2072,6 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "examiner":
-			out.Values[i] = ec._Exam_examiner(ctx, field, obj)
 		case "semester":
 			out.Values[i] = ec._Exam_semester(ctx, field, obj)
 		default:
@@ -2137,8 +2096,8 @@ func (ec *executionContext) _Lecturer(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Lecturer")
-		case "id":
-			out.Values[i] = ec._Lecturer_id(ctx, field, obj)
+		case "ID":
+			out.Values[i] = ec._Lecturer_ID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2556,13 +2515,13 @@ func (ec *executionContext) marshalNExam2ᚖgithubᚗcomᚋFachschaftMathPhysInf
 	return ec._Exam(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2868,53 +2827,6 @@ func (ec *executionContext) marshalOExam2ᚖgithubᚗcomᚋFachschaftMathPhysInf
 		return graphql.Null
 	}
 	return ec._Exam(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOLecturer2ᚕᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐLecturer(ctx context.Context, sel ast.SelectionSet, v []*model.Lecturer) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOLecturer2ᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐLecturer(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalOLecturer2ᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐLecturer(ctx context.Context, sel ast.SelectionSet, v *model.Lecturer) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Lecturer(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOLinkInput2ᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐLinkInput(ctx context.Context, v interface{}) (*model.LinkInput, error) {

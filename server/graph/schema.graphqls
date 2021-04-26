@@ -2,18 +2,19 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Exam {
-  id: ID!
-  subject: String!
-  url: String!
-  examiner: [Lecturer]
-  semester: String
-}
 
 type Lecturer {
-  id: ID!
+  ID: Int!
   name: String!
   surname: String!
+}
+
+type Exam {
+  ID: Int!
+  subject: String!
+  url: String!
+  # examiner: [Lecturer]
+  semester: String
 }
 
 type Query {
@@ -31,8 +32,8 @@ input NewLecturer {
 }
 
 input LinkInput {
-  lecturer_id: ID!
-  exam_id: ID!
+  lecturer_id: Int!
+  exam_id: Int!
 }
 
 type Mutation {
