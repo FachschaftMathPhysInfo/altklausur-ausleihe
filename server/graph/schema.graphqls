@@ -4,6 +4,7 @@ type Exam {
   subject: String!
   moduleName: String!
   url: String!
+  moduleAltName: String
   year: Int
   examiners: String
   semester: String
@@ -16,6 +17,7 @@ type Query {
 input NewExam {
   subject: String!
   moduleName: String!
+  moduleAltName: String
   year: Int
   examiners: String
   semester: String

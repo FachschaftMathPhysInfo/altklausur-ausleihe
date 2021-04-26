@@ -44,13 +44,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Exam struct {
-		Examiners  func(childComplexity int) int
-		ID         func(childComplexity int) int
-		ModuleName func(childComplexity int) int
-		Semester   func(childComplexity int) int
-		Subject    func(childComplexity int) int
-		URL        func(childComplexity int) int
-		Year       func(childComplexity int) int
+		Examiners     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		ModuleAltName func(childComplexity int) int
+		ModuleName    func(childComplexity int) int
+		Semester      func(childComplexity int) int
+		Subject       func(childComplexity int) int
+		URL           func(childComplexity int) int
+		Year          func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -97,6 +98,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Exam.ID(childComplexity), true
+
+	case "Exam.moduleAltName":
+		if e.complexity.Exam.ModuleAltName == nil {
+			break
+		}
+
+		return e.complexity.Exam.ModuleAltName(childComplexity), true
 
 	case "Exam.moduleName":
 		if e.complexity.Exam.ModuleName == nil {
@@ -222,6 +230,7 @@ type Exam {
   subject: String!
   moduleName: String!
   url: String!
+  moduleAltName: String
   year: Int
   examiners: String
   semester: String
@@ -234,6 +243,7 @@ type Query {
 input NewExam {
   subject: String!
   moduleName: String!
+  moduleAltName: String
   year: Int
   examiners: String
   semester: String
@@ -456,6 +466,38 @@ func (ec *executionContext) _Exam_url(ctx context.Context, field graphql.Collect
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Exam_moduleAltName(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Exam",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ModuleAltName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Exam_year(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
@@ -1811,6 +1853,14 @@ func (ec *executionContext) unmarshalInputNewExam(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "moduleAltName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("moduleAltName"))
+			it.ModuleAltName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "year":
 			var err error
 
@@ -1880,6 +1930,8 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "moduleAltName":
+			out.Values[i] = ec._Exam_moduleAltName(ctx, field, obj)
 		case "year":
 			out.Values[i] = ec._Exam_year(ctx, field, obj)
 		case "examiners":
