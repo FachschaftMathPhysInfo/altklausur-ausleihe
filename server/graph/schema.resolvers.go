@@ -15,14 +15,6 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) CreateLecturer(ctx context.Context, input model.NewLecturer) (*model.Lecturer, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) LinkExamAndLecturer(ctx context.Context, input *model.LinkInput) (*model.Exam, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	panic(fmt.Errorf("not implemented"))
 }

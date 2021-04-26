@@ -1,19 +1,11 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-
-type Lecturer {
-  ID: Int!
-  name: String!
-  surname: String!
-}
 
 type Exam {
   ID: Int!
   subject: String!
+  moduleName: String!
   url: String!
-  # examiner: [Lecturer]
+  year: Int
+  examiners: String
   semester: String
 }
 
@@ -23,21 +15,12 @@ type Query {
 
 input NewExam {
   subject: String!
+  moduleName: String!
+  year: Int
+  examiners: String
   semester: String
-}
-
-input NewLecturer {
-  name: String!
-  surname: String!
-}
-
-input LinkInput {
-  lecturer_id: Int!
-  exam_id: Int!
 }
 
 type Mutation {
   createExam(input: NewExam!): Exam!
-  createLecturer(input: NewLecturer!): Lecturer!
-  linkExamAndLecturer(input: LinkInput): Exam
 }

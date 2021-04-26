@@ -45,7 +45,6 @@ func initDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&model.Exam{})
-	db.AutoMigrate(&model.Lecturer{})
 
 	return db
 }

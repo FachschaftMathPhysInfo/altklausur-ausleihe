@@ -3,29 +3,19 @@
 package model
 
 type Exam struct {
-	ID       int     `json:"ID"`
-	Subject  string  `json:"subject"`
-	URL      string  `json:"url"`
-	Semester *string `json:"semester"`
-}
-
-type Lecturer struct {
-	ID      int    `json:"ID"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-}
-
-type LinkInput struct {
-	LecturerID int `json:"lecturer_id"`
-	ExamID     int `json:"exam_id"`
+	ID         int     `json:"ID"`
+	Subject    string  `json:"subject"`
+	ModuleName string  `json:"moduleName"`
+	URL        string  `json:"url"`
+	Year       *int    `json:"year"`
+	Examiners  *string `json:"examiners"`
+	Semester   *string `json:"semester"`
 }
 
 type NewExam struct {
-	Subject  string  `json:"subject"`
-	Semester *string `json:"semester"`
-}
-
-type NewLecturer struct {
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
+	Subject    string  `json:"subject"`
+	ModuleName string  `json:"moduleName"`
+	Year       *int    `json:"year"`
+	Examiners  *string `json:"examiners"`
+	Semester   *string `json:"semester"`
 }
