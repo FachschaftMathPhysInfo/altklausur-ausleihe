@@ -1,0 +1,28 @@
+
+type Exam {
+  ID: Int!
+  subject: String!
+  moduleName: String!
+  url: String!
+  moduleAltName: String
+  year: Int
+  examiners: String
+  semester: String
+}
+
+type Query {
+  exams: [Exam!]!
+}
+
+input NewExam {
+  subject: String!
+  moduleName: String!
+  moduleAltName: String
+  year: Int
+  examiners: String
+  semester: String
+}
+
+type Mutation {
+  createExam(input: NewExam!): Exam!
+}
