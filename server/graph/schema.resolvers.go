@@ -5,18 +5,39 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 )
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-	panic(fmt.Errorf("not implemented"))
+	exam := model.Exam{
+		Subject:       input.Subject,
+		ModuleName:    input.ModuleName,
+		ModuleAltName: input.ModuleAltName,
+		Year:          input.Year,
+		Examiners:     input.Examiners,
+		Semester:      input.Semester,
+	}
+
+	r.DB.Create(&exam)
+
+	if r.DB.Error != nil {
+		return nil, r.DB.Error
+	}
+
+	return &exam, nil
 }
 
 func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
-	panic(fmt.Errorf("not implemented"))
+	var exam []*model.Exam
+	r.DB.Find(&exam)
+
+	if r.DB.Error != nil {
+		return nil, r.DB.Error
+	}
+
+	return exam, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
