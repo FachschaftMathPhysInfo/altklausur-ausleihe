@@ -10,6 +10,10 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 )
 
+func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
+	return obj.UUID.String(), nil
+}
+
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
 	exam := model.Exam{
 		Subject:       input.Subject,
@@ -40,11 +44,15 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
+// Exam returns generated.ExamResolver implementation.
+func (r *Resolver) Exam() generated.ExamResolver { return &examResolver{r} }
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type examResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

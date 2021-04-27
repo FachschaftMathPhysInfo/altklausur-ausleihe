@@ -1,6 +1,6 @@
 
 type Exam {
-  ID: Int!
+  UUID: String!
   subject: String!
   moduleName: String!
   url: String!
