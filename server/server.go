@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"gorm.io/driver/postgres"
 	_ "gorm.io/driver/postgres"
@@ -29,10 +33,17 @@ func initDB() *gorm.DB {
 	}
 	err := fmt.Errorf("initial connect failed")
 
-	db, err := gorm.Open(postgres.Open(databaseConnectionString), &gorm.Config{})
+	db, err := gorm.Open(
+		postgres.Open(databaseConnectionString),
+		&gorm.Config{},
+	)
+
 	for err != nil {
 		log.Println(err)
-		db, err = gorm.Open(postgres.Open(databaseConnectionString), &gorm.Config{})
+		db, err = gorm.Open(
+			postgres.Open(databaseConnectionString),
+			&gorm.Config{},
+		)
 		time.Sleep(500 * time.Millisecond)
 	}
 
@@ -49,14 +60,49 @@ func initDB() *gorm.DB {
 	return db
 }
 
+func initMinIO() *minio.Client {
+	server := os.Getenv("MINIO_SERVER")
+	port := os.Getenv("MINIO_PORT")
+	accessKeyID := os.Getenv("MINIO_ROOT_USER")
+	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	useSSL := false
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(server+":"+port, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("MinIO client successfully set up:")
+	log.Printf("%#v\n", minioClient) // minioClient is now setup
+	return minioClient
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: initDB()}}))
+	srv := handler.NewDefaultServer(
+		generated.NewExecutableSchema(
+			generated.Config{Resolvers: &graph.Resolver{DB: initDB()}},
+		),
+	)
+
+	minioClient := initMinIO()
+
+	buckets, err := minioClient.ListBuckets(context.Background())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, bucket := range buckets {
+		fmt.Println(bucket)
+	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
