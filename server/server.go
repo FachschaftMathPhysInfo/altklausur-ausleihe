@@ -65,6 +65,7 @@ func initMinIO() *minio.Client {
 	port := os.Getenv("MINIO_PORT")
 	accessKeyID := os.Getenv("MINIO_ROOT_USER")
 	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	bucketName := os.Getenv("MINIO_BUCKET_NAME")
 	useSSL := false
 
 	// Initialize minio client object.
@@ -77,8 +78,47 @@ func initMinIO() *minio.Client {
 	}
 
 	log.Println("MinIO client successfully set up:")
-	log.Printf("%#v\n", minioClient) // minioClient is now setup
+
+	// set up the bucket to write the exams into
+	contxt := context.Background()
+	err = minioClient.MakeBucket(
+		contxt,
+		bucketName,
+		minio.MakeBucketOptions{},
+	)
+
+	if err != nil {
+		// Check to see if we already own this bucket (which happens if you run this twice)
+		exists, errBucketExists := minioClient.BucketExists(contxt, bucketName)
+		if errBucketExists == nil && exists {
+			log.Printf("We already own %s\n", bucketName)
+		} else {
+			log.Fatalln(err)
+		}
+	} else {
+		log.Printf("Successfully created %s\n", bucketName)
+	}
+
 	return minioClient
+}
+
+func uploadExam(minioClient *minio.Client, objectName string, filePath string, contentType string) error {
+	bucketName := os.Getenv("MINIO_BUCKET_NAME")
+
+	info, err := minioClient.FPutObject(
+		context.Background(),
+		bucketName,
+		objectName,
+		filePath,
+		minio.PutObjectOptions{ContentType: contentType},
+	)
+
+	if err != nil {
+		return err
+	}
+	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
+
+	return nil
 }
 
 func main() {
