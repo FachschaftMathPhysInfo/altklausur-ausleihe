@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
@@ -44,7 +46,7 @@ func initDB() *gorm.DB {
 			postgres.Open(databaseConnectionString),
 			&gorm.Config{},
 		)
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 	}
 
 	log.Print("connected successfully to the Database")
@@ -127,11 +129,19 @@ func main() {
 		port = defaultPort
 	}
 
+	var mb int64 = 1 << 20
+
 	srv := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{Resolvers: &graph.Resolver{DB: initDB()}},
 		),
 	)
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{
+		MaxMemory:     32 * mb,
+		MaxUploadSize: 50 * mb,
+	})
+	srv.Use(extension.Introspection{})
 
 	minioClient := initMinIO()
 

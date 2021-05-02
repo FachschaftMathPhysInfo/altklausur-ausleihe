@@ -5,6 +5,7 @@ package model
 import (
 	"gorm.io/gorm"
 
+	"github.com/99designs/gqlgen/graphql"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -29,10 +30,11 @@ func (exam *Exam) BeforeCreate(db *gorm.DB) error {
 }
 
 type NewExam struct {
-	Subject       string  `json:"subject"`
-	ModuleName    string  `json:"moduleName"`
-	ModuleAltName *string `json:"moduleAltName"`
-	Year          *int    `json:"year"`
-	Examiners     *string `json:"examiners"`
-	Semester      *string `json:"semester"`
+	Subject       string         `json:"subject"`
+	ModuleName    string         `json:"moduleName"`
+	File          graphql.Upload `json:"file"`
+	ModuleAltName *string        `json:"moduleAltName"`
+	Year          *int           `json:"year"`
+	Examiners     *string        `json:"examiners"`
+	Semester      *string        `json:"semester"`
 }

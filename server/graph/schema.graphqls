@@ -1,3 +1,5 @@
+"The `Upload` scalar type represents a multipart file upload."
+scalar Upload
 
 type Exam {
   UUID: String!
@@ -17,6 +19,7 @@ type Query {
 input NewExam {
   subject: String!
   moduleName: String!
+  file: Upload
   moduleAltName: String
   year: Int
   examiners: String
