@@ -98,7 +98,7 @@ func initMinIO() *minio.Client {
 			log.Fatalln(err)
 		}
 	} else {
-		log.Printf("Successfully created %s\n", bucketName)
+		log.Printf("Successfully created the bucket \"%s\"\n", bucketName)
 	}
 
 	return minioClient

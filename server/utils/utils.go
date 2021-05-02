@@ -24,7 +24,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 	if err != nil {
 		return err
 	}
-	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
+	log.Printf("Successfully uploaded %s of size %d with ContentType \"%s\"\n", objectName, info.Size, contentType)
 
 	return nil
 }

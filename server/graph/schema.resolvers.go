@@ -16,8 +16,8 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-	utils.UploadExam(r.MinIOClient, input.File.Filename, input.File.File, input.File.Size, input.File.ContentType)
 
+	// map the GraphQL input to the Model
 	exam := model.Exam{
 		Subject:       input.Subject,
 		ModuleName:    input.ModuleName,
@@ -27,10 +27,24 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		Semester:      input.Semester,
 	}
 
+	// create the exam in the database
 	r.DB.Create(&exam)
-
 	if r.DB.Error != nil {
 		return nil, r.DB.Error
+	}
+
+	// upload the file to the storage server
+	// this assumes that the database sets an exams' UUID
+	uploadErr := utils.UploadExam(
+		r.MinIOClient,
+		exam.UUID.String(),
+		input.File.File,
+		input.File.Size,
+		input.File.ContentType)
+
+	if uploadErr != nil {
+		// do we need to reroll the inserted db entry?
+		return nil, uploadErr
 	}
 
 	return &exam, nil
