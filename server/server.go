@@ -79,7 +79,7 @@ func initMinIO() *minio.Client {
 		log.Fatalln(err)
 	}
 
-	log.Println("MinIO client successfully set up:")
+	log.Println("MinIO client successfully set up!")
 
 	// set up the bucket to write the exams into
 	contxt := context.Background()
@@ -104,25 +104,6 @@ func initMinIO() *minio.Client {
 	return minioClient
 }
 
-func uploadExam(minioClient *minio.Client, objectName string, filePath string, contentType string) error {
-	bucketName := os.Getenv("MINIO_BUCKET_NAME")
-
-	info, err := minioClient.FPutObject(
-		context.Background(),
-		bucketName,
-		objectName,
-		filePath,
-		minio.PutObjectOptions{ContentType: contentType},
-	)
-
-	if err != nil {
-		return err
-	}
-	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
-
-	return nil
-}
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -133,7 +114,12 @@ func main() {
 
 	srv := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &graph.Resolver{DB: initDB()}},
+			generated.Config{
+				Resolvers: &graph.Resolver{
+					DB:          initDB(),
+					MinIOClient: initMinIO(),
+				},
+			},
 		),
 	)
 	srv.AddTransport(transport.POST{})
@@ -142,17 +128,6 @@ func main() {
 		MaxUploadSize: 50 * mb,
 	})
 	srv.Use(extension.Introspection{})
-
-	minioClient := initMinIO()
-
-	buckets, err := minioClient.ListBuckets(context.Background())
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for _, bucket := range buckets {
-		fmt.Println(bucket)
-	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

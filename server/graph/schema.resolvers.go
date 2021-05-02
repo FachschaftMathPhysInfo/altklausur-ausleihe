@@ -5,11 +5,10 @@ package graph
 
 import (
 	"context"
-	"io/ioutil"
-	"log"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
 )
 
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
@@ -17,11 +16,7 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-	content, err := ioutil.ReadAll(input.File.File)
-	if err != nil {
-		return nil, err
-	}
-	log.Println(string(content))
+	utils.UploadExam(r.MinIOClient, input.File.Filename, input.File.File, input.File.Size, input.File.ContentType)
 
 	exam := model.Exam{
 		Subject:       input.Subject,

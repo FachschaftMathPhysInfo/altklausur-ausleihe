@@ -7,6 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY graph ./graph
+COPY utils ./utils
 COPY server.go ./
 
 RUN go build -a -o graphQLServer server.go
