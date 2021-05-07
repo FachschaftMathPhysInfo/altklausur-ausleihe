@@ -41,7 +41,7 @@ services:
 
   altklausur_ausleihe-exam_marker:
     build: exam_marker
-    image: "altklausur_ausleihe-backend:latest"
+    image: "altklausur_ausleihe-exam_marker:latest"
     env_file:
       - exam_marker/altklausur_ausleihe-exam_marker.env
     networks:

@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"gorm.io/driver/postgres"
@@ -67,7 +66,7 @@ func InitDB() *gorm.DB {
 		db.Debug()
 	}
 
-	db.AutoMigrate(&model.Exam{})
+	// db.AutoMigrate(&model.Exam{})
 
 	return db
 }
