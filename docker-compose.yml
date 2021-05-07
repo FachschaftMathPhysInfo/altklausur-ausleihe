@@ -37,6 +37,18 @@ services:
       - internal
     depends_on:
       - altklausur_ausleihe-db
+      - altklausur_ausleihe-storage
+
+  altklausur_ausleihe-exam_marker:
+    build: exam_marker
+    image: "altklausur_ausleihe-backend:latest"
+    env_file:
+      - exam_marker/altklausur_ausleihe-exam_marker.env
+    networks:
+      - internal
+    depends_on:
+      - altklausur_ausleihe-db
+      - altklausur_ausleihe-storage
 
   altklausur_ausleihe-frontend:
     build:

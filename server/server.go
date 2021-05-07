@@ -19,7 +19,6 @@ import (
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"gorm.io/driver/postgres"
-	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
