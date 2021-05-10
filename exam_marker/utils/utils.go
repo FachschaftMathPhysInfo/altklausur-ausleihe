@@ -76,7 +76,8 @@ func InitMinIO() *minio.Client {
 	port := os.Getenv("MINIO_PORT")
 	accessKeyID := os.Getenv("MINIO_ROOT_USER")
 	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
-	bucketName := os.Getenv("MINIO_BUCKET_NAME")
+	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
+	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
 	useSSL := false
 
 	// Initialize minio client object.
@@ -90,9 +91,16 @@ func InitMinIO() *minio.Client {
 
 	log.Println("MinIO client successfully set up!")
 
+	setUpBucket(minioClient, examBucket)
+	setUpBucket(minioClient, cacheBucket)
+
+	return minioClient
+}
+
+func setUpBucket(minioClient *minio.Client, bucketName string) error {
 	// set up the bucket to write the exams into
 	contxt := context.Background()
-	err = minioClient.MakeBucket(
+	err := minioClient.MakeBucket(
 		contxt,
 		bucketName,
 		minio.MakeBucketOptions{},
@@ -104,11 +112,10 @@ func InitMinIO() *minio.Client {
 		if errBucketExists == nil && exists {
 			log.Printf("We already own %s\n", bucketName)
 		} else {
-			log.Fatalln(err)
+			return err
 		}
 	} else {
 		log.Printf("Successfully created the bucket \"%s\"\n", bucketName)
 	}
-
-	return minioClient
+	return nil
 }
