@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"log"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
@@ -16,7 +17,6 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-
 	// map the GraphQL input to the Model
 	exam := model.Exam{
 		Subject:       input.Subject,
@@ -59,6 +59,18 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	}
 
 	return exam, nil
+}
+
+func (r *queryResolver) RequestMarkedExam(ctx context.Context, uuid string) (*string, error) {
+	log.Println(uuid)
+
+	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
+	if err != nil {
+		return nil, err
+	}
+
+	tagQueue.Publish(uuid)
+	return &uuid, nil
 }
 
 // Exam returns generated.ExamResolver implementation.

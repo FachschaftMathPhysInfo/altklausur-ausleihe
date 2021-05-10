@@ -30,6 +30,7 @@ func main() {
 				Resolvers: &graph.Resolver{
 					DB:          utils.InitDB(),
 					MinIOClient: utils.InitMinIO(),
+					RmqClient:   utils.InitRmq(),
 				},
 			},
 		),
