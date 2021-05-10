@@ -13,6 +13,11 @@ services:
     networks:
       - internal
 
+  altklausur_ausleihe-redis:
+    image: "redis:alpine"
+    networks:
+      - internal
+
   altklausur_ausleihe-storage:
     image: minio/minio:latest
     command: server /data
@@ -49,6 +54,7 @@ services:
     depends_on:
       - altklausur_ausleihe-db
       - altklausur_ausleihe-storage
+      - altklausur_ausleihe-redis
 
   altklausur_ausleihe-frontend:
     build:

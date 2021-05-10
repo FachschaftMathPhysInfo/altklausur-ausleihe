@@ -4,15 +4,30 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/exam_marker/v2/utils"
+	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
 	api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+)
+
+const (
+	prefetchLimit = 1000
+	pollDuration  = 100 * time.Millisecond
+	numConsumers  = 5
+
+	reportBatchSize = 10000
+	consumeDuration = time.Millisecond
+	shouldLog       = false
 )
 
 func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
@@ -85,14 +100,67 @@ func watermarkFile(filename string) {
 	)
 }
 
+func logErrors(errChan <-chan error) {
+	for err := range errChan {
+		switch err := err.(type) {
+		case *rmq.HeartbeatError:
+			if err.Count == rmq.HeartbeatErrorLimit {
+				log.Print("heartbeat error (limit): ", err)
+			} else {
+				log.Print("heartbeat error: ", err)
+			}
+		case *rmq.ConsumeError:
+			log.Print("consume error: ", err)
+		case *rmq.DeliveryError:
+			log.Print("delivery error: ", err.Delivery, err)
+		default:
+			log.Print("other error: ", err)
+		}
+	}
+}
+
 func main() {
 	// get job from queue
-	// TODO: implement
+	errChan := make(chan error, 10)
+	go logErrors(errChan)
+	rmqClient, err := rmq.OpenConnection("exam-message-passing", "tcp", "altklausur_ausleihe-redis:6379", 1, errChan)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	// watermark file
-	watermarkFile("d7b99c10-dd23-487f-af02-53e6a41b4b65")
-	watermarkFile("044fb0f6-48de-4c27-b778-8cff8db7c67c")
+	tagQueue, err := rmqClient.OpenQueue("tag-queue")
 
-	// flatten the PDF by going from PDF to IMG to PDF so the watermark cant be removed
-	// TODO: implement
+	if err = tagQueue.StartConsuming(10, time.Second); err != nil {
+		log.Fatalln(err)
+	}
+
+	for i := 0; i < numConsumers; i++ {
+		name := fmt.Sprintf("consumer %d", i)
+		log.Println(name)
+		if _, err := tagQueue.AddConsumerFunc(name, handleDelivery); err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT)
+	defer signal.Stop(signals)
+
+	<-signals // wait for signal
+	go func() {
+		<-signals // hard exit on second signal (in case shutdown gets stuck)
+		os.Exit(1)
+	}()
+
+	<-rmqClient.StopAllConsuming() // wait for all Consume() calls to finish
+}
+
+func handleDelivery(delivery rmq.Delivery) {
+	// perform task
+	content := delivery.Payload()
+	log.Printf("working on task %s", content)
+	watermarkFile(content)
+	if err := delivery.Ack(); err != nil {
+		log.Fatalln(err)
+	}
 }
