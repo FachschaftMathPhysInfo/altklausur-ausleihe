@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Exam() ExamResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -45,12 +46,12 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Exam struct {
 		Examiners     func(childComplexity int) int
-		ID            func(childComplexity int) int
 		ModuleAltName func(childComplexity int) int
 		ModuleName    func(childComplexity int) int
 		Semester      func(childComplexity int) int
 		Subject       func(childComplexity int) int
 		URL           func(childComplexity int) int
+		UUID          func(childComplexity int) int
 		Year          func(childComplexity int) int
 	}
 
@@ -59,15 +60,20 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Exams func(childComplexity int) int
+		Exams             func(childComplexity int) int
+		RequestMarkedExam func(childComplexity int, uuid string) int
 	}
 }
 
+type ExamResolver interface {
+	UUID(ctx context.Context, obj *model.Exam) (string, error)
+}
 type MutationResolver interface {
 	CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error)
 }
 type QueryResolver interface {
 	Exams(ctx context.Context) ([]*model.Exam, error)
+	RequestMarkedExam(ctx context.Context, uuid string) (*string, error)
 }
 
 type executableSchema struct {
@@ -91,13 +97,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Exam.Examiners(childComplexity), true
-
-	case "Exam.ID":
-		if e.complexity.Exam.ID == nil {
-			break
-		}
-
-		return e.complexity.Exam.ID(childComplexity), true
 
 	case "Exam.moduleAltName":
 		if e.complexity.Exam.ModuleAltName == nil {
@@ -134,6 +133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Exam.URL(childComplexity), true
 
+	case "Exam.UUID":
+		if e.complexity.Exam.UUID == nil {
+			break
+		}
+
+		return e.complexity.Exam.UUID(childComplexity), true
+
 	case "Exam.year":
 		if e.complexity.Exam.Year == nil {
 			break
@@ -159,6 +165,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Exams(childComplexity), true
+
+	case "Query.requestMarkedExam":
+		if e.complexity.Query.RequestMarkedExam == nil {
+			break
+		}
+
+		args, err := ec.field_Query_requestMarkedExam_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RequestMarkedExam(childComplexity, args["UUID"].(string)), true
 
 	}
 	return 0, false
@@ -224,9 +242,11 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `
+	{Name: "graph/schema.graphqls", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
+scalar Upload
+
 type Exam {
-  ID: Int!
+  UUID: String!
   subject: String!
   moduleName: String!
   url: String!
@@ -238,11 +258,13 @@ type Exam {
 
 type Query {
   exams: [Exam!]!
+  requestMarkedExam(UUID: String!): String
 }
 
 input NewExam {
   subject: String!
   moduleName: String!
+  file: Upload
   moduleAltName: String
   year: Int
   examiners: String
@@ -290,6 +312,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_requestMarkedExam_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["UUID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("UUID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["UUID"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -328,7 +365,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Exam_ID(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
+func (ec *executionContext) _Exam_UUID(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -339,14 +376,14 @@ func (ec *executionContext) _Exam_ID(ctx context.Context, field graphql.Collecte
 		Object:     "Exam",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Exam().UUID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -358,9 +395,9 @@ func (ec *executionContext) _Exam_ID(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Exam_subject(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
@@ -671,6 +708,45 @@ func (ec *executionContext) _Query_exams(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.Exam)
 	fc.Result = res
 	return ec.marshalNExam2ᚕᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐExamᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_requestMarkedExam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_requestMarkedExam_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().RequestMarkedExam(rctx, args["UUID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1853,6 +1929,14 @@ func (ec *executionContext) unmarshalInputNewExam(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "file":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			it.File, err = ec.unmarshalOUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "moduleAltName":
 			var err error
 
@@ -1910,25 +1994,34 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Exam")
-		case "ID":
-			out.Values[i] = ec._Exam_ID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+		case "UUID":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Exam_UUID(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "subject":
 			out.Values[i] = ec._Exam_subject(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "moduleName":
 			out.Values[i] = ec._Exam_moduleName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "url":
 			out.Values[i] = ec._Exam_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "moduleAltName":
 			out.Values[i] = ec._Exam_moduleAltName(ctx, field, obj)
@@ -2007,6 +2100,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "requestMarkedExam":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_requestMarkedExam(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2335,21 +2439,6 @@ func (ec *executionContext) marshalNExam2ᚖgithubᚗcomᚋFachschaftMathPhysInf
 	return ec._Exam(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNNewExam2githubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐNewExam(ctx context.Context, v interface{}) (model.NewExam, error) {
 	res, err := ec.unmarshalInputNewExam(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2660,6 +2749,15 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	return graphql.MarshalUpload(v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

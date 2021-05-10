@@ -6,9 +6,8 @@ WORKDIR /go/src
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY graph ./graph
 COPY utils ./utils
-COPY server.go ./
+COPY exam_marker.go ./
 
-RUN go build -a -o graphQLServer server.go
-ENTRYPOINT ["./graphQLServer"]
+RUN go build -a -o exam_marker exam_marker.go
+ENTRYPOINT ["./exam_marker"]

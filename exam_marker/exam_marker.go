@@ -1,0 +1,166 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/exam_marker/v2/utils"
+	"github.com/adjust/rmq/v3"
+	"github.com/minio/minio-go/v7"
+	api "github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+)
+
+const (
+	prefetchLimit = 1000
+	pollDuration  = 100 * time.Millisecond
+	numConsumers  = 5
+
+	reportBatchSize = 10000
+	consumeDuration = time.Millisecond
+	shouldLog       = false
+)
+
+func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
+	onTop := true
+	update := false
+
+	// Stamp all odd pages of the pfd in red at the right border of the document
+	watermark, err := api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
+	if err != nil {
+		return err
+	}
+	err = api.AddWatermarks(input, output, nil, watermark, nil)
+	if err != nil {
+		return err
+	}
+
+	// add the mathphys logo to the top-left corner? :P
+	// wm, err = api.PDFWatermark("MathPhysLogoInfo.pdf", "pos:tr, rot:0, sc:0.5 abs, offset: -10 -10, opacity:0.5", onTop, update, pdfcpu.POINTS)
+	// api.AddWatermarks(input, output, nil, wm, nil)
+	// if err != nil {
+	//	return err
+	// }
+
+	return nil
+}
+
+func watermarkFile(filename string) {
+
+	context := context.Background()
+	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
+	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
+
+	minioClient := utils.InitMinIO()
+	obj, err := minioClient.GetObject(context, examBucket, filename, minio.GetObjectOptions{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	objInfo, err := obj.Stat()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// create a new buffer to write the watermarked pdf into
+	var b bytes.Buffer
+	bufWriter := bufio.NewWriter(&b)
+
+	// read the object from the bucket storage
+	// (dunno why this has to be done, doesnt work otherwise :P)
+	exam, err := ioutil.ReadAll(obj)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	examReader := bytes.NewReader(exam)
+
+	// apply the watermark to the PDF
+	wmErr := applyWatermark(examReader, bufWriter, "test123 1. Mai 2021")
+	if wmErr != nil {
+		log.Fatalln(wmErr)
+	}
+
+	// write back the changed pdf to the bucket storage
+	minioClient.PutObject(
+		context,
+		cacheBucket,
+		objInfo.Key,
+		&b,
+		int64(b.Len()),
+		minio.PutObjectOptions{ContentType: objInfo.ContentType},
+	)
+}
+
+func logErrors(errChan <-chan error) {
+	for err := range errChan {
+		switch err := err.(type) {
+		case *rmq.HeartbeatError:
+			if err.Count == rmq.HeartbeatErrorLimit {
+				log.Print("heartbeat error (limit): ", err)
+			} else {
+				log.Print("heartbeat error: ", err)
+			}
+		case *rmq.ConsumeError:
+			log.Print("consume error: ", err)
+		case *rmq.DeliveryError:
+			log.Print("delivery error: ", err.Delivery, err)
+		default:
+			log.Print("other error: ", err)
+		}
+	}
+}
+
+func main() {
+	// get job from queue
+	errChan := make(chan error, 10)
+	go logErrors(errChan)
+	rmqClient, err := rmq.OpenConnection("exam-message-passing", "tcp", "altklausur_ausleihe-redis:6379", 1, errChan)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	tagQueue, err := rmqClient.OpenQueue("tag-queue")
+
+	if err = tagQueue.StartConsuming(10, time.Second); err != nil {
+		log.Fatalln(err)
+	}
+
+	for i := 0; i < numConsumers; i++ {
+		name := fmt.Sprintf("consumer %d", i)
+		log.Println(name)
+		if _, err := tagQueue.AddConsumerFunc(name, handleDelivery); err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT)
+	defer signal.Stop(signals)
+
+	<-signals // wait for signal
+	go func() {
+		<-signals // hard exit on second signal (in case shutdown gets stuck)
+		os.Exit(1)
+	}()
+
+	<-rmqClient.StopAllConsuming() // wait for all Consume() calls to finish
+}
+
+func handleDelivery(delivery rmq.Delivery) {
+	// perform task
+	content := delivery.Payload()
+	log.Printf("working on task %s", content)
+	watermarkFile(content)
+	if err := delivery.Ack(); err != nil {
+		log.Fatalln(err)
+	}
+}

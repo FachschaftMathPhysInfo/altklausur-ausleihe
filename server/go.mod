@@ -4,9 +4,12 @@ go 1.16
 
 require (
 	github.com/99designs/gqlgen v0.13.0 // indirect
+	github.com/adjust/rmq/v3 v3.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/jackc/pgx/v4 v4.11.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
+	github.com/minio/minio-go/v7 v7.0.10
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/text v0.3.6 // indirect

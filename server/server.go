@@ -1,53 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
-	"gorm.io/driver/postgres"
-	_ "gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
 )
 
 const defaultPort = "8081"
-
-func initDB() *gorm.DB {
-	databaseConnectionString := os.Getenv("DB_CONNECTION_STRING")
-
-	if databaseConnectionString != "" {
-		log.Println(databaseConnectionString)
-	} else {
-		log.Fatal("DB_CONNECTION_STRING empty!")
-	}
-	err := fmt.Errorf("initial connect failed")
-
-	db, err := gorm.Open(postgres.Open(databaseConnectionString), &gorm.Config{})
-	for err != nil {
-		log.Println(err)
-		db, err = gorm.Open(postgres.Open(databaseConnectionString), &gorm.Config{})
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	log.Print("connected successfully to the Database")
-
-	deploymentEnv := os.Getenv("DEPLOYMENT_ENV")
-	if deploymentEnv != "production" {
-		log.Print("deployment environment: " + deploymentEnv)
-		db.Debug()
-	}
-
-	db.AutoMigrate(&model.Exam{})
-
-	return db
-}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -55,8 +22,25 @@ func main() {
 		port = defaultPort
 	}
 
-	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: initDB()}}))
+	var mb int64 = 1 << 20
+
+	srv := handler.NewDefaultServer(
+		generated.NewExecutableSchema(
+			generated.Config{
+				Resolvers: &graph.Resolver{
+					DB:          utils.InitDB(),
+					MinIOClient: utils.InitMinIO(),
+					RmqClient:   utils.InitRmq(),
+				},
+			},
+		),
+	)
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{
+		MaxMemory:     32 * mb,
+		MaxUploadSize: 50 * mb,
+	})
+	srv.Use(extension.Introspection{})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
