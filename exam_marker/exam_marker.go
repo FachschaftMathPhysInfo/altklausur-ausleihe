@@ -34,15 +34,20 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 	onTop := true
 	update := false
 
-	// Stamp all odd pages of the pfd in red at the right border of the document
-	watermark, err := api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
+	var watermarks []*pdfcpu.Watermark
+	// Stamp all odd pages of the pdf in red at the right border of the document
+	watermark1, err := api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
-	err = api.AddWatermarks(input, output, nil, watermark, nil)
+	watermarks = append(watermarks, watermark1)
+
+	// Stamp all odd pages of the pdf in red at the right border of the document
+	watermark2, err := api.TextWatermark("eq192 - eq192 - eq192", "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
+	watermarks = append(watermarks, watermark2)
 
 	// add the mathphys logo to the top-left corner? :P
 	// wm, err = api.PDFWatermark("MathPhysLogoInfo.pdf", "pos:tr, rot:0, sc:0.5 abs, offset: -10 -10, opacity:0.5", onTop, update, pdfcpu.POINTS)
@@ -50,6 +55,29 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 	// if err != nil {
 	//	return err
 	// }
+
+	if len(watermarks) == 0 {
+		return fmt.Errorf("no watermarks in array")
+	}
+
+	var tempout, tempin bytes.Buffer
+	// handle the first case seperately to save one copy
+	if err = api.AddWatermarks(input, &tempout, nil, watermarks[0], nil); err != nil {
+		return err
+	}
+
+	for _, watermark := range watermarks[1:] {
+		// swap the two buffers
+		tempin, tempout = tempout, tempin
+		tempout.Reset()
+		tmpReader := bytes.NewReader(tempin.Bytes())
+
+		if err = api.AddWatermarks(tmpReader, &tempout, nil, watermark, nil); err != nil {
+			return err
+		}
+	}
+
+	io.Copy(output, &tempout)
 
 	return nil
 }
@@ -135,7 +163,7 @@ func main() {
 	}
 
 	for i := 0; i < numConsumers; i++ {
-		name := fmt.Sprintf("consumer %d", i)
+		name := fmt.Sprintf("Started consumer #%d!", i)
 		log.Println(name)
 		if _, err := tagQueue.AddConsumerFunc(name, handleDelivery); err != nil {
 			log.Fatalln(err)
