@@ -6,12 +6,15 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
 	"os"
+	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
-	"github.com/minio/minio-go/v7"
+	minio "github.com/minio/minio-go/v7"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
@@ -54,31 +57,9 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	return &exam, nil
 }
 
-func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
-	var exam []*model.Exam
-	r.DB.Find(&exam)
-
-	if r.DB.Error != nil {
-		return nil, r.DB.Error
-	}
-
-	return exam, nil
-}
-
-func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuidstring string) (*string, error) {
-	// try to find the entry in cache
-	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), uuidstring, minio.GetObjectOptions{})
-	if e != nil {
-		errResponse := minio.ToErrorResponse(e)
-		if errResponse.Code != "NoSuchKey" {
-			return nil, e
-		}
-	} else {
-		return &uuidstring, nil
-	}
-
+func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID string) (*string, error) {
 	// check if we got a valid uuid and also prepare the DB search
-	realUUID, err := uuid.FromString(uuidstring)
+	realUUID, err := uuid.FromString(stringUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +71,24 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuidstring str
 		return nil, dbErr
 	}
 
+	// try to find the entry in cache
+	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	if e != nil {
+		errResponse := minio.ToErrorResponse(e)
+		if errResponse.Code != "NoSuchKey" {
+			return nil, e
+		}
+	} else {
+		return &stringUUID, nil
+	}
+
 	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
 	if err != nil {
 		return nil, err
 	}
 
 	// add the job to the workers
-	if err := tagQueue.Publish(uuidstring); err != nil {
+	if err := tagQueue.Publish(stringUUID); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +109,56 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuidstring str
 	//	}
 	//	return nil, fmt.Errorf("Timeout reached while marking exam \"%s\"!", uuidstring)
 
-	return &uuidstring, nil
+	return &stringUUID, nil
+}
+
+func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
+	var exam []*model.Exam
+	r.DB.Find(&exam)
+
+	if r.DB.Error != nil {
+		return nil, r.DB.Error
+	}
+
+	return exam, nil
+}
+
+func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string, error) {
+	// check if we got a valid uuid and also prepare the DB search
+	realUUID, err := uuid.FromString(stringUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	// see if there is an registered exam for this uuid
+	var exam model.Exam
+	dbErr := r.DB.First(&exam, realUUID).Error
+	if errors.Is(dbErr, gorm.ErrRecordNotFound) {
+		return nil, dbErr
+	}
+
+	// try to find the entry in cache
+	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	if e != nil {
+		errResponse := minio.ToErrorResponse(e)
+		if errResponse.Code != "NoSuchKey" {
+			return nil, e
+		}
+	}
+
+	// Set request parameters for content-disposition.
+	// Beware of this issue: https://github.com/minio/minio/issues/7936
+	reqParams := make(url.Values)
+	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+
+	// Generates a presigned url which expires in a day.
+	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 5*time.Minute, reqParams)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	urlStr := "http://localhost:8082" + presignedURL.RequestURI()
+	return &urlStr, nil
 }
 
 // Exam returns generated.ExamResolver implementation.

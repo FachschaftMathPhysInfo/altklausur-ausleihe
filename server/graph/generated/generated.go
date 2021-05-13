@@ -57,11 +57,12 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateExam        func(childComplexity int, input model.NewExam) int
-		RequestMarkedExam func(childComplexity int, uuid string) int
+		RequestMarkedExam func(childComplexity int, stringUUID string) int
 	}
 
 	Query struct {
-		Exams func(childComplexity int) int
+		Exams   func(childComplexity int) int
+		GetExam func(childComplexity int, stringUUID string) int
 	}
 }
 
@@ -70,10 +71,11 @@ type ExamResolver interface {
 }
 type MutationResolver interface {
 	CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error)
-	RequestMarkedExam(ctx context.Context, uuid string) (*string, error)
+	RequestMarkedExam(ctx context.Context, stringUUID string) (*string, error)
 }
 type QueryResolver interface {
 	Exams(ctx context.Context) ([]*model.Exam, error)
+	GetExam(ctx context.Context, stringUUID string) (*string, error)
 }
 
 type executableSchema struct {
@@ -169,7 +171,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestMarkedExam(childComplexity, args["UUID"].(string)), true
+		return e.complexity.Mutation.RequestMarkedExam(childComplexity, args["StringUUID"].(string)), true
 
 	case "Query.exams":
 		if e.complexity.Query.Exams == nil {
@@ -177,6 +179,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Exams(childComplexity), true
+
+	case "Query.getExam":
+		if e.complexity.Query.GetExam == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getExam_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetExam(childComplexity, args["StringUUID"].(string)), true
 
 	}
 	return 0, false
@@ -258,6 +272,7 @@ type Exam {
 
 type Query {
   exams: [Exam!]!
+  getExam(StringUUID: String!): String
 }
 
 input NewExam {
@@ -272,7 +287,7 @@ input NewExam {
 
 type Mutation {
   createExam(input: NewExam!): Exam!
-  requestMarkedExam(UUID: String!): String
+  requestMarkedExam(StringUUID: String!): String
 }
 `, BuiltIn: false},
 }
@@ -301,14 +316,14 @@ func (ec *executionContext) field_Mutation_requestMarkedExam_args(ctx context.Co
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["UUID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("UUID"))
+	if tmp, ok := rawArgs["StringUUID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("StringUUID"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["UUID"] = arg0
+	args["StringUUID"] = arg0
 	return args, nil
 }
 
@@ -324,6 +339,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getExam_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["StringUUID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("StringUUID"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["StringUUID"] = arg0
 	return args, nil
 }
 
@@ -700,7 +730,7 @@ func (ec *executionContext) _Mutation_requestMarkedExam(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RequestMarkedExam(rctx, args["UUID"].(string))
+		return ec.resolvers.Mutation().RequestMarkedExam(rctx, args["StringUUID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -747,6 +777,45 @@ func (ec *executionContext) _Query_exams(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.Exam)
 	fc.Result = res
 	return ec.marshalNExam2ᚕᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐExamᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getExam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getExam_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetExam(rctx, args["StringUUID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2102,6 +2171,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "getExam":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getExam(ctx, field)
 				return res
 			})
 		case "__type":

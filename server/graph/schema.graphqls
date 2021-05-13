@@ -14,6 +14,7 @@ type Exam {
 
 type Query {
   exams: [Exam!]!
+  getExam(StringUUID: String!): String
 }
 
 input NewExam {
@@ -28,5 +29,5 @@ input NewExam {
 
 type Mutation {
   createExam(input: NewExam!): Exam!
-  requestMarkedExam(UUIDstring: String!): String
+  requestMarkedExam(StringUUID: String!): String
 }
