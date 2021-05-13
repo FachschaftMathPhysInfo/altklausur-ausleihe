@@ -28,5 +28,5 @@ input NewExam {
 
 type Mutation {
   createExam(input: NewExam!): Exam!
-  requestMarkedExam(UUID: String!): String
+  requestMarkedExam(UUIDstring: String!): String
 }

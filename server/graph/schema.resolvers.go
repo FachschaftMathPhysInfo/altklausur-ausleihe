@@ -5,11 +5,15 @@ package graph
 
 import (
 	"context"
-	"log"
+	"errors"
+	"os"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/minio/minio-go/v7"
+	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
@@ -61,16 +65,59 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
-func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuid string) (*string, error) {
-	log.Println(uuid)
+func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuidstring string) (*string, error) {
+	// try to find the entry in cache
+	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), uuidstring, minio.GetObjectOptions{})
+	if e != nil {
+		errResponse := minio.ToErrorResponse(e)
+		if errResponse.Code != "NoSuchKey" {
+			return nil, e
+		}
+	} else {
+		return &uuidstring, nil
+	}
+
+	// check if we got a valid uuid and also prepare the DB search
+	realUUID, err := uuid.FromString(uuidstring)
+	if err != nil {
+		return nil, err
+	}
+
+	// see if there is an registered exam for this uuid
+	var exam model.Exam
+	dbErr := r.DB.First(&exam, realUUID).Error
+	if errors.Is(dbErr, gorm.ErrRecordNotFound) {
+		return nil, dbErr
+	}
 
 	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
 	if err != nil {
 		return nil, err
 	}
 
-	tagQueue.Publish(uuid)
-	return &uuid, nil
+	// add the job to the workers
+	if err := tagQueue.Publish(uuidstring); err != nil {
+		return nil, err
+	}
+
+	//	// TODO(chris): is checking for the timeout even necessary?!
+	//	timeout := 10
+	//	for i := 0; i < timeout; i++ {
+	//		// try to find the entry in cache
+	//		_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), uuidstring, minio.GetObjectOptions{})
+	//		if e != nil {
+	//			errResponse := minio.ToErrorResponse(e)
+	//			if errResponse.Code != "NoSuchKey" {
+	//				return nil, e
+	//			}
+	//		} else {
+	//			return &uuidstring, nil
+	//		}
+	//		time.Sleep(500 * time.Millisecond)
+	//	}
+	//	return nil, fmt.Errorf("Timeout reached while marking exam \"%s\"!", uuidstring)
+
+	return &uuidstring, nil
 }
 
 // Exam returns generated.ExamResolver implementation.
