@@ -61,7 +61,7 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
-func (r *queryResolver) RequestMarkedExam(ctx context.Context, uuid string) (*string, error) {
+func (r *mutationResolver) RequestMarkedExam(ctx context.Context, uuid string) (*string, error) {
 	log.Println(uuid)
 
 	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
