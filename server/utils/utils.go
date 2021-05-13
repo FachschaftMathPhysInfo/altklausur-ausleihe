@@ -17,7 +17,7 @@ import (
 )
 
 func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Reader, fileSize int64, contentType string) error {
-	bucketName := os.Getenv("MINIO_BUCKET_NAME")
+	bucketName := os.Getenv("MINIO_EXAM_BUCKET")
 
 	info, err := minioClient.PutObject(
 		context.Background(),
@@ -78,7 +78,7 @@ func InitMinIO() *minio.Client {
 	port := os.Getenv("MINIO_PORT")
 	accessKeyID := os.Getenv("MINIO_ROOT_USER")
 	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
-	bucketName := os.Getenv("MINIO_BUCKET_NAME")
+	bucketName := os.Getenv("MINIO_EXAM_BUCKET")
 	useSSL := false
 
 	// Initialize minio client object.
