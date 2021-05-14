@@ -5,11 +5,18 @@ package graph
 
 import (
 	"context"
-	"log"
+	"errors"
+	"fmt"
+	"net/url"
+	"os"
+	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	minio "github.com/minio/minio-go/v7"
+	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
@@ -50,6 +57,61 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	return &exam, nil
 }
 
+func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID string) (*string, error) {
+	// check if we got a valid uuid and also prepare the DB search
+	realUUID, err := uuid.FromString(stringUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	// see if there is an registered exam for this uuid
+	var exam model.Exam
+	dbErr := r.DB.First(&exam, realUUID).Error
+	if errors.Is(dbErr, gorm.ErrRecordNotFound) {
+		return nil, dbErr
+	}
+
+	// try to find the entry in cache
+	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	if e != nil {
+		errResponse := minio.ToErrorResponse(e)
+		if errResponse.Code != "NoSuchKey" {
+			return nil, e
+		}
+	} else {
+		return &stringUUID, nil
+	}
+
+	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
+	if err != nil {
+		return nil, err
+	}
+
+	// add the job to the workers
+	if err := tagQueue.Publish(stringUUID); err != nil {
+		return nil, err
+	}
+
+	//	// TODO(chris): is checking for the timeout even necessary?!
+	//	timeout := 10
+	//	for i := 0; i < timeout; i++ {
+	//		// try to find the entry in cache
+	//		_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), uuidstring, minio.GetObjectOptions{})
+	//		if e != nil {
+	//			errResponse := minio.ToErrorResponse(e)
+	//			if errResponse.Code != "NoSuchKey" {
+	//				return nil, e
+	//			}
+	//		} else {
+	//			return &uuidstring, nil
+	//		}
+	//		time.Sleep(500 * time.Millisecond)
+	//	}
+	//	return nil, fmt.Errorf("Timeout reached while marking exam \"%s\"!", uuidstring)
+
+	return &stringUUID, nil
+}
+
 func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	var exam []*model.Exam
 	r.DB.Find(&exam)
@@ -61,16 +123,43 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
-func (r *queryResolver) RequestMarkedExam(ctx context.Context, uuid string) (*string, error) {
-	log.Println(uuid)
-
-	tagQueue, err := r.RmqClient.OpenQueue("tag-queue")
+func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string, error) {
+	// check if we got a valid uuid and also prepare the DB search
+	realUUID, err := uuid.FromString(stringUUID)
 	if err != nil {
 		return nil, err
 	}
 
-	tagQueue.Publish(uuid)
-	return &uuid, nil
+	// see if there is an registered exam for this uuid
+	var exam model.Exam
+	dbErr := r.DB.First(&exam, realUUID).Error
+	if errors.Is(dbErr, gorm.ErrRecordNotFound) {
+		return nil, dbErr
+	}
+
+	// try to find the entry in cache
+	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	if e != nil {
+		errResponse := minio.ToErrorResponse(e)
+		if errResponse.Code != "NoSuchKey" {
+			return nil, e
+		}
+		return nil, nil
+	}
+
+	// Set request parameters for content-disposition.
+	// Beware of this issue: https://github.com/minio/minio/issues/7936
+	reqParams := make(url.Values)
+	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+
+	// Generates a presigned url which expires in a day.
+	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 5*time.Minute, reqParams)
+	if err != nil {
+		return nil, err
+	}
+	// urlStr := "http://localhost:8082" + presignedURL.RequestURI()
+	urlStr := presignedURL.String()
+	return &urlStr, nil
 }
 
 // Exam returns generated.ExamResolver implementation.
