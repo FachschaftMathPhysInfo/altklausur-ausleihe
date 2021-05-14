@@ -144,6 +144,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string
 		if errResponse.Code != "NoSuchKey" {
 			return nil, e
 		}
+		return nil, nil
 	}
 
 	// Set request parameters for content-disposition.
@@ -154,10 +155,10 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string
 	// Generates a presigned url which expires in a day.
 	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 5*time.Minute, reqParams)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
-	urlStr := "http://localhost:8082" + presignedURL.RequestURI()
+	// urlStr := "http://localhost:8082" + presignedURL.RequestURI()
+	urlStr := presignedURL.String()
 	return &urlStr, nil
 }
 
