@@ -118,14 +118,19 @@ func watermarkFile(filename string) {
 	}
 
 	// write back the changed pdf to the bucket storage
-	minioClient.PutObject(
+	_, putErr := minioClient.PutObject(
 		context,
 		cacheBucket,
 		objInfo.Key,
 		&b,
 		int64(b.Len()),
-		minio.PutObjectOptions{ContentType: objInfo.ContentType},
+		minio.PutObjectOptions{
+			ContentType: objInfo.ContentType,
+		},
 	)
+	if putErr != nil {
+		log.Println(err)
+	}
 }
 
 func logErrors(errChan <-chan error) {
