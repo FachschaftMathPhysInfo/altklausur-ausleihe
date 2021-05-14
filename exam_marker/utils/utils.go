@@ -10,6 +10,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -89,11 +90,27 @@ func InitMinIO() *minio.Client {
 		log.Fatalln(err)
 	}
 
-	log.Println("MinIO client successfully set up!")
-
 	setUpBucket(minioClient, examBucket)
 	setUpBucket(minioClient, cacheBucket)
 
+	// set the lifecycle policy for the cache bucket
+	// this should auto delete the objects after a day
+	config := lifecycle.NewConfiguration()
+	config.Rules = []lifecycle.Rule{
+		{
+			ID:     cacheBucket,
+			Status: "Enabled",
+			Expiration: lifecycle.Expiration{
+				Days: 1,
+			},
+		},
+	}
+
+	if err = minioClient.SetBucketLifecycle(context.Background(), cacheBucket, config); err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("MinIO client successfully set up!")
 	return minioClient
 }
 
@@ -117,5 +134,6 @@ func setUpBucket(minioClient *minio.Client, bucketName string) error {
 	} else {
 		log.Printf("Successfully created the bucket \"%s\"\n", bucketName)
 	}
+
 	return nil
 }
