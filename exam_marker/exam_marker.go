@@ -30,6 +30,33 @@ const (
 	shouldLog       = false
 )
 
+type RMQConsumer struct {
+	name        string
+	count       int
+	before      time.Time
+	MinIOClient *minio.Client
+}
+
+func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
+	return &RMQConsumer{
+		name:        fmt.Sprintf("consumer%d", tag),
+		count:       0,
+		before:      time.Now(),
+		MinIOClient: minioClient,
+	}
+}
+
+func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
+	// perform task
+	content := delivery.Payload()
+	log.Printf("working on task %s", content)
+	watermarkFile(consumer.MinIOClient, content)
+
+	if err := delivery.Ack(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 	onTop := true
 	update := false
@@ -82,13 +109,12 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 	return nil
 }
 
-func watermarkFile(filename string) {
+func watermarkFile(minioClient *minio.Client, filename string) {
 
 	context := context.Background()
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
 
-	minioClient := utils.InitMinIO()
 	obj, err := minioClient.GetObject(context, examBucket, filename, minio.GetObjectOptions{})
 	if err != nil {
 		log.Fatalln(err)
@@ -153,6 +179,8 @@ func logErrors(errChan <-chan error) {
 }
 
 func main() {
+	minioClient := utils.InitMinIO()
+
 	// get job from queue
 	errChan := make(chan error, 10)
 	go logErrors(errChan)
@@ -170,7 +198,7 @@ func main() {
 	for i := 0; i < numConsumers; i++ {
 		name := fmt.Sprintf("Started consumer #%d!", i)
 		log.Println(name)
-		if _, err := tagQueue.AddConsumerFunc(name, handleDelivery); err != nil {
+		if _, err := tagQueue.AddConsumer(name, NewRMQConsumer(minioClient, i)); err != nil {
 			log.Fatalln(err)
 		}
 	}
@@ -186,14 +214,4 @@ func main() {
 	}()
 
 	<-rmqClient.StopAllConsuming() // wait for all Consume() calls to finish
-}
-
-func handleDelivery(delivery rmq.Delivery) {
-	// perform task
-	content := delivery.Payload()
-	log.Printf("working on task %s", content)
-	watermarkFile(content)
-	if err := delivery.Ack(); err != nil {
-		log.Fatalln(err)
-	}
 }
