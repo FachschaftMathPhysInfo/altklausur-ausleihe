@@ -4,10 +4,8 @@ version: '3.0'
 services:
   altklausur_ausleihe-db:
     image: postgres:13.0
-    environment:
-      POSTGRES_PASSWORD: randomtest1
-      POSTGRES_USER: altklausur_ausleihe
-      POSTGRES_DB: altklausur_ausleihe
+    env_file:
+      - env_files/postgres-credentials.env
     volumes:
       - db:/var/lib/postgresql/data
     networks:
@@ -22,10 +20,10 @@ services:
     image: minio/minio:latest
     command: server /data
     ports:
-      - "127.0.0.1:8082:9000"
-    environment:
-      MINIO_ROOT_USER: root
-      MINIO_ROOT_PASSWORD: somepasswd
+      - "9000:9000"
+    env_file:
+      - env_files/postgres-credentials.env
+      - env_files/minio.env
     volumes:
       - storage:/data
     networks:
@@ -37,6 +35,8 @@ services:
     ports:
       - "127.0.0.1:8081:8081"
     env_file:
+      - env_files/postgres-credentials.env
+      - env_files/minio.env
       - server/altklausur_ausleihe-backend.env
     networks:
       - internal
@@ -48,6 +48,8 @@ services:
     build: exam_marker
     image: "altklausur_ausleihe-exam_marker:latest"
     env_file:
+      - env_files/postgres-credentials.env
+      - env_files/minio.env
       - exam_marker/altklausur_ausleihe-exam_marker.env
     networks:
       - internal
