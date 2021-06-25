@@ -4,6 +4,7 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/gabriel-vasile/mimetype"
 	minio "github.com/minio/minio-go/v7"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -44,12 +46,33 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		return nil, r.DB.Error
 	}
 
+	// check file size
+	if input.File.Size < 512 {
+		// TODO: implement DB rollback here!
+		return nil, fmt.Errorf("File is not valid: size of %d too small!", input.File.Size)
+	}
+
+	// check file MIME type
+	// Only the first 512 bytes are used to sniff the content type.
+	fileReader := bufio.NewReader(input.File.File)
+	buffer, err := fileReader.Peek(512)
+	if err != nil {
+		return nil, err
+	}
+
+	mtype := mimetype.Detect(buffer)
+	allowedMIMETypes := []string{"application/pdf"}
+	if !mimetype.EqualsAny(mtype.String(), allowedMIMETypes...) {
+		// TODO: implement DB rollback here!
+		return nil, fmt.Errorf("File is not valid: mimetype \"%s\" forbidden!", mtype.String())
+	}
+
 	// upload the file to the storage server
 	// this assumes that the database sets an exams' UUID
 	uploadErr := utils.UploadExam(
 		r.MinIOClient,
 		exam.UUID.String(),
-		input.File.File,
+		fileReader,
 		input.File.Size,
 		input.File.ContentType)
 

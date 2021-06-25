@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/adjust/rmq/v3 v3.0.0
+	github.com/gabriel-vasile/mimetype v1.3.0
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/jackc/pgx/v4 v4.11.0 // indirect
