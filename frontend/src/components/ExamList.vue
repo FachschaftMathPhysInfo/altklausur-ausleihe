@@ -79,6 +79,7 @@
         v-model="selected"
         :headers="headers"
         :items="exams"
+        item-key="UUID"
         :items-per-page="-1"
         :search="this.$parent.search"
         :hide-default-footer="true"
@@ -95,7 +96,7 @@
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
-            <iframe :src="item.path" style="width:100%; height: 1500px;" />
+            <iframe :src="item.path" style="width: 100%; height: 1500px;" />
           </td>
         </template>
         <template v-slot:no-data>
@@ -144,7 +145,24 @@
 </template>
 
 <script>
-import testexams from "@/assets/testexams.json";
+import gql from "graphql-tag";
+
+// fetch all exams
+const EXAMS_QUERY = gql`
+  query {
+    exams {
+      UUID
+      subject
+      moduleName
+      url
+      moduleAltName
+      year
+      examiners
+      semester
+    }
+  }
+`;
+
 export default {
   name: "ExamList",
   components: {},
@@ -157,31 +175,36 @@ export default {
       subjects: ["Mathe", "Physik", "Info"],
       fromSemester: null,
       toSemester: null,
-      exams: testexams,
+      exams: [],
       headers: [
         { text: "", value: "data-table-expand" },
         {
           text: "Veranstaltung",
-          value: "moduleName"
+          value: "moduleName",
         },
         { text: "Prüfer", value: "examiners" },
         {
           text: "Semester",
           value: "semester",
           sortable: true,
-          sort: (a, b) => self.semesterBefore(a, b)
+          sort: (a, b) => self.semesterBefore(a, b),
         },
         { text: "Fach", value: "subject" },
-        { text: "", value: "data-table-select" }
-      ]
+        { text: "", value: "data-table-select" },
+      ],
     };
   },
   computed: {
     semesters() {
-      return testexams
-        .map(exam => ({ name: exam.semester }))
-        .sort((a, b) => this.semesterBefore(a.name, b.name));
-    }
+      //TODO: To be fixed: generate a range of possible semesters to be selected
+      if (this.exams.length == 0) {
+        return this.exams
+          .map((exam) => ({ name: exam.semester }))
+          .sort((a, b) => this.semesterBefore(a.name, b.name));
+      } else {
+        return [];
+      }
+    },
   },
 
   methods: {
@@ -221,8 +244,8 @@ export default {
       );
     },
     filterExams() {
-      this.exams = testexams.filter(
-        exam =>
+      this.exams = this.exams.filter(
+        (exam) =>
           this.subjects.includes(exam.subject) &&
           (this.moduleName == null ||
             exam.moduleName.includes(this.moduleName)) &&
@@ -254,7 +277,13 @@ export default {
       } else {
         return "mdi-label";
       }
-    }
-  }
+    },
+  },
+  apollo: {
+    exams: {
+      query: EXAMS_QUERY,
+      update: (data) => data.exams,
+    },
+  },
 };
 </script>
