@@ -22,7 +22,7 @@ fi
 set -o nounset                              # Treat unset variables as an error
 
 curl --silent 'http://localhost:8081/query' \
-    -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName} }", "variables": { "input": { "subject": "trixi", "moduleName": "test", "file": null } } }' \
+    -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName} }", "variables": { "input": { "subject": "trixi", "moduleName": "test", "semester": "WiSe", "file": null } } }' \
     -F map='{ "0": ["variables.input.file"] }' \
     -F 0=@$1 | \
     python3 -m json.tool

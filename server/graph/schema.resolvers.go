@@ -24,6 +24,10 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
+	if input.Semester != nil && !(*input.Semester == "SoSe" || *input.Semester == "WiSe") {
+		return nil, fmt.Errorf("Input \"%s\" is not a valid input for field input.Semester", *input.Semester)
+	}
+
 	// map the GraphQL input to the Model
 	exam := model.Exam{
 		Subject:       input.Subject,
