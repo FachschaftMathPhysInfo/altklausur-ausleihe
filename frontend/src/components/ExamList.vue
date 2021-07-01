@@ -85,6 +85,7 @@
         :hide-default-footer="true"
         show-expand
         show-select
+        @item-expanded="getMarkedExamURL"
       >
         <template v-slot:[`item.subject`]="{ item }">
           <v-chip v-if="item.subject"
@@ -96,7 +97,13 @@
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
-            <iframe :src="item.path" style="width: 100%; height: 1500px;" />
+            <v-btn v-if="!path">Get exam</v-btn>
+            {{ item.path }}
+            <iframe
+              v-if="path"
+              :src="path"
+              style="width: 100%; height: 1500px;"
+            />
           </td>
         </template>
         <template v-slot:no-data>
@@ -176,6 +183,7 @@ export default {
       fromSemester: null,
       toSemester: null,
       exams: [],
+      path: "",
       headers: [
         { text: "", value: "data-table-expand" },
         {
@@ -277,6 +285,38 @@ export default {
       } else {
         return "mdi-label";
       }
+    },
+    async getMarkedExamURL(row) {
+      console.log(row.item.UUID);
+      // Call to the graphql mutation
+      await this.$apollo.mutate({
+        // Query
+        mutation: gql`
+          mutation($UUID: String!) {
+            requestMarkedExam(StringUUID: $UUID)
+          }
+        `,
+        // Parameters
+        variables: {
+          UUID: row.item.UUID,
+        },
+      });
+
+      // Call to the graphql query
+      const exam = await this.$apollo.query({
+        // Query
+        query: gql`
+          query($UUID: String!) {
+            getExam(StringUUID: $UUID)
+          }
+        `,
+        // Parameters
+        variables: {
+          UUID: row.item.UUID,
+        },
+      });
+      this.path = exam.data.getExam;
+      fetch(this.path).then((response) => console.log(response));
     },
   },
   apollo: {

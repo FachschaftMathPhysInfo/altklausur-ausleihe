@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"net/url"
 	"os"
 	"time"
@@ -17,7 +18,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
 	"github.com/gabriel-vasile/mimetype"
 	minio "github.com/minio/minio-go/v7"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
