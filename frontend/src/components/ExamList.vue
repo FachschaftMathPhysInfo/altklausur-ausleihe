@@ -178,8 +178,7 @@ export default {
       fromSemester: null,
       toSemester: null,
       exams: [],
-      path:
-        "http://altklausur_ausleihe-storage:9000/marker-cache/bcd23f1e-5504-42d3-9ceb-a1d95fa29e7a?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=root%2F20210701%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20210701T184914Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22bcd23f1e-5504-42d3-9ceb-a1d95fa29e7a%22&X-Amz-Signature=b7ebab1068d5436bb2957783b9ed55f1f1086bc83e7a64e7ada6f677400a731a",
+      path: "",
       headers: [
         { text: "", value: "data-table-expand" },
         {
