@@ -50,7 +50,6 @@ type ComplexityRoot struct {
 		ModuleName    func(childComplexity int) int
 		Semester      func(childComplexity int) int
 		Subject       func(childComplexity int) int
-		URL           func(childComplexity int) int
 		UUID          func(childComplexity int) int
 		Year          func(childComplexity int) int
 	}
@@ -58,6 +57,11 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateExam        func(childComplexity int, input model.NewExam) int
 		RequestMarkedExam func(childComplexity int, stringUUID string) int
+	}
+
+	PresignedReturn struct {
+		DownloadURL func(childComplexity int) int
+		ViewURL     func(childComplexity int) int
 	}
 
 	Query struct {
@@ -75,7 +79,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Exams(ctx context.Context) ([]*model.Exam, error)
-	GetExam(ctx context.Context, stringUUID string) (*string, error)
+	GetExam(ctx context.Context, stringUUID string) (*model.PresignedReturn, error)
 }
 
 type executableSchema struct {
@@ -128,13 +132,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Exam.Subject(childComplexity), true
 
-	case "Exam.url":
-		if e.complexity.Exam.URL == nil {
-			break
-		}
-
-		return e.complexity.Exam.URL(childComplexity), true
-
 	case "Exam.UUID":
 		if e.complexity.Exam.UUID == nil {
 			break
@@ -172,6 +169,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RequestMarkedExam(childComplexity, args["StringUUID"].(string)), true
+
+	case "PresignedReturn.downloadUrl":
+		if e.complexity.PresignedReturn.DownloadURL == nil {
+			break
+		}
+
+		return e.complexity.PresignedReturn.DownloadURL(childComplexity), true
+
+	case "PresignedReturn.viewUrl":
+		if e.complexity.PresignedReturn.ViewURL == nil {
+			break
+		}
+
+		return e.complexity.PresignedReturn.ViewURL(childComplexity), true
 
 	case "Query.exams":
 		if e.complexity.Query.Exams == nil {
@@ -263,16 +274,20 @@ type Exam {
   UUID: String!
   subject: String!
   moduleName: String!
-  url: String!
   moduleAltName: String
   year: Int
   examiners: String
   semester: String
 }
 
+type PresignedReturn {
+  viewUrl: String!
+  downloadUrl: String!
+}
+
 type Query {
   exams: [Exam!]!
-  getExam(StringUUID: String!): String
+  getExam(StringUUID: String!): PresignedReturn
 }
 
 input NewExam {
@@ -500,41 +515,6 @@ func (ec *executionContext) _Exam_moduleName(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Exam_url(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Exam",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Exam_moduleAltName(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -744,6 +724,76 @@ func (ec *executionContext) _Mutation_requestMarkedExam(ctx context.Context, fie
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PresignedReturn_viewUrl(ctx context.Context, field graphql.CollectedField, obj *model.PresignedReturn) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PresignedReturn",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViewURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PresignedReturn_downloadUrl(ctx context.Context, field graphql.CollectedField, obj *model.PresignedReturn) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PresignedReturn",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DownloadURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_exams(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -813,9 +863,9 @@ func (ec *executionContext) _Query_getExam(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*model.PresignedReturn)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOPresignedReturn2ᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐPresignedReturn(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2087,11 +2137,6 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "url":
-			out.Values[i] = ec._Exam_url(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "moduleAltName":
 			out.Values[i] = ec._Exam_moduleAltName(ctx, field, obj)
 		case "year":
@@ -2133,6 +2178,38 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "requestMarkedExam":
 			out.Values[i] = ec._Mutation_requestMarkedExam(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var presignedReturnImplementors = []string{"PresignedReturn"}
+
+func (ec *executionContext) _PresignedReturn(ctx context.Context, sel ast.SelectionSet, obj *model.PresignedReturn) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, presignedReturnImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PresignedReturn")
+		case "viewUrl":
+			out.Values[i] = ec._PresignedReturn_viewUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "downloadUrl":
+			out.Values[i] = ec._PresignedReturn_downloadUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2796,6 +2873,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
+}
+
+func (ec *executionContext) marshalOPresignedReturn2ᚖgithubᚗcomᚋFachschaftMathPhysInfoᚋaltklausurᚑausleiheᚋserverᚋgraphᚋmodelᚐPresignedReturn(ctx context.Context, sel ast.SelectionSet, v *model.PresignedReturn) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PresignedReturn(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

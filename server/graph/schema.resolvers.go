@@ -17,7 +17,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
 	"github.com/gabriel-vasile/mimetype"
 	minio "github.com/minio/minio-go/v7"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -150,7 +150,7 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
-func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string, error) {
+func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.PresignedReturn, error) {
 	// check if we got a valid uuid and also prepare the DB search
 	realUUID, err := uuid.FromString(stringUUID)
 	if err != nil {
@@ -177,16 +177,25 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string
 	// Set request parameters for content-disposition.
 	// Beware of this issue: https://github.com/minio/minio/issues/7936
 	reqParams := make(url.Values)
-	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
 
-	// Generates a presigned url which expires in a day.
-	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 5*time.Minute, reqParams)
+	// Generates a presigned url to view the pdf which expires in 15 min.
+	presignedViewURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 15*time.Minute, reqParams)
 	if err != nil {
 		return nil, err
 	}
-	// urlStr := "http://localhost:8082" + presignedURL.RequestURI()
-	urlStr := presignedURL.String()
-	return &urlStr, nil
+
+	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+	// Generates a presigned url to download the pdf which expires in 15 min.
+	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 15*time.Minute, reqParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PresignedReturn{
+			ViewURL:     presignedViewURL.String(),
+			DownloadURL: presignedDownloadURL.String(),
+		},
+		nil
 }
 
 // Exam returns generated.ExamResolver implementation.

@@ -5,16 +5,20 @@ type Exam {
   UUID: String!
   subject: String!
   moduleName: String!
-  url: String!
   moduleAltName: String
   year: Int
   examiners: String
   semester: String
 }
 
+type PresignedReturn {
+  viewUrl: String!
+  downloadUrl: String!
+}
+
 type Query {
   exams: [Exam!]!
-  getExam(StringUUID: String!): String
+  getExam(StringUUID: String!): PresignedReturn
 }
 
 input NewExam {
