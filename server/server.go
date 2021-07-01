@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -12,6 +12,9 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/go-chi/chi"
+	"github.com/rs/cors"
+
 )
 
 const defaultPort = "8081"
@@ -21,6 +24,15 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+	router := chi.NewRouter()
+	// Add CORS middleware around every request
+	// See https://github.com/rs/cors for full option listing
+	router.Use(cors.New(cors.Options{
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            false,
+	}).Handler)
 
 	var mb int64 = 1 << 20
 
@@ -42,9 +54,20 @@ func main() {
 	})
 	srv.Use(extension.Introspection{})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
-
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	
+	router.Handle("/query", srv)
+	fmt.Print(
+		"==========================================\n",
+		"Started the backend listening on Port "+port+"\n",
+		"==========================================\n",
+	)
+	err := http.ListenAndServe(":"+port, router)
+	if err != nil {
+		panic(err)
+	}
+
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
