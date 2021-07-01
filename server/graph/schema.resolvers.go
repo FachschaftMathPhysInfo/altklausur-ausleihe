@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"net/url"
 	"os"
 	"time"
@@ -150,10 +150,10 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*string
 	// Set request parameters for content-disposition.
 	// Beware of this issue: https://github.com/minio/minio/issues/7936
 	reqParams := make(url.Values)
-	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+	// reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
 
 	// Generates a presigned url which expires in a day.
-	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 5*time.Minute, reqParams)
+	presignedURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 15*time.Minute, reqParams)
 	if err != nil {
 		return nil, err
 	}

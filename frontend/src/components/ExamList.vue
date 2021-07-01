@@ -85,6 +85,7 @@
         :hide-default-footer="true"
         show-expand
         show-select
+        @item-expanded="getMarkedExamURL"
       >
         <template v-slot:[`item.subject`]="{ item }">
           <v-chip v-if="item.subject"
@@ -96,9 +97,13 @@
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
-            <v-btn @click="getMarkedExamURL(item.UUID)">Get exam</v-btn>
-            {{ path }}
-            <iframe :src="item.path" style="width: 100%; height: 1500px;" />
+            <v-btn v-if="!path">Get exam</v-btn>
+            {{ item.path }}
+            <iframe
+              v-if="path"
+              :src="path"
+              style="width: 100%; height: 1500px;"
+            />
           </td>
         </template>
         <template v-slot:no-data>
@@ -281,7 +286,8 @@ export default {
         return "mdi-label";
       }
     },
-    async getMarkedExamURL(UUID) {
+    async getMarkedExamURL(row) {
+      console.log(row.item.UUID);
       // Call to the graphql mutation
       await this.$apollo.mutate({
         // Query
@@ -292,7 +298,7 @@ export default {
         `,
         // Parameters
         variables: {
-          UUID: UUID,
+          UUID: row.item.UUID,
         },
       });
 
@@ -306,10 +312,11 @@ export default {
         `,
         // Parameters
         variables: {
-          UUID: UUID,
+          UUID: row.item.UUID,
         },
       });
       this.path = exam.data.getExam;
+      fetch(this.path).then((response) => console.log(response));
     },
   },
   apollo: {
