@@ -53,7 +53,7 @@ func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	watermarkFile(consumer.MinIOClient, content)
 
 	if err := delivery.Ack(); err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
 
@@ -117,12 +117,12 @@ func watermarkFile(minioClient *minio.Client, filename string) {
 
 	obj, err := minioClient.GetObject(context, examBucket, filename, minio.GetObjectOptions{})
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	objInfo, err := obj.Stat()
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	// create a new buffer to write the watermarked pdf into
@@ -133,14 +133,14 @@ func watermarkFile(minioClient *minio.Client, filename string) {
 	// (dunno why this has to be done, doesnt work otherwise :P)
 	exam, err := ioutil.ReadAll(obj)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	examReader := bytes.NewReader(exam)
 
 	// apply the watermark to the PDF
 	wmErr := applyWatermark(examReader, bufWriter, "test123 1. Mai 2021")
 	if wmErr != nil {
-		log.Fatalln(wmErr)
+		log.Println(wmErr)
 	}
 
 	// write back the changed pdf to the bucket storage

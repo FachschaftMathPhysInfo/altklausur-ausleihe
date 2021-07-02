@@ -161,7 +161,6 @@ const EXAMS_QUERY = gql`
       UUID
       subject
       moduleName
-      url
       moduleAltName
       year
       examiners
