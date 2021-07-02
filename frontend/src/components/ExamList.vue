@@ -100,8 +100,8 @@
             <v-btn v-if="!path">Get exam</v-btn>
             {{ item.path }}
             <iframe
-              v-if="path"
-              :src="path"
+              v-if="path.viewUrl"
+              :src="path.viewUrl"
               style="width: 100%; height: 1500px;"
             />
           </td>
@@ -306,7 +306,10 @@ export default {
         // Query
         query: gql`
           query($UUID: String!) {
-            getExam(StringUUID: $UUID)
+            getExam(StringUUID: $UUID) {
+              viewUrl
+              downloadUrl
+            }
           }
         `,
         // Parameters
