@@ -190,7 +190,7 @@ export default {
         { text: "Prüfer", value: "examiners" },
         {
           text: "Semester",
-          value: "semester",
+          value: "combinedSemester",
           sortable: true,
           sort: (a, b) => self.semesterBefore(a, b),
         },
@@ -328,7 +328,18 @@ export default {
   apollo: {
     exams: {
       query: EXAMS_QUERY,
-      update: (data) => data.exams,
+      update: (data) => {
+        data.exams.forEach((exam) => {
+          // Set undefined elements to empty strings
+          Object.keys(exam).forEach((key) => {
+            exam[key] = exam[key] ? exam[key] : "";
+          });
+
+          // combine year and semester to combined semester
+          exam.combinedSemester = `${exam.semester} ${exam.year}`;
+        });
+        return data.exams;
+      },
     },
   },
 };
