@@ -201,10 +201,11 @@ export default {
   },
   computed: {
     semesters() {
-      //TODO: To be fixed: generate a range of possible semesters to be selected
-      if (this.exams.length == 0) {
+      if (this.exams.length > 0) {
+        console.log(this.exams);
         return this.exams
-          .map((exam) => ({ name: exam.semester }))
+          .filter((exam) => exam.combinedSemester.trim() != "")
+          .map((exam) => ({ name: exam.combinedSemester }))
           .sort((a, b) => this.semesterBefore(a.name, b.name));
       } else {
         return [];
@@ -253,9 +254,12 @@ export default {
             exam.moduleName.includes(this.moduleName)) &&
           (this.examiner == null || exam.examiners.includes(this.examiner)) &&
           (this.fromSemester == null ||
-            this.semesterBeforeOrEqual(this.fromSemester, exam.semester)) &&
+            this.semesterBeforeOrEqual(
+              this.fromSemester,
+              exam.combinedSemester
+            )) &&
           (this.toSemester == null ||
-            this.semesterBeforeOrEqual(exam.semester, this.toSemester))
+            this.semesterBeforeOrEqual(exam.combinedSemester, this.toSemester))
       );
     },
     getSubjectColor(subject) {
@@ -282,8 +286,7 @@ export default {
     },
     async watermarkExam(UUID) {
       // Call to the graphql mutation
-      console.log(UUID);
-      await this.$apollo.mutate({
+      const result = await this.$apollo.mutate({
         mutation: gql`
           mutation($UUID: String!) {
             requestMarkedExam(StringUUID: $UUID)
@@ -293,6 +296,10 @@ export default {
           UUID: UUID,
         },
       });
+      if (!result) {
+        // this seems to be necessary to watermark new exams
+        console.log(result);
+      }
     },
     async getExamURLs(exam) {
       // Call to the graphql query
@@ -313,6 +320,7 @@ export default {
       });
       exam.viewUrl = result.data.getExam.viewUrl;
       exam.downloadUrl = result.data.getExam.downloadUrl;
+
       this.$forceUpdate();
     },
     async getMarkedExamURLFromRow(row) {
@@ -338,6 +346,7 @@ export default {
           // combine year and semester to combined semester
           exam.combinedSemester = `${exam.semester} ${exam.year}`;
         });
+
         return data.exams;
       },
     },
