@@ -76,7 +76,6 @@
         </v-col>
       </v-row>
       <v-data-table
-        v-model="selected"
         :headers="headers"
         :items="exams"
         item-key="UUID"
@@ -84,8 +83,7 @@
         :search="this.$parent.search"
         :hide-default-footer="true"
         show-expand
-        show-select
-        @item-expanded="getMarkedExamURL"
+        @item-expanded="getMarkedExamURLFromRow"
       >
         <template v-slot:[`item.subject`]="{ item }">
           <v-chip v-if="item.subject"
@@ -95,13 +93,31 @@
             >{{ item.subject }}</v-chip
           >
         </template>
+        <template v-slot:[`item.download`]="{ item }">
+          <a v-if="item.downloadUrl" :href="item.downloadUrl" target="_blank">
+            <tooltipped-icon
+              icon="mdi-download"
+              color="green"
+              text="Altklausur herunterladen"
+              position="bottom"
+              @clicked="downloadExam(item.downloadUrl)"
+            ></tooltipped-icon>
+          </a>
+          <tooltipped-icon
+            v-if="!item.downloadUrl"
+            icon="mdi-stamper"
+            color="primary"
+            text="Altklausur mit Wasserzeichen versehen"
+            position="bottom"
+            @clicked="getMarkedExamURL(item)"
+          ></tooltipped-icon>
+        </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
-            <v-btn v-if="!path">Get exam</v-btn>
-            {{ item.path }}
+            <p v-if="!item.viewUrl">Watermarking and Loading Exam ...</p>
             <iframe
-              v-if="path.viewUrl"
-              :src="path.viewUrl"
+              v-if="item.viewUrl"
+              :src="item.viewUrl"
               style="width: 100%; height: 1500px;"
             />
           </td>
@@ -113,24 +129,7 @@
           >
         </template>
       </v-data-table>
-      <v-tooltip left v-if="selected.length > 0">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            v-bind="attrs"
-            v-on="on"
-            elevation="2"
-            fixed
-            right
-            bottom
-            color="primary"
-            fab
-            @click="downloadExams"
-            ><v-icon>mdi-download</v-icon></v-btn
-          >
-        </template>
-        <span>Ausgewählte Altklausuren herunterladen</span>
-      </v-tooltip>
-      <v-tooltip left v-if="selected.length == 0">
+      <v-tooltip left>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             v-bind="attrs"
@@ -145,13 +144,14 @@
             ><v-icon>mdi-help</v-icon></v-btn
           >
         </template>
-        <span>Wähle eine Altklausur aus, um sie dann herunterzuladen.</span>
+        <span>Klicke hier für eine Anleitung</span>
       </v-tooltip>
     </v-container>
   </div>
 </template>
 
 <script>
+import TooltippedIcon from "./generic/TooltippedIcon.vue";
 import gql from "graphql-tag";
 
 // fetch all exams
@@ -171,18 +171,16 @@ const EXAMS_QUERY = gql`
 
 export default {
   name: "ExamList",
-  components: {},
+  components: { TooltippedIcon },
   data() {
     const self = this;
     return {
-      selected: [],
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
       fromSemester: null,
       toSemester: null,
       exams: [],
-      path: "",
       headers: [
         { text: "", value: "data-table-expand" },
         {
@@ -197,7 +195,7 @@ export default {
           sort: (a, b) => self.semesterBefore(a, b),
         },
         { text: "Fach", value: "subject" },
-        { text: "", value: "data-table-select" },
+        { text: "Download", value: "download" },
       ],
     };
   },
@@ -215,9 +213,6 @@ export default {
   },
 
   methods: {
-    downloadExams() {
-      alert("To be implemented: download selected PDFs.");
-    },
     help() {
       alert(
         "To be implemented: Open help dialog with very detailed instructions"
@@ -285,24 +280,23 @@ export default {
         return "mdi-label";
       }
     },
-    async getMarkedExamURL(row) {
-      console.log(row.item.UUID);
+    async watermarkExam(UUID) {
       // Call to the graphql mutation
+      console.log(UUID);
       await this.$apollo.mutate({
-        // Query
         mutation: gql`
           mutation($UUID: String!) {
             requestMarkedExam(StringUUID: $UUID)
           }
         `,
-        // Parameters
         variables: {
-          UUID: row.item.UUID,
+          UUID: UUID,
         },
       });
-
+    },
+    async getExamURLs(exam) {
       // Call to the graphql query
-      const exam = await this.$apollo.query({
+      const result = await this.$apollo.query({
         // Query
         query: gql`
           query($UUID: String!) {
@@ -314,11 +308,21 @@ export default {
         `,
         // Parameters
         variables: {
-          UUID: row.item.UUID,
+          UUID: exam.UUID,
         },
       });
-      this.path = exam.data.getExam;
-      fetch(this.path).then((response) => console.log(response));
+      exam.viewUrl = result.data.getExam.viewUrl;
+      exam.downloadUrl = result.data.getExam.downloadUrl;
+      this.$forceUpdate();
+    },
+    async getMarkedExamURLFromRow(row) {
+      console.log(row.item);
+      await this.getMarkedExamURL(row.item);
+    },
+    async getMarkedExamURL(exam) {
+      console.log(exam);
+      await this.watermarkExam(exam.UUID);
+      await this.getExamURLs(exam);
     },
   },
   apollo: {
