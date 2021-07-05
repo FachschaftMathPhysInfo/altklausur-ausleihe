@@ -38,6 +38,7 @@
           :key="item.title"
           link
           :href="item.action"
+          :target="item.target"
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
@@ -65,26 +66,28 @@ export default {
       {
         title: "Altklausur ausleihen",
         icon: "mdi-file-document",
-        action: "exams"
+        action: "exams",
       },
       {
         title: "Altklausur einreichen",
         icon: "mdi-send",
-        action: "mailto:pruefungsberichte@mathphys.info"
+        action:
+          "mailto:pruefungsberichte@mathphys.info?subject=Neue Altklausur über die digitale Altklausurausleihe&body=Liebe Fachschaft,%0D%0A%0D%0Aich möchte euch eine neue Altklausur einreichen. Diese wurde im (Sommersemester/Wintersemester) XXXX für das Modul XXXX von der Lehrperson XXXX gestellt.%0D%0A%0D%0AViele Grüße,%0D%0A%0D%0AAnhang nicht vergessen, am liebsten als PDF oder TeX Datei",
       },
       {
         title: "GitHub Projekt",
         icon: "mdi-github",
-        action: "https://github.com/FachschaftMathPhysInfo/altklausur-ausleihe"
+        action: "https://github.com/FachschaftMathPhysInfo/altklausur-ausleihe",
+        target: "_blank",
       },
       {
         title: "Datenschutz",
         icon: "mdi-file-document-multiple",
-        action: "privacy"
+        action: "privacy",
       },
-      { title: "Impressum", icon: "mdi-information", action: "impress" }
+      { title: "Impressum", icon: "mdi-information", action: "impress" },
     ],
-    right: null
-  })
+    right: null,
+  }),
 };
 </script>

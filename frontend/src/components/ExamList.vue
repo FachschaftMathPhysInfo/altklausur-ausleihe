@@ -190,7 +190,7 @@ export default {
           text: "Veranstaltung",
           value: "moduleName",
         },
-        { text: "Prüfer", value: "examiners" },
+        { text: "Prüfende", value: "examiners" },
         {
           text: "Semester",
           value: "combinedSemester",
