@@ -11,6 +11,7 @@
             single-line
             clearable
             @input="filterExams"
+            @change="filterExams"
           ></v-text-field>
         </v-col>
         <v-col sm="2">
@@ -147,6 +148,7 @@
         <span>Klicke hier für eine Anleitung</span>
       </v-tooltip>
     </v-container>
+    {{ examiner }}
   </div>
 </template>
 
@@ -181,6 +183,7 @@ export default {
       fromSemester: null,
       toSemester: null,
       exams: [],
+      originalExams: [],
       headers: [
         { text: "", value: "data-table-expand" },
         {
@@ -202,7 +205,6 @@ export default {
   computed: {
     semesters() {
       if (this.exams.length > 0) {
-        console.log(this.exams);
         return this.exams
           .filter((exam) => exam.combinedSemester.trim() != "")
           .map((exam) => ({ name: exam.combinedSemester }))
@@ -247,7 +249,10 @@ export default {
       );
     },
     filterExams() {
-      this.exams = this.exams.filter(
+      if (this.originalExams.length == 0) {
+        this.originalExams = this.exams;
+      }
+      this.exams = this.originalExams.filter(
         (exam) =>
           this.subjects.includes(exam.subject) &&
           (this.moduleName == null ||
@@ -324,11 +329,9 @@ export default {
       this.$forceUpdate();
     },
     async getMarkedExamURLFromRow(row) {
-      console.log(row.item);
       await this.getMarkedExamURL(row.item);
     },
     async getMarkedExamURL(exam) {
-      console.log(exam);
       await this.watermarkExam(exam.UUID);
       await this.getExamURLs(exam);
     },
