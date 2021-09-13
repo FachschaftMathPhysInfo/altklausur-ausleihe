@@ -47,8 +47,8 @@ services:
     build:
       context: frontend
       args:
-        SERVER_HTTP: http://localhost:8081/query
-        SERVER_WS: ws://localhost:8081/query
+        SERVER_HTTP: https://altklausuren.mathphys.info/query
+        SERVER_WS: wss://altklausuren.mathphys.info/query
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:3091:80"
