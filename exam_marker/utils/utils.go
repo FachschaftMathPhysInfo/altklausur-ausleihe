@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -76,7 +77,15 @@ func InitMinIO() *minio.Client {
 	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
+
 	useSSL := false
+	if os.Getenv("MINIO_SERVER_SSL") != "" {
+		useSSLBool, err := strconv.ParseBool(os.Getenv("MINIO_SERVER_SSL"))
+		if err != nil {
+			log.Fatalln("MINIO_SERVER_SSL ", err)
+		}
+		useSSL = useSSLBool
+	}
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(server+":"+port, &minio.Options{
