@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
@@ -77,7 +78,15 @@ func InitMinIO() *minio.Client {
 	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
 	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
 	bucketName := os.Getenv("MINIO_EXAM_BUCKET")
+
 	useSSL := false
+	if os.Getenv("MINIO_SERVER_SSL") != "" {
+		useSSLBool, err := strconv.ParseBool(os.Getenv("MINIO_SERVER_SSL"))
+		if err != nil {
+			log.Fatalln("MINIO_SERVER_SSL ", err)
+		}
+		useSSL = useSSLBool
+	}
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(server+":"+port, &minio.Options{
