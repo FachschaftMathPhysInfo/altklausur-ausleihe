@@ -62,17 +62,27 @@ func main() {
 	})
 	srv.Use(extension.Introspection{})
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	if os.Getenv("DEPLOYMENT_ENV") == "testing" {
+		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	}
 
 	router.Get("/distributor/lti_config", utils.LTIConfigHandler)
 	router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
 
-	router.Use(jwtauth.Verifier(tokenAuth))
-	router.Use(jwtauth.Authenticator)
+	router.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(tokenAuth))
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+		// Handle valid / invalid tokens. In this example, we use
+		// the provided authenticator middleware, but you can write your
+		// own very easily, look at the Authenticator method in jwtauth.go
+		// and tweak it, its not scary.
+		r.Use(jwtauth.Authenticator)
 
-	router.Handle("/query", srv)
+		r.Handle("/query", srv)
+	})
+
 	fmt.Print(
 		"==========================================\n",
 		"Started the backend listening on Port "+port+"\n",
