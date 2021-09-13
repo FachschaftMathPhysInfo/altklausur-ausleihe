@@ -29,7 +29,6 @@ services:
       - internal
     depends_on:
       - altklausur_ausleihe-db
-      - altklausur_ausleihe-storage
 
   altklausur_ausleihe-exam_marker:
     build: exam_marker
