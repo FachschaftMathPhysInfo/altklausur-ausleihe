@@ -17,10 +17,11 @@ services:
       - internal
 
   altklausur_ausleihe-storage:
-    image: minio/minio:latest
-    command: server /data
+    image: quay.io/minio/minio:RELEASE.2021-09-09T21-37-07Z
+    command: server --console-address ":9001" /data
     ports:
       - "9000:9000"
+      - "9001:9001"
     env_file:
       - env_files/minio.env
     volumes:
