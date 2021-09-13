@@ -2,7 +2,7 @@
 version: '3.0'
 
 services:
-  altklausur_ausleihe-db:
+  db:
     image: postgres:13.0
     env_file:
       - env_files/postgres-credentials.env
@@ -11,12 +11,12 @@ services:
     networks:
       - internal
 
-  altklausur_ausleihe-redis:
+  redis:
     image: "redis:alpine"
     networks:
       - internal
 
-  altklausur_ausleihe-storage:
+  storage:
     image: quay.io/minio/minio:RELEASE.2021-09-09T21-37-07Z
     command: server --console-address ":9001" /data
     ports:
@@ -29,7 +29,7 @@ services:
     networks:
       - internal
 
-  altklausur_ausleihe-backend:
+  backend:
     build: server
     image: "altklausur_ausleihe-backend:latest"
     ports:
@@ -37,28 +37,28 @@ services:
     env_file:
       - env_files/postgres-credentials.env
       - env_files/minio.env
-      - env_files/altklausur_ausleihe-backend.env
+      - env_files/backend.env
     networks:
       - internal
     depends_on:
-      - altklausur_ausleihe-db
-      - altklausur_ausleihe-storage
+      - db
+      - storage
 
-  altklausur_ausleihe-exam_marker:
+  exam_marker:
     build: exam_marker
     image: "altklausur_ausleihe-exam_marker:latest"
     env_file:
       - env_files/postgres-credentials.env
       - env_files/minio.env
-      - env_files/altklausur_ausleihe-exam_marker.env
+      - env_files/exam_marker.env
     networks:
       - internal
     depends_on:
-      - altklausur_ausleihe-db
-      - altklausur_ausleihe-storage
-      - altklausur_ausleihe-redis
+      - db
+      - storage
+      - redis
 
-  altklausur_ausleihe-frontend:
+  frontend:
     build:
       context: frontend
       args:
@@ -68,7 +68,7 @@ services:
     ports:
       - "127.0.0.1:8080:80"
     depends_on:
-      - altklausur_ausleihe-backend
+      - backend
 
 networks:
   internal: {}

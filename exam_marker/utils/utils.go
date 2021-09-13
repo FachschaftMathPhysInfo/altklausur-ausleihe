@@ -38,7 +38,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 
 func InitDB() *gorm.DB {
 	databaseConnectionString := fmt.Sprintf("host=%s port=5432 user=%s dbname=%s password=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
+		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_PASSWORD"))

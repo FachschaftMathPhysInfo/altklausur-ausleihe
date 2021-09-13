@@ -39,7 +39,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 
 func InitDB() *gorm.DB {
 	databaseConnectionString := fmt.Sprintf("host=%s port=5432 user=%s dbname=%s password=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
+		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_PASSWORD"))
@@ -126,7 +126,14 @@ func InitRmq() rmq.Connection {
 	// get job from queue
 	errChan := make(chan error, 10)
 	go logErrors(errChan)
-	rmqClient, err := rmq.OpenConnection("exam-message-passing", "tcp", "altklausur_ausleihe-redis:6379", 1, errChan)
+	rmqClient, err := rmq.OpenConnection(
+		os.Getenv("RMQ_QUEUE_NAME"),
+		"tcp",
+		os.Getenv("REDIS_CONNECTION_STRING"),
+		1,
+		errChan,
+	)
+
 	if err != nil {
 		log.Fatalln(err)
 	}

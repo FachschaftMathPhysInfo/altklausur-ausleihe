@@ -184,7 +184,13 @@ func main() {
 	// get job from queue
 	errChan := make(chan error, 10)
 	go logErrors(errChan)
-	rmqClient, err := rmq.OpenConnection("exam-message-passing", "tcp", "altklausur_ausleihe-redis:6379", 1, errChan)
+	rmqClient, err := rmq.OpenConnection(
+		os.Getenv("RMQ_QUEUE_NAME"),
+		"tcp",
+		os.Getenv("REDIS_CONNECTION_STRING"),
+		1,
+		errChan,
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
