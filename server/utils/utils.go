@@ -74,8 +74,8 @@ func InitDB() *gorm.DB {
 func InitMinIO() *minio.Client {
 	server := os.Getenv("MINIO_SERVER")
 	port := os.Getenv("MINIO_PORT")
-	accessKeyID := os.Getenv("MINIO_ROOT_USER")
-	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
 	bucketName := os.Getenv("MINIO_EXAM_BUCKET")
 	useSSL := false
 
