@@ -13,7 +13,8 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/rs/cors"
 )
 
@@ -35,12 +36,19 @@ func main() {
 	}).Handler)
 
 	var mb int64 = 1 << 20
+	db := utils.InitDB()
+	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET_KEY")), nil)
+
+	ltiConnector := utils.LTIConnector{
+		DB:        db,
+		TokenAuth: tokenAuth,
+	}
 
 	srv := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &graph.Resolver{
-					DB:          utils.InitDB(),
+					DB:          db,
 					MinIOClient: utils.InitMinIO(),
 					RmqClient:   utils.InitRmq(),
 				},
@@ -55,10 +63,12 @@ func main() {
 	srv.Use(extension.Introspection{})
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+
 	router.Get("/distributor/lti_config", utils.LTIConfigHandler)
-	router.Post("/distributor/lti_launch", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
+
+	router.Use(jwtauth.Verifier(tokenAuth))
+	router.Use(jwtauth.Authenticator)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 

@@ -7,11 +7,12 @@ require (
 	github.com/adjust/rmq/v3 v3.0.0
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.3.1
-	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/go-chi/chi/v5 v5.0.4
+	github.com/go-chi/jwtauth/v5 v5.0.1
 	github.com/go-redis/redis/v7 v7.4.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/henrixapp/go-lti v0.0.2 // indirect
+	github.com/henrixapp/go-lti v0.0.2
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect

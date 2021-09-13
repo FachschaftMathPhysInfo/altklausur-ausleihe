@@ -66,6 +66,7 @@ func InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&model.Exam{})
+	db.AutoMigrate(&LTIUserInfos{})
 
 	return db
 }
