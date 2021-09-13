@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"fmt"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -14,7 +15,6 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
-
 )
 
 const defaultPort = "8081"
@@ -55,9 +55,13 @@ func main() {
 	srv.Use(extension.Introspection{})
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	
+	router.Get("/distributor/lti_config", utils.LTIConfigHandler)
+	router.Post("/distributor/lti_launch", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("welcome"))
+	})
+
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	
+
 	router.Handle("/query", srv)
 	fmt.Print(
 		"==========================================\n",
