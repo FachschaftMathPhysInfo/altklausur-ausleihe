@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import LandingPage from '@/components/LandingPage'
+// import LandingPage from '@/components/LandingPage'
 import ExamList from '@/components/ExamList'
 import Application from '@/components/Application'
 import Impress from '@/components/Impress'
@@ -11,8 +11,7 @@ Vue.use(Router)
 export default new Router({
   routes: [{
       path: '/',
-      name: 'LandingPage',
-      component: LandingPage
+      redirect: '/app/exams'
     },
     {
       path: '/app/',
