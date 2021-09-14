@@ -105,10 +105,10 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 		jwtClaims := map[string]interface{}{"ID": res.ID}
 		jwtauth.SetExpiryIn(jwtClaims, 60*time.Minute)
 		_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
-		jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false}
+		jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
 		http.SetCookie(w, jwtCookie)
 
-		http.Redirect(w, r, "https://"+r.Host+"/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "https://"+r.Host+"/", http.StatusMovedPermanently)
 	} else {
 		log.Println(err)
 		// Redirect to return URL
