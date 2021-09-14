@@ -21,7 +21,8 @@ fi
 
 set -o nounset                              # Treat unset variables as an error
 
-curl --silent 'http://localhost:8081/query' \
+curl --silent 'https://altklausuren.mathphys.info/query' \
+    -H 'Cookie: jwt=ADD.YOUR.TOKEN' \
     -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": { "subject": "Info", "moduleName": "Betriebssysteme und Netzwerke", "moduleAltName": "IBN, BeNe", "year": 2021, "semester": "SoSe", "examiners": "Tom Rix", "file": null } } }' \
     -F map='{ "0": ["variables.input.file"] }' \
     -F 0=@$1 | \

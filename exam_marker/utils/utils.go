@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -37,7 +38,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 
 func InitDB() *gorm.DB {
 	databaseConnectionString := fmt.Sprintf("host=%s port=5432 user=%s dbname=%s password=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
+		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_PASSWORD"))
@@ -72,11 +73,19 @@ func InitDB() *gorm.DB {
 func InitMinIO() *minio.Client {
 	server := os.Getenv("MINIO_SERVER")
 	port := os.Getenv("MINIO_PORT")
-	accessKeyID := os.Getenv("MINIO_ROOT_USER")
-	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
+
 	useSSL := false
+	if os.Getenv("MINIO_SERVER_SSL") != "" {
+		useSSLBool, err := strconv.ParseBool(os.Getenv("MINIO_SERVER_SSL"))
+		if err != nil {
+			log.Fatalln("MINIO_SERVER_SSL ", err)
+		}
+		useSSL = useSSLBool
+	}
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(server+":"+port, &minio.Options{

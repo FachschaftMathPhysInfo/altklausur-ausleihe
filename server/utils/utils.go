@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
@@ -38,7 +39,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 
 func InitDB() *gorm.DB {
 	databaseConnectionString := fmt.Sprintf("host=%s port=5432 user=%s dbname=%s password=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
+		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_PASSWORD"))
@@ -66,6 +67,7 @@ func InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&model.Exam{})
+	db.AutoMigrate(&LTIUserInfos{})
 
 	return db
 }
@@ -73,10 +75,18 @@ func InitDB() *gorm.DB {
 func InitMinIO() *minio.Client {
 	server := os.Getenv("MINIO_SERVER")
 	port := os.Getenv("MINIO_PORT")
-	accessKeyID := os.Getenv("MINIO_ROOT_USER")
-	secretAccessKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
 	bucketName := os.Getenv("MINIO_EXAM_BUCKET")
+
 	useSSL := false
+	if os.Getenv("MINIO_SERVER_SSL") != "" {
+		useSSLBool, err := strconv.ParseBool(os.Getenv("MINIO_SERVER_SSL"))
+		if err != nil {
+			log.Fatalln("MINIO_SERVER_SSL ", err)
+		}
+		useSSL = useSSLBool
+	}
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(server+":"+port, &minio.Options{
@@ -116,7 +126,14 @@ func InitRmq() rmq.Connection {
 	// get job from queue
 	errChan := make(chan error, 10)
 	go logErrors(errChan)
-	rmqClient, err := rmq.OpenConnection("exam-message-passing", "tcp", "altklausur_ausleihe-redis:6379", 1, errChan)
+	rmqClient, err := rmq.OpenConnection(
+		os.Getenv("RMQ_QUEUE_NAME"),
+		"tcp",
+		os.Getenv("REDIS_CONNECTION_STRING"),
+		1,
+		errChan,
+	)
+
 	if err != nil {
 		log.Fatalln(err)
 	}

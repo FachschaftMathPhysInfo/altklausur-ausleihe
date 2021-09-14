@@ -16,24 +16,11 @@ services:
     networks:
       - internal
 
-  storage:
-    image: quay.io/minio/minio:RELEASE.2021-09-09T21-37-07Z
-    command: server --console-address ":9001" /data
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    env_file:
-      - env_files/minio.env
-    volumes:
-      - storage:/data
-    networks:
-      - internal
-
   backend:
     build: server
     image: "altklausur_ausleihe-backend:latest"
     ports:
-      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:3090:8081"
     env_file:
       - env_files/postgres-credentials.env
       - env_files/minio.env
@@ -42,7 +29,6 @@ services:
       - internal
     depends_on:
       - db
-      - storage
 
   exam_marker:
     build: exam_marker
@@ -55,18 +41,17 @@ services:
       - internal
     depends_on:
       - db
-      - storage
       - redis
 
   frontend:
     build:
       context: frontend
       args:
-        SERVER_HTTP: http://localhost:8081/query
-        SERVER_WS: ws://localhost:8081/query
+        SERVER_HTTP: https://altklausuren.mathphys.info/query
+        SERVER_WS: wss://altklausuren.mathphys.info/query
     image: "altklausur_ausleihe-frontend:latest"
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:3091:80"
     depends_on:
       - backend
 
@@ -75,4 +60,3 @@ networks:
 
 volumes:
   db: {}
-  storage: {}
