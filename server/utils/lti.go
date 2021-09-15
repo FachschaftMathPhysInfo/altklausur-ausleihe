@@ -1,5 +1,5 @@
-// Package utils provides ...
-package utils
+// Package lti_utils provides ...
+package lti_utils
 
 import (
 	"encoding/xml"

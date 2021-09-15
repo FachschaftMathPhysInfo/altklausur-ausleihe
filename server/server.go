@@ -12,7 +12,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/rs/cors"
@@ -36,10 +37,11 @@ func main() {
 	}).Handler)
 
 	var mb int64 = 1 << 20
-	db := utils.InitDB()
+	// we initialize the db
+	db := utils.InitDB(true)
 	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET_KEY")), nil)
 
-	ltiConnector := utils.LTIConnector{
+	ltiConnector := lti_utils.LTIConnector{
 		DB:        db,
 		TokenAuth: tokenAuth,
 	}
@@ -67,7 +69,7 @@ func main() {
 		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	}
 
-	router.Get("/distributor/lti_config", utils.LTIConfigHandler)
+	router.Get("/distributor/lti_config", lti_utils.LTIConfigHandler)
 	router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
 
 	router.Group(func(r chi.Router) {
