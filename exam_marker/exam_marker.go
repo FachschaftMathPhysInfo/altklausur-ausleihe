@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/exam_marker/v2/utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
 	api "github.com/pdfcpu/pdfcpu/pkg/api"

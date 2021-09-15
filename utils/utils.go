@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
@@ -36,7 +39,7 @@ func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Read
 	return nil
 }
 
-func InitDB() *gorm.DB {
+func InitDB(initialize bool) *gorm.DB {
 	databaseConnectionString := fmt.Sprintf("host=%s port=5432 user=%s dbname=%s password=%s sslmode=disable",
 		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
@@ -65,7 +68,10 @@ func InitDB() *gorm.DB {
 		db.Debug()
 	}
 
-	// db.AutoMigrate(&model.Exam{})
+	if initialize {
+		db.AutoMigrate(&model.Exam{})
+		db.AutoMigrate(&utils.LTIUserInfos{})
+	}
 
 	return db
 }
@@ -142,4 +148,41 @@ func setUpBucket(minioClient *minio.Client, bucketName string) error {
 	}
 
 	return nil
+}
+
+func InitRmq() rmq.Connection {
+	// get job from queue
+	errChan := make(chan error, 10)
+	go logErrors(errChan)
+	rmqClient, err := rmq.OpenConnection(
+		os.Getenv("RMQ_QUEUE_NAME"),
+		"tcp",
+		os.Getenv("REDIS_CONNECTION_STRING"),
+		1,
+		errChan,
+	)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return rmqClient
+}
+
+func logErrors(errChan <-chan error) {
+	for err := range errChan {
+		switch err := err.(type) {
+		case *rmq.HeartbeatError:
+			if err.Count == rmq.HeartbeatErrorLimit {
+				log.Print("heartbeat error (limit): ", err)
+			} else {
+				log.Print("heartbeat error: ", err)
+			}
+		case *rmq.ConsumeError:
+			log.Print("consume error: ", err)
+		case *rmq.DeliveryError:
+			log.Print("delivery error: ", err.Delivery, err)
+		default:
+			log.Print("other error: ", err)
+		}
+	}
 }
