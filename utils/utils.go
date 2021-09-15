@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -70,7 +70,7 @@ func InitDB(initialize bool) *gorm.DB {
 
 	if initialize {
 		db.AutoMigrate(&model.Exam{})
-		db.AutoMigrate(&utils.LTIUserInfos{})
+		db.AutoMigrate(&lti_utils.LTIUserInfos{})
 	}
 
 	return db
