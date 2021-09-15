@@ -15,7 +15,7 @@ import (
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/gabriel-vasile/mimetype"
 	minio "github.com/minio/minio-go/v7"
 	uuid "github.com/satori/go.uuid"
