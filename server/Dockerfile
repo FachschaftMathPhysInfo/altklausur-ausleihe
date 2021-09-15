@@ -6,9 +6,10 @@ WORKDIR /go/src
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY graph ./graph
+COPY server/graph ./server/graph
+COPY server/lti_utils ./server/lti_utils
+COPY server/server.go ./server/
 COPY utils ./utils
-COPY server.go ./
 
-RUN go build -a -o graphQLServer server.go
+RUN go build -a -o graphQLServer server/server.go
 ENTRYPOINT ["./graphQLServer"]
