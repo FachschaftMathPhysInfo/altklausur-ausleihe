@@ -11,5 +11,5 @@ COPY server/lti_utils ./server/lti_utils
 COPY server/server.go ./server/
 COPY utils ./utils
 
-RUN go build -a -o graphQLServer server/server.go
-ENTRYPOINT ["./graphQLServer"]
+RUN go build -a -o graphQLServer.runnable server/server.go
+ENTRYPOINT ["./graphQLServer.runnable"]

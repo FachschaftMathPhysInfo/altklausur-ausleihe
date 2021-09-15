@@ -12,5 +12,5 @@ COPY server/lti_utils ./server/lti_utils
 COPY exam_marker/exam_marker.go ./exam_marker/exam_marker.go
 COPY utils ./utils
 
-RUN go build -a -o exam_marker ./exam_marker/exam_marker.go
-ENTRYPOINT ["./exam_marker"]
+RUN go build -a -o exam_marker.runnable ./exam_marker/exam_marker.go
+ENTRYPOINT ["./exam_marker.runnable"]

@@ -17,7 +17,9 @@ services:
       - internal
 
   backend:
-    build: server
+    build:
+      dockerfile: server/Dockerfile
+      context: .
     image: "altklausur_ausleihe-backend:latest"
     ports:
       - "127.0.0.1:3090:8081"
@@ -31,7 +33,9 @@ services:
       - db
 
   exam_marker:
-    build: exam_marker
+    build:
+      dockerfile: exam_marker/Dockerfile
+      context: .
     image: "altklausur_ausleihe-exam_marker:latest"
     env_file:
       - env_files/postgres-credentials.env
