@@ -187,18 +187,7 @@ func main() {
 	minioClient := utils.InitMinIO()
 
 	// get job from queue
-	errChan := make(chan error, 10)
-	go logErrors(errChan)
-	rmqClient, err := rmq.OpenConnection(
-		os.Getenv("RMQ_QUEUE_NAME"),
-		"tcp",
-		os.Getenv("REDIS_CONNECTION_STRING"),
-		1,
-		errChan,
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	rmqClient := utils.InitRmq()
 
 	tagQueue, err := rmqClient.OpenQueue("tag-queue")
 
