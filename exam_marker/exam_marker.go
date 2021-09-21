@@ -17,7 +17,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
-	api "github.com/pdfcpu/pdfcpu/pkg/api"
+	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 )
 
@@ -68,22 +68,22 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 
 	var watermarks []*pdfcpu.Watermark
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark1, err := api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
+	watermark1, err := pdfcpu_api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
 	watermarks = append(watermarks, watermark1)
 
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark2, err := api.TextWatermark("eq192 - eq192 - eq192", "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
+	watermark2, err := pdfcpu_api.TextWatermark("eq192 - eq192 - eq192", "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
 	watermarks = append(watermarks, watermark2)
 
 	// add the mathphys logo to the top-left corner? :P
-	// wm, err = api.PDFWatermark("MathPhysLogoInfo.pdf", "pos:tr, rot:0, sc:0.5 abs, offset: -10 -10, opacity:0.5", onTop, update, pdfcpu.POINTS)
-	// api.AddWatermarks(input, output, nil, wm, nil)
+	// wm, err = pdfcpu_api.PDFWatermark("MathPhysLogoInfo.pdf", "pos:tr, rot:0, sc:0.5 abs, offset: -10 -10, opacity:0.5", onTop, update, pdfcpu.POINTS)
+	// pdfcpu_api.AddWatermarks(input, output, nil, wm, nil)
 	// if err != nil {
 	//	return err
 	// }
@@ -94,7 +94,7 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 
 	var tempout, tempin bytes.Buffer
 	// handle the first case seperately to save one copy
-	if err = api.AddWatermarks(input, &tempout, nil, watermarks[0], nil); err != nil {
+	if err = pdfcpu_api.AddWatermarks(input, &tempout, nil, watermarks[0], nil); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 		tempout.Reset()
 		tmpReader := bytes.NewReader(tempin.Bytes())
 
-		if err = api.AddWatermarks(tmpReader, &tempout, nil, watermark, nil); err != nil {
+		if err = pdfcpu_api.AddWatermarks(tmpReader, &tempout, nil, watermark, nil); err != nil {
 			return err
 		}
 	}
