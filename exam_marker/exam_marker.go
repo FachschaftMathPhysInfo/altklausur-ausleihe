@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -48,9 +49,13 @@ func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
 
 func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	// perform task
-	content := delivery.Payload()
-	log.Printf("working on task %s", content)
-	watermarkFile(consumer.MinIOClient, content)
+	var task utils.RMQMarkerTask
+	if err := json.Unmarshal([]byte(delivery.Payload()), &task); err != nil {
+		// is this the correct error handling?
+		delivery.Reject()
+	}
+	log.Printf("working on task %q", task.ExamUUID)
+	executeMarkerTask(consumer.MinIOClient, task)
 
 	if err := delivery.Ack(); err != nil {
 		log.Println(err)
@@ -109,13 +114,13 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
 	return nil
 }
 
-func watermarkFile(minioClient *minio.Client, filename string) {
+func executeMarkerTask(minioClient *minio.Client, task utils.RMQMarkerTask) {
 
 	context := context.Background()
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
 
-	obj, err := minioClient.GetObject(context, examBucket, filename, minio.GetObjectOptions{})
+	obj, err := minioClient.GetObject(context, examBucket, task.ExamUUID.String(), minio.GetObjectOptions{})
 	if err != nil {
 		log.Println(err)
 	}
@@ -138,7 +143,7 @@ func watermarkFile(minioClient *minio.Client, filename string) {
 	examReader := bytes.NewReader(exam)
 
 	// apply the watermark to the PDF
-	wmErr := applyWatermark(examReader, bufWriter, "test123 1. Mai 2021")
+	wmErr := applyWatermark(examReader, bufWriter, task.Text+"1. Mai 2021")
 	if wmErr != nil {
 		log.Println(wmErr)
 	}

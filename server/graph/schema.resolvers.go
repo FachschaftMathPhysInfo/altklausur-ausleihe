@@ -6,6 +6,7 @@ package graph
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -115,8 +116,18 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		return nil, err
 	}
 
+	rawTask := utils.RMQMarkerTask{
+		ExamUUID: realUUID,
+		Text:     "test",
+	}
+
+	task, err := json.Marshal(rawTask)
+	if err != nil {
+		return nil, err
+	}
+
 	// add the job to the workers
-	if err := tagQueue.Publish(stringUUID); err != nil {
+	if err := tagQueue.Publish(string(task)); err != nil {
 		return nil, err
 	}
 

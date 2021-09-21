@@ -15,6 +15,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -185,4 +186,9 @@ func logErrors(errChan <-chan error) {
 			log.Print("other error: ", err)
 		}
 	}
+}
+
+type RMQMarkerTask struct {
+	ExamUUID uuid.UUID `json:"examuuid"`
+	Text     string    `json:"text"`
 }
