@@ -38,6 +38,7 @@ type LTIUserInfos struct {
 	PersonGivenName    string
 	PersonPrimaryEmail string
 	PersonFamilyName   string
+	PersonFullName     string
 }
 
 func LTIConfigHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,11 +85,13 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	var res LTIUserInfos
-	res.ID = ltiRequest.LTIHeaders.UserId
-	res.PersonFamilyName = ltiRequest.LTIHeaders.LISPersonFamilyName
-	res.PersonGivenName = ltiRequest.LTIHeaders.LISPersonGivenName
-	res.PersonPrimaryEmail = ltiRequest.LTIHeaders.LISPersonPrimaryEmail
+	res := LTIUserInfos{
+		ID:                 ltiRequest.LTIHeaders.UserId,
+		PersonFamilyName:   ltiRequest.LTIHeaders.LISPersonFamilyName,
+		PersonGivenName:    ltiRequest.LTIHeaders.LISPersonGivenName,
+		PersonPrimaryEmail: ltiRequest.LTIHeaders.LISPersonPrimaryEmail,
+		PersonFullName:     ltiRequest.LTIHeaders.LISPersonFullName,
+	}
 
 	if valid {
 		var userInfos LTIUserInfos

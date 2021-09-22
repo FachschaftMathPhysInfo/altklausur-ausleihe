@@ -16,8 +16,10 @@ import (
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -100,6 +102,10 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		return nil, dbErr
 	}
 
+	_, claims, err := jwtauth.FromContext(ctx)
+	var userInfos lti_utils.LTIUserInfos
+	r.DB.First(&userInfos, claims["ID"])
+
 	// try to find the entry in cache
 	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
 	if e != nil {
@@ -118,7 +124,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 
 	rawTask := utils.RMQMarkerTask{
 		ExamUUID: realUUID,
-		Text:     "test",
+		Text:     userInfos.PersonFullName,
 	}
 
 	task, err := json.Marshal(rawTask)
