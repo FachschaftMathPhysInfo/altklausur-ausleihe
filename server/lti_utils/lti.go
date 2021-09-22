@@ -85,7 +85,7 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	res := LTIUserInfos{
+	userInfoFromRequest := LTIUserInfos{
 		ID:                 ltiRequest.LTIHeaders.UserId,
 		PersonFamilyName:   ltiRequest.LTIHeaders.LISPersonFamilyName,
 		PersonGivenName:    ltiRequest.LTIHeaders.LISPersonGivenName,
@@ -94,19 +94,27 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if valid {
+		// see if the user already exists in the database
 		var userInfos LTIUserInfos
-		l.DB.First(&userInfos, res.ID)
+		l.DB.First(&userInfos, userInfoFromRequest.ID)
 		if l.DB.Error != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// TODO: Add some more validation for the user data
+		// but since the data is coming from a trusted source (Moodle)
+		// this sanity check could already be sufficient
 		if userInfos.ID == "" {
-			l.DB.Create(&res)
+			l.DB.Create(&userInfoFromRequest)
+		} else {
+			l.DB.Save(&userInfoFromRequest)
 		}
 
-		jwtClaims := map[string]interface{}{"ID": res.ID}
-		jwtauth.SetExpiryIn(jwtClaims, 60*time.Minute)
+		// Create the JWT Token for the User so he can access our application
+		jwtClaims := map[string]interface{}{"ID": userInfoFromRequest.ID}
+		jwtauth.SetExpiryIn(jwtClaims, time.Hour)
 		_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
 		jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
 		http.SetCookie(w, jwtCookie)
