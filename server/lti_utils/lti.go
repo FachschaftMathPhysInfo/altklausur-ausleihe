@@ -3,6 +3,7 @@ package lti_utils
 
 import (
 	"encoding/xml"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -96,19 +97,20 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 	if valid {
 		// see if the user already exists in the database
 		var userInfos LTIUserInfos
-		l.DB.First(&userInfos, userInfoFromRequest.ID)
-		if l.DB.Error != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 
 		// TODO: Add some more validation for the user data
 		// but since the data is coming from a trusted source (Moodle)
 		// this sanity check could already be sufficient
-		if userInfos.ID == "" {
+		if err := l.DB.First(&userInfos, userInfoFromRequest.ID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+			// create user if not found in DB
 			l.DB.Create(&userInfoFromRequest)
+		} else if err != nil {
+			// report any other errors to the log
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		} else {
+			// update the user data if there are no errors
 			l.DB.Save(&userInfoFromRequest)
 		}
 
