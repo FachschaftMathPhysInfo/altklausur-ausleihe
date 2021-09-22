@@ -122,37 +122,22 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		return nil, err
 	}
 
-	rawTask := utils.RMQMarkerTask{
-		ExamUUID: realUUID,
-		Text:     userInfos.PersonFullName,
-	}
+	// create the task for the exam marker
+	task, err := json.Marshal(
+		utils.RMQMarkerTask{
+			ExamUUID: realUUID,
+			Text:     userInfos.PersonFullName,
+		},
+	)
 
-	task, err := json.Marshal(rawTask)
 	if err != nil {
 		return nil, err
 	}
 
-	// add the job to the workers
+	// communicate it to the marker
 	if err := tagQueue.Publish(string(task)); err != nil {
 		return nil, err
 	}
-
-	//	// TODO(chris): is checking for the timeout even necessary?!
-	//	timeout := 10
-	//	for i := 0; i < timeout; i++ {
-	//		// try to find the entry in cache
-	//		_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), uuidstring, minio.GetObjectOptions{})
-	//		if e != nil {
-	//			errResponse := minio.ToErrorResponse(e)
-	//			if errResponse.Code != "NoSuchKey" {
-	//				return nil, e
-	//			}
-	//		} else {
-	//			return &uuidstring, nil
-	//		}
-	//		time.Sleep(500 * time.Millisecond)
-	//	}
-	//	return nil, fmt.Errorf("Timeout reached while marking exam \"%s\"!", uuidstring)
 
 	return &stringUUID, nil
 }
