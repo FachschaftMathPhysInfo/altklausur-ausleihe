@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	connectRetries int = 20
+	connectRetries int = 5
 )
 
 func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Reader, fileSize int64, contentType string) error {
@@ -57,7 +57,7 @@ func InitDB(initialize bool) *gorm.DB {
 	)
 
 	for tries := 0; err != nil && tries <= connectRetries; tries++ {
-		log.Println(err)
+		log.Println("Error while connecting to DB:", err)
 		db, err = gorm.Open(
 			postgres.Open(databaseConnectionString),
 			&gorm.Config{},
@@ -109,18 +109,18 @@ func InitMinIO() *minio.Client {
 		Secure: useSSL,
 	})
 
-	for tries := 0; err != nil && tries <= connectRetries; tries++ {
-		log.Println(err)
-		minioClient, err = minio.New(server+":"+port, &minio.Options{
-			Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-			Secure: useSSL,
-		})
+	// try to actually use the connection
+	// otherwise timeouts wont get caught
+	_, err = minioClient.ListBuckets(context.Background())
 
-		time.Sleep(1 * time.Second)
+	for tries := 0; err != nil && tries <= connectRetries; tries++ {
+		log.Printf("Trying to connect to the S3 storage service. Try No. %d of %d with error [%s]", tries, connectRetries, err.Error())
+		_, err = minioClient.ListBuckets(context.Background())
+
+		time.Sleep(time.Second)
 	}
 	if err != nil {
-		log.Println("reached maximium amount of connection tries to S3 Storage Service: ", connectRetries)
-		log.Fatalln(err)
+		log.Fatalln("reached maximium amount of connection tries to S3 storage service. Aborting now! ")
 	}
 
 	setUpBucket(minioClient, examBucket)
