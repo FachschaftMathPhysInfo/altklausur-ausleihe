@@ -74,13 +74,15 @@ func main() {
 
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
-		r.Use(jwtauth.Verifier(tokenAuth))
+		if os.Getenv("DEPLOYMENT_ENV") != "testing" {
+			r.Use(jwtauth.Verifier(tokenAuth))
 
-		// Handle valid / invalid tokens. In this example, we use
-		// the provided authenticator middleware, but you can write your
-		// own very easily, look at the Authenticator method in jwtauth.go
-		// and tweak it, its not scary.
-		r.Use(jwtauth.Authenticator)
+			// Handle valid / invalid tokens. In this example, we use
+			// the provided authenticator middleware, but you can write your
+			// own very easily, look at the Authenticator method in jwtauth.go
+			// and tweak it, its not scary.
+			r.Use(jwtauth.Authenticator)
+		}
 
 		r.Handle("/query", srv)
 	})
