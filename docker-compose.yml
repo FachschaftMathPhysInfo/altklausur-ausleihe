@@ -31,8 +31,9 @@ services:
 
   backend:
     build:
-      dockerfile: server/Dockerfile
+      dockerfile: Dockerfile
       context: .
+      target: server
     image: "altklausur_ausleihe-backend:latest"
     ports:
       - "127.0.0.1:8081:8081"
@@ -48,8 +49,9 @@ services:
 
   exam_marker:
     build:
-      dockerfile: exam_marker/Dockerfile
+      dockerfile: Dockerfile
       context: .
+      target: exam_marker
     image: "altklausur_ausleihe-exam_marker:latest"
     env_file:
       - env_files/postgres-credentials.env
