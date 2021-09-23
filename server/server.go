@@ -70,19 +70,22 @@ func main() {
 	}
 
 	router.Get("/distributor/lti_config", lti_utils.LTIConfigHandler)
-	router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
+
+	if os.Getenv("DEPLOYMENT_ENV") != "testing" {
+		router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
+	} else {
+		router.Post("/distributor/lti_launch", ltiConnector.DummyLTILaunch)
+	}
 
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
-		if os.Getenv("DEPLOYMENT_ENV") != "testing" {
-			r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Verifier(tokenAuth))
 
-			// Handle valid / invalid tokens. In this example, we use
-			// the provided authenticator middleware, but you can write your
-			// own very easily, look at the Authenticator method in jwtauth.go
-			// and tweak it, its not scary.
-			r.Use(jwtauth.Authenticator)
-		}
+		// Handle valid / invalid tokens. In this example, we use
+		// the provided authenticator middleware, but you can write your
+		// own very easily, look at the Authenticator method in jwtauth.go
+		// and tweak it, its not scary.
+		r.Use(jwtauth.Authenticator)
 
 		r.Handle("/query", srv)
 	})

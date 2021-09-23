@@ -130,3 +130,40 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Couldn't validate your request.", http.StatusInternalServerError)
 	}
 }
+
+// DummyLTILaunch just returns an invitation
+// You can obtain a JWT Token by executing the following command
+// curl -X POST http://localhost:8081/distributor/lti_launch -I
+func (l *LTIConnector) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
+	userInfoFromRequest := LTIUserInfos{
+		ID:                 "200",
+		PersonFamilyName:   "Testerson",
+		PersonGivenName:    "Test",
+		PersonPrimaryEmail: "test@example.com",
+		PersonFullName:     "Test Testerson",
+	}
+
+	// see if the user already exists in the database
+	var userInfos LTIUserInfos
+	if err := l.DB.First(&userInfos, userInfoFromRequest.ID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		// create user if not found in DB
+		l.DB.Create(&userInfoFromRequest)
+	} else if err != nil {
+		// report any other errors to the log
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else {
+		// update the user data if there are no errors
+		l.DB.Save(&userInfoFromRequest)
+	}
+
+	// Create the JWT Token for the User so he can access our application
+	jwtClaims := map[string]interface{}{"ID": userInfoFromRequest.ID}
+	jwtauth.SetExpiryIn(jwtClaims, time.Hour)
+	_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
+	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
+	http.SetCookie(w, jwtCookie)
+
+	http.Redirect(w, r, "https://"+r.Host+"/", http.StatusMovedPermanently)
+}

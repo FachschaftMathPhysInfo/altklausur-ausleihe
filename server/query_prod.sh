@@ -12,8 +12,9 @@
 #===============================================================================
 
 JWT_TOKEN="PASTE.YOUR.TOKEN"
-UUID="81d6750d-a535-46b6-8491-accd6b1eb0c7"
+UUID="391ce003-7885-440d-9405-d9458b8ab695"
 TARGET_HOST='https://altklausuren.mathphys.info/query'
+# TARGET_HOST='http://localhost:8081/query'
 
 set -o nounset                              # Treat unset variables as an error
 
