@@ -209,6 +209,7 @@ func logErrors(errChan <-chan error) {
 }
 
 type RMQMarkerTask struct {
-	ExamUUID uuid.UUID `json:"examuuid"`
-	Text     string    `json:"text"`
+	ExamUUID     uuid.UUID `json:"examuuid"`
+	TextLeft     string    `json:"textleft"`
+	TextDiagonal string    `json:"textdiagonal"`
 }

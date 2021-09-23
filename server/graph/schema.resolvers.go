@@ -125,8 +125,9 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	// create the task for the exam marker
 	task, err := json.Marshal(
 		utils.RMQMarkerTask{
-			ExamUUID: realUUID,
-			Text:     userInfos.PersonFullName,
+			ExamUUID:     realUUID,
+			TextLeft:     userInfos.PersonFullName,
+			TextDiagonal: userInfos.PersonPrimaryEmail,
 		},
 	)
 

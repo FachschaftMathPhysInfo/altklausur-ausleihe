@@ -62,20 +62,20 @@ func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	}
 }
 
-func applyWatermark(input io.ReadSeeker, output io.Writer, text string) error {
+func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, textDiagonal string) error {
 	onTop := true
 	update := false
 
 	var watermarks []*pdfcpu.Watermark
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark1, err := pdfcpu_api.TextWatermark(text, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
+	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
 	watermarks = append(watermarks, watermark1)
 
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark2, err := pdfcpu_api.TextWatermark("eq192 - eq192 - eq192", "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
+	watermark2, err := pdfcpu_api.TextWatermark(textDiagonal, "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func executeMarkerTask(minioClient *minio.Client, task utils.RMQMarkerTask) {
 	examReader := bytes.NewReader(exam)
 
 	// apply the watermark to the PDF
-	wmErr := applyWatermark(examReader, bufWriter, task.Text+"1. Mai 2021")
+	wmErr := applyWatermark(examReader, bufWriter, task.TextLeft, task.TextDiagonal)
 	if wmErr != nil {
 		log.Println(wmErr)
 	}
