@@ -23,10 +23,12 @@ JWT_TOKEN="ADD.YOUR.TOKEN"
 
 set -o nounset                              # Treat unset variables as an error
 
-# mark Exam
-curl 'https://altklausuren.mathphys.info/query' -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' -H "Cookie: jwt=$JWT_TOKEN" --data-binary '{"query":"mutation requestMarkedExam {\n  requestMarkedExam(StringUUID: \"85975cf6-b3da-4ef0-9e66-7ae44d47635e\",)\n}\n"}' --compressed
-# get URL
-curl 'https://altklausuren.mathphys.info/query' -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' -H "Cookie: jwt=$JWT_TOKEN" --data-binary '{"query":"query($UUID: String!) {\n  getExam(StringUUID: $UUID) {\n    viewUrl\n    downloadUrl\n  }\n}\n","variables":{"UUID":"81d6750d-a535-46b6-8491-accd6b1eb0c7"}}' --compressed
+curl --silent 'http://localhost:8081/query' \
+    -H 'Cookie: jwt=ADD.YOUR.TOKEN' \
+    -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": { "subject": "Info", "moduleName": "Betriebssysteme und Netzwerke", "moduleAltName": "IBN, BeNe", "year": 2021, "semester": "SoSe", "examiners": "Tom Rix", "file": null } } }' \
+    -F map='{ "0": ["variables.input.file"] }' \
+    -F 0=@$1 | \
+    jq
 
 # Original:
 # curl localhost:8081/query \
