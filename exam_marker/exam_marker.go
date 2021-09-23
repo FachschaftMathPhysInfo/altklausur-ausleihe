@@ -54,7 +54,7 @@ func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 		// is this the correct error handling?
 		delivery.Reject()
 	}
-	log.Printf("working on task %q", task.ExamUUID)
+	log.Printf("%s working on task %q", consumer.name, task.ExamUUID)
 	executeMarkerTask(consumer.MinIOClient, task)
 
 	if err := delivery.Ack(); err != nil {
@@ -68,7 +68,7 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 
 	var watermarks []*pdfcpu.Watermark
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:40, col: 1 0 0, rot:-90, sc:1 abs, opacity:0.4, pos: l, offset: -190 0", onTop, update, pdfcpu.POINTS)
+	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:20, col: 1 0 0, rot:-90, sc: 0.8 rel, opacity:0.4, off: -260 0", onTop, update, pdfcpu.POINTS)
 	if err != nil {
 		return err
 	}
