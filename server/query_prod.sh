@@ -18,6 +18,7 @@ TARGET_HOST='https://altklausuren.mathphys.info/query'
 
 set -o nounset                              # Treat unset variables as an error
 
+echo "List of Exams and their UUID:"
 # get exam list
 curl --silent $TARGET_HOST \
     -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' \
@@ -25,6 +26,7 @@ curl --silent $TARGET_HOST \
     --data-binary '{"query":"query {\n  exams { UUID }\n}\n","variables":{}}' --compressed | \
     jq
 
+echo "Request a marked exam:"
 # mark Exam
 curl --silent $TARGET_HOST \
     -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' \
@@ -32,6 +34,7 @@ curl --silent $TARGET_HOST \
     --data-binary '{"query":"mutation requestMarkedExam {\n  requestMarkedExam(StringUUID: \"'$UUID'\",)\n}\n"}' --compressed | \
     jq
 
+echo "Request the URL of the finished exam:"
 # get URL
 curl --silent $TARGET_HOST \
     -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' \
