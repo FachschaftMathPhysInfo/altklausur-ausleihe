@@ -13,8 +13,6 @@ services:
 
   redis:
     image: "redis:alpine"
-    logging:
-      driver: none
     networks:
       - internal
 
