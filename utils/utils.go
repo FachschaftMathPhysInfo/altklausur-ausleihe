@@ -208,8 +208,15 @@ func logErrors(errChan <-chan error) {
 	}
 }
 
+// GetExamCachePath returns the string under which the exam should be saved /
+// can be found in the marker cache
+func GetExamCachePath(userID string, examUUID uuid.UUID) string {
+	return userID + "_" + examUUID.String()
+}
+
 type RMQMarkerTask struct {
 	ExamUUID     uuid.UUID `json:"examuuid"`
+	UserID       string    `json:"userid"`
 	TextLeft     string    `json:"textleft"`
 	TextDiagonal string    `json:"textdiagonal"`
 }

@@ -107,7 +107,12 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	r.DB.First(&userInfos, claims["ID"])
 
 	// try to find the entry in cache
-	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	_, e := r.MinIOClient.StatObject(
+		context.Background(),
+		os.Getenv("MINIO_CACHE_BUCKET"),
+		utils.GetExamCachePath(userInfos.ID, realUUID),
+		minio.GetObjectOptions{})
+
 	if e != nil {
 		errResponse := minio.ToErrorResponse(e)
 		if errResponse.Code != "NoSuchKey" {
@@ -126,6 +131,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	task, err := json.Marshal(
 		utils.RMQMarkerTask{
 			ExamUUID:     realUUID,
+			UserID:       userInfos.ID,
 			TextLeft:     userInfos.PersonFullName,
 			TextDiagonal: userInfos.PersonPrimaryEmail,
 		},
@@ -168,8 +174,15 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 		return nil, dbErr
 	}
 
+	_, claims, err := jwtauth.FromContext(ctx)
+
 	// try to find the entry in cache
-	_, e := r.MinIOClient.StatObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, minio.GetObjectOptions{})
+	_, e := r.MinIOClient.StatObject(
+		context.Background(),
+		os.Getenv("MINIO_CACHE_BUCKET"),
+		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		minio.GetObjectOptions{})
+
 	if e != nil {
 		errResponse := minio.ToErrorResponse(e)
 		if errResponse.Code != "NoSuchKey" {
@@ -183,14 +196,26 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	reqParams := make(url.Values)
 
 	// Generates a presigned url to view the pdf which expires in 15 min.
-	presignedViewURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 15*time.Minute, reqParams)
+	presignedViewURL, err := r.MinIOClient.PresignedGetObject(
+		context.Background(),
+		os.Getenv("MINIO_CACHE_BUCKET"),
+		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		15*time.Minute,
+		reqParams)
+
 	if err != nil {
 		return nil, err
 	}
 
 	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
 	// Generates a presigned url to download the pdf which expires in 15 min.
-	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(context.Background(), os.Getenv("MINIO_CACHE_BUCKET"), stringUUID, 15*time.Minute, reqParams)
+	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(
+		context.Background(),
+		os.Getenv("MINIO_CACHE_BUCKET"),
+		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		15*time.Minute,
+		reqParams)
+
 	if err != nil {
 		return nil, err
 	}
