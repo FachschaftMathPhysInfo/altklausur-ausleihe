@@ -120,7 +120,12 @@ func executeMarkerTask(minioClient *minio.Client, task utils.RMQMarkerTask) {
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
 
-	obj, err := minioClient.GetObject(context, examBucket, task.ExamUUID.String(), minio.GetObjectOptions{})
+	obj, err := minioClient.GetObject(
+		context,
+		examBucket,
+		task.ExamUUID.String(),
+		minio.GetObjectOptions{})
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -152,7 +157,7 @@ func executeMarkerTask(minioClient *minio.Client, task utils.RMQMarkerTask) {
 	_, putErr := minioClient.PutObject(
 		context,
 		cacheBucket,
-		objInfo.Key,
+		utils.GetExamCachePath(task.UserID, task.ExamUUID),
 		&b,
 		int64(b.Len()),
 		minio.PutObjectOptions{
