@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime"
 
 	"net/url"
 	"os"
@@ -177,7 +178,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	_, claims, err := jwtauth.FromContext(ctx)
 
 	// try to find the entry in cache
-	_, e := r.MinIOClient.StatObject(
+	objectInfo, e := r.MinIOClient.StatObject(
 		context.Background(),
 		os.Getenv("MINIO_CACHE_BUCKET"),
 		utils.GetExamCachePath(claims["ID"].(string), realUUID),
@@ -207,7 +208,14 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 		return nil, err
 	}
 
-	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+	filename := exam.ToFilename()
+
+	if extensions, err := mime.ExtensionsByType(objectInfo.ContentType); extensions != nil && err == nil {
+		fmt.Println(err, extensions)
+		filename += extensions[0]
+	}
+
+	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	// Generates a presigned url to download the pdf which expires in 15 min.
 	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(
 		context.Background(),
