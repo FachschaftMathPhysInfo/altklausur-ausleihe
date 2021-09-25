@@ -33,11 +33,13 @@ func (exam *Exam) BeforeCreate(db *gorm.DB) error {
 }
 
 func (exam *Exam) ToFilename() string {
-	filename := strings.ToLower(exam.Subject) + "_" + strings.ToLower(exam.ModuleName)
+	filename := exam.Subject + "_" + exam.ModuleName
 
 	if exam.Year != nil && exam.Semester != nil {
-		filename += "_" + strings.ToLower(*exam.Semester) + "_" + strconv.Itoa(*exam.Year)
+		filename += "_" + *exam.Semester + "_" + strconv.Itoa(*exam.Year)
 	}
+
+	filename = strings.ReplaceAll(strings.ToLower(filename), " ", "_")
 
 	return filename
 }
