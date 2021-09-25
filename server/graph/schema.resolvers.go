@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"mime"
-
 	"net/url"
 	"os"
 	"time"
@@ -20,9 +19,9 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/go-chi/jwtauth/v5"
+	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 

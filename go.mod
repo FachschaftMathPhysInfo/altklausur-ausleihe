@@ -11,7 +11,6 @@ require (
 	github.com/henrixapp/go-lti v0.0.2
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/pdfcpu/pdfcpu v0.3.12
-	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/vektah/gqlparser/v2 v2.2.0
