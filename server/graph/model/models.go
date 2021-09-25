@@ -16,7 +16,6 @@ type Exam struct {
 	UUID          uuid.UUID `gorm:"type:uuid;primary_key;" json:"ID,omitempty"`
 	Subject       string    `json:"subject"`
 	ModuleName    string    `json:"moduleName"`
-	URL           string    `json:"url"`
 	ModuleAltName *string   `json:"moduleAltName"`
 	Year          *int      `json:"year"`
 	Examiners     *string   `json:"examiners"`
