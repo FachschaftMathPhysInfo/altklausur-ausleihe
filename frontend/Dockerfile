@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json *.config.js ./
 RUN npm install
 COPY ./src ./src
+COPY ./public ./public
 
 ARG SERVER_WS
 ENV SERVER_WS "$SERVER_WS"
