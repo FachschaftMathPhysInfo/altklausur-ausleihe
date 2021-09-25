@@ -54,7 +54,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	// check file size
 	if input.File.Size < 512 {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: size of %d too small!", input.File.Size)
+		return nil, fmt.Errorf("File is not valid: size of %d too small", input.File.Size)
 	}
 
 	// check file MIME type
@@ -69,7 +69,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	allowedMIMETypes := []string{"application/pdf"}
 	if !mimetype.EqualsAny(mtype.String(), allowedMIMETypes...) {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: mimetype \"%s\" forbidden!", mtype.String())
+		return nil, fmt.Errorf("File is not valid: mimetype \"%s\" forbidden", mtype.String())
 	}
 
 	// upload the file to the storage server
