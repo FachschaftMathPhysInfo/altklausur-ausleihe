@@ -32,9 +32,11 @@ func (exam *Exam) BeforeCreate(db *gorm.DB) error {
 	return nil
 }
 
+// ToFilename returns a normalized string version of the metadata for this exam
 func (exam *Exam) ToFilename() string {
-	filename := exam.Subject + "_" + exam.ModuleName
+	filename := exam.ModuleName
 
+	// add year and semester if both are present
 	if exam.Year != nil && exam.Semester != nil {
 		filename += "_" + *exam.Semester + "_" + strconv.Itoa(*exam.Year)
 	}
