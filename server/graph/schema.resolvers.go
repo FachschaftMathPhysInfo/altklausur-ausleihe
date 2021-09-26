@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
+	"mime"
 	"net/url"
 	"os"
 	"time"
@@ -19,7 +19,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/go-chi/jwtauth/v5"
+	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -53,7 +53,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	// check file size
 	if input.File.Size < 512 {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: size of %d too small!", input.File.Size)
+		return nil, fmt.Errorf("File is not valid: size of %d too small", input.File.Size)
 	}
 
 	// check file MIME type
@@ -68,7 +68,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	allowedMIMETypes := []string{"application/pdf"}
 	if !mimetype.EqualsAny(mtype.String(), allowedMIMETypes...) {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: mimetype \"%s\" forbidden!", mtype.String())
+		return nil, fmt.Errorf("File is not valid: mimetype \"%s\" forbidden", mtype.String())
 	}
 
 	// upload the file to the storage server
@@ -177,7 +177,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	_, claims, err := jwtauth.FromContext(ctx)
 
 	// try to find the entry in cache
-	_, e := r.MinIOClient.StatObject(
+	objectInfo, e := r.MinIOClient.StatObject(
 		context.Background(),
 		os.Getenv("MINIO_CACHE_BUCKET"),
 		utils.GetExamCachePath(claims["ID"].(string), realUUID),
@@ -207,7 +207,13 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 		return nil, err
 	}
 
-	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", stringUUID))
+	filename := exam.ToFilename()
+
+	if extensions, err := mime.ExtensionsByType(objectInfo.ContentType); extensions != nil && err == nil {
+		filename += extensions[0]
+	}
+
+	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	// Generates a presigned url to download the pdf which expires in 15 min.
 	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(
 		context.Background(),

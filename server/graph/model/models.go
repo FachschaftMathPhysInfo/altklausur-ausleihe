@@ -3,6 +3,9 @@
 package model
 
 import (
+	"strconv"
+	"strings"
+
 	"gorm.io/gorm"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -13,7 +16,6 @@ type Exam struct {
 	UUID          uuid.UUID `gorm:"type:uuid;primary_key;" json:"ID,omitempty"`
 	Subject       string    `json:"subject"`
 	ModuleName    string    `json:"moduleName"`
-	URL           string    `json:"url"`
 	ModuleAltName *string   `json:"moduleAltName"`
 	Year          *int      `json:"year"`
 	Examiners     *string   `json:"examiners"`
@@ -27,6 +29,20 @@ func (exam *Exam) BeforeCreate(db *gorm.DB) error {
 	uuid := uuid.NewV4()
 	exam.UUID = uuid
 	return nil
+}
+
+// ToFilename returns a normalized string version of the metadata for this exam
+func (exam *Exam) ToFilename() string {
+	filename := exam.ModuleName
+
+	// add year and semester if both are present
+	if exam.Year != nil && exam.Semester != nil {
+		filename += "_" + *exam.Semester + "_" + strconv.Itoa(*exam.Year)
+	}
+
+	filename = strings.ReplaceAll(strings.ToLower(filename), " ", "_")
+
+	return filename
 }
 
 type NewExam struct {
