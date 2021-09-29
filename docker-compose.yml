@@ -9,12 +9,12 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     networks:
-      - internal
+      - backend-internal
 
   redis:
     image: "redis:alpine"
     networks:
-      - internal
+      - backend-internal
 
   storage:
     image: quay.io/minio/minio:RELEASE.2021-09-09T21-37-07Z
@@ -27,7 +27,7 @@ services:
     volumes:
       - storage:/data
     networks:
-      - internal
+      - backend-internal
 
   backend:
     build:
@@ -41,7 +41,8 @@ services:
       - env_files/minio.env
       - env_files/backend.env
     networks:
-      - internal
+      - backend-internal
+      - backend
     depends_on:
       - db
       - storage
@@ -56,7 +57,7 @@ services:
       - env_files/minio.env
       - env_files/exam_marker.env
     networks:
-      - internal
+      - backend-internal
     depends_on:
       - db
       - storage
@@ -66,16 +67,19 @@ services:
     build:
       context: frontend
       args:
-        SERVER_HTTP: http://localhost:8081/query
+        SERVER_HTTP: http://localhost:8080/query
         SERVER_WS: ws://localhost:8081/query
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:8080:80"
+    networks:
+      - backend
     depends_on:
       - backend
 
 networks:
-  internal: {}
+  backend-internal: {}
+  backend: {}
 
 volumes:
   db: {}
