@@ -20,7 +20,7 @@ if [ "$1" == "" ] || [ $# -ne 1 ]; then
 fi
 
 JWT_TOKEN="ADD.YOUR.TOKEN"
-TARGET_HOST='http://localhost:8081/query' 
+TARGET_HOST='http://localhost:8080/query'
 # TARGET_HOST='https://altklausuren.mathphys.info/query'
 
 set -o nounset                              # Treat unset variables as an error
@@ -29,8 +29,7 @@ curl --silent $TARGET_HOST \
     -H 'Cookie: jwt='$JWT_TOKEN \
     -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": { "subject": "Info", "moduleName": "Betriebssysteme und Netzwerke", "moduleAltName": "IBN, BeNe", "year": 2021, "semester": "SoSe", "examiners": "Tom Rix", "file": null } } }' \
     -F map='{ "0": ["variables.input.file"] }' \
-    -F 0=@$1 | \
-    jq
+    -F 0=@$1
 
 # Original:
 # curl localhost:8081/query \

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -67,6 +68,11 @@ func main() {
 	if os.Getenv("DEPLOYMENT_ENV") == "testing" {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+
+		router.Get("/testlogin", func(w http.ResponseWriter, r *http.Request) {
+			tmpl := template.Must(template.ParseFiles("server/dummylogin.html"))
+			tmpl.Execute(w, nil)
+		})
 	}
 
 	router.Get("/distributor/lti_config", lti_utils.LTIConfigHandler)
