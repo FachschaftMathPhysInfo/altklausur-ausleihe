@@ -165,5 +165,5 @@ func (l *LTIConnector) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
 	http.SetCookie(w, jwtCookie)
 
-	http.Redirect(w, r, "https://"+r.Host+"/", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
