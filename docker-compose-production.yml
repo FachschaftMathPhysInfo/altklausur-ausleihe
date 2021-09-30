@@ -9,12 +9,12 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     networks:
-      - internal
+      - backend-internal
 
   redis:
     image: "redis:alpine"
     networks:
-      - internal
+      - backend-internal
 
   backend:
     build:
@@ -28,7 +28,8 @@ services:
       - env_files/minio.env
       - env_files/backend.env
     networks:
-      - internal
+      - backend-internal
+      - backend
     depends_on:
       - db
 
@@ -42,7 +43,7 @@ services:
       - env_files/minio.env
       - env_files/exam_marker.env
     networks:
-      - internal
+      - backend-internal
     depends_on:
       - db
       - redis
@@ -56,11 +57,14 @@ services:
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:3091:80"
+    networks:
+      - backend
     depends_on:
       - backend
 
 networks:
-  internal: {}
+  backend-internal: {}
+  backend: {}
 
 volumes:
   db: {}
