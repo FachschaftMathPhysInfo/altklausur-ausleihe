@@ -95,27 +95,29 @@
           >
         </template>
         <template v-slot:[`item.download`]="{ item }">
-          <a v-if="item.downloadUrl" :href="item.downloadUrl" target="_blank">
-            <tooltipped-icon
-              icon="mdi-download"
-              color="green"
-              text="Altklausur herunterladen"
-              position="bottom"
-              @clicked="downloadExam(item.downloadUrl)"
-            ></tooltipped-icon>
-          </a>
-          <tooltipped-icon
-            v-if="!item.downloadUrl"
-            icon="mdi-stamper"
+          <v-btn
+            :loading="item.loading"
+            :disabled="item.disabled"
             color="primary"
-            text="Altklausur mit Wasserzeichen versehen"
-            position="bottom"
-            @clicked="getMarkedExamURL(item)"
-          ></tooltipped-icon>
+            @click="downloadAltklausur(item)"
+            rounded
+          >
+            <v-icon>
+              mdi-download
+            </v-icon>
+            herunterladen
+          </v-btn>
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
-            <p v-if="!item.viewUrl">Watermarking and Loading Exam ...</p>
+            <div v-if="!item.viewUrl" class="text-center">
+              <h4>Watermarking and Loading Exam ...</h4>
+              <v-progress-circular
+                indeterminate
+                color="primary"
+              ></v-progress-circular>
+            </div>
+
             <iframe
               v-if="item.viewUrl"
               :src="item.viewUrl"
@@ -153,7 +155,6 @@
 </template>
 
 <script>
-import TooltippedIcon from "./generic/TooltippedIcon.vue";
 import gql from "graphql-tag";
 
 // fetch all exams
@@ -173,7 +174,7 @@ const EXAMS_QUERY = gql`
 
 export default {
   name: "ExamList",
-  components: { TooltippedIcon },
+  components: {},
   data() {
     const self = this;
     return {
@@ -289,9 +290,37 @@ export default {
         return "mdi-label";
       }
     },
+    async downloadAltklausur(exam) {
+      // download the exam in a two step process: 1. watermark 2. get URLs
+      console.log("download Altklausur");
+      if (!exam.downloadUrl) {
+        exam.loading = true;
+        exam.disabled = true;
+
+        await this.watermarkExam(exam.UUID);
+        await this.getExamURLs(exam, true);
+
+        exam.loading = false;
+        exam.disabled = false;
+        console.log("done");
+      } else {
+        // simply open exam if it has been processed already
+        this.openExam(exam.downloadUrl);
+      }
+    },
+    async getMarkedExamURLFromRow(row) {
+      // retrieve urls from backend when exam row is opened
+      console.log("get exam from row");
+      if (!row.item.viewUrl) {
+        console.log("in if");
+        await this.watermarkExam(row.item.UUID);
+        await this.getExamURLs(row.item, false);
+      }
+    },
     async watermarkExam(UUID) {
-      // Call to the graphql mutation
-      const result = await this.$apollo.mutate({
+      // Call to the graphql mutation to initiate watermarking process in backend
+      await new Promise((f) => setTimeout(f, 500));
+      await this.$apollo.mutate({
         mutation: gql`
           mutation($UUID: String!) {
             requestMarkedExam(StringUUID: $UUID)
@@ -301,39 +330,49 @@ export default {
           UUID: UUID,
         },
       });
-      if (!result) {
-        // this seems to be necessary to watermark new exams
-        console.log(result);
+    },
+    async getExamURLs(exam, openDownload) {
+      // Call to the graphql query, to retrieve URLs of exam PDFs. Repeat 5 times if not successful and then time out
+      for (let i = 0; i < 5; i++) {
+        let result = await this.$apollo.query({
+          query: gql`
+            query($UUID: String!) {
+              getExam(StringUUID: $UUID) {
+                viewUrl
+                downloadUrl
+              }
+            }
+          `,
+          variables: {
+            UUID: exam.UUID,
+          },
+          fetchPolicy: "network-only", //necessary, otherwise result.data.getExam will always be null
+        });
+
+        if (result.data.getExam == null) {
+          // watermarked result isn't ready yet => wait a moment and retry
+          await new Promise((f) => setTimeout(f, 1000));
+          console.log("downloaded failed");
+        } else {
+          exam.viewUrl = result.data.getExam.viewUrl;
+          exam.downloadUrl = result.data.getExam.downloadUrl;
+          console.log("downloaded successfully");
+          if (openDownload) {
+            this.openExam(exam.downloadUrl);
+          }
+          break;
+        }
+      }
+      if (exam.loading) {
+        // request failed even after 5 retries
+        alert("Sorry, your request failed, please retry later.");
+        console.log("timed out");
       }
     },
-    async getExamURLs(exam) {
-      // Call to the graphql query
-      const result = await this.$apollo.query({
-        // Query
-        query: gql`
-          query($UUID: String!) {
-            getExam(StringUUID: $UUID) {
-              viewUrl
-              downloadUrl
-            }
-          }
-        `,
-        // Parameters
-        variables: {
-          UUID: exam.UUID,
-        },
-      });
-      exam.viewUrl = result.data.getExam.viewUrl;
-      exam.downloadUrl = result.data.getExam.downloadUrl;
-
-      this.$forceUpdate();
-    },
-    async getMarkedExamURLFromRow(row) {
-      await this.getMarkedExamURL(row.item);
-    },
-    async getMarkedExamURL(exam) {
-      await this.watermarkExam(exam.UUID);
-      await this.getExamURLs(exam);
+    openExam(url) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.click();
     },
   },
   apollo: {
@@ -348,6 +387,9 @@ export default {
 
           // combine year and semester to combined semester
           exam.combinedSemester = `${exam.semester} ${exam.year}`;
+          exam.loading = null;
+          exam.disabled = null;
+          exam.viewUrl = null;
         });
 
         return data.exams;
