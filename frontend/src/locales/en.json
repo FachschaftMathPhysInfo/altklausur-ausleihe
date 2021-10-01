@@ -1,0 +1,7 @@
+{
+  "message": "hello i18n !!",
+  "application": {
+    "search_label": "Filter exams, e.g. by lecturers or modules",
+    "get_exam": "Get exam"
+  }
+}

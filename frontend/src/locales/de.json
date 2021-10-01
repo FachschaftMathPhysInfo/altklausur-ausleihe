@@ -1,0 +1,7 @@
+{
+  "message": "hallo internationalisierung !!",
+  "application": {
+    "search_label": "Filter Altklausuren, z.B. nach Prüfenden oder Veranstaltungen",
+    "get_exam": "Altklausur ausleihen"
+  }
+}

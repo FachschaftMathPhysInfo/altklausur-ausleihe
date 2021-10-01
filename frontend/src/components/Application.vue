@@ -10,18 +10,18 @@
       <v-text-field
         v-model="search"
         prepend-inner-icon="mdi-magnify"
-        label="Filter Altklausuren, z.B. nach Prüfenden oder Veranstaltungen"
+        :label="$t('application.search_label')"
         single-line
         hide-details
         clearable
       ></v-text-field>
 
       <v-spacer></v-spacer>
-      <v-btn-toggle v-model="locale" mandatory dense>
-        <v-btn>
+      <v-btn-toggle v-model="$i18n.locale" mandatory dense>
+        <v-btn value="de">
           <v-icon>mdi-sail-boat</v-icon>
         </v-btn>
-        <v-btn>
+        <v-btn value="en">
           <v-icon>mdi-eye</v-icon>
         </v-btn>
       </v-btn-toggle>
@@ -54,7 +54,7 @@
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -71,11 +71,9 @@ export default {
   data: () => ({
     search: "",
     drawer: null,
-    locales: ["en", "de"],
-    locale: "de",
     items: [
       {
-        title: "Altklausur ausleihen",
+        title: "application.get_exam",
         icon: "mdi-file-document",
         action: "exams",
       },
