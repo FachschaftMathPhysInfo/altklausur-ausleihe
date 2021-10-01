@@ -292,7 +292,6 @@ export default {
     },
     async downloadAltklausur(exam) {
       // download the exam in a two step process: 1. watermark 2. get URLs
-      console.log("download Altklausur");
       if (!exam.downloadUrl) {
         exam.loading = true;
         exam.disabled = true;
@@ -302,7 +301,6 @@ export default {
 
         exam.loading = false;
         exam.disabled = false;
-        console.log("done");
       } else {
         // simply open exam if it has been processed already
         this.openExam(exam.downloadUrl);
@@ -310,9 +308,7 @@ export default {
     },
     async getMarkedExamURLFromRow(row) {
       // retrieve urls from backend when exam row is opened
-      console.log("get exam from row");
       if (!row.item.viewUrl) {
-        console.log("in if");
         await this.watermarkExam(row.item.UUID);
         await this.getExamURLs(row.item, false);
       }
@@ -352,11 +348,10 @@ export default {
         if (result.data.getExam == null) {
           // watermarked result isn't ready yet => wait a moment and retry
           await new Promise((f) => setTimeout(f, 1000));
-          console.log("downloaded failed");
         } else {
           exam.viewUrl = result.data.getExam.viewUrl;
           exam.downloadUrl = result.data.getExam.downloadUrl;
-          console.log("downloaded successfully");
+          this.$forceUpdate();
           if (openDownload) {
             this.openExam(exam.downloadUrl);
           }
@@ -366,7 +361,6 @@ export default {
       if (exam.loading) {
         // request failed even after 5 retries
         alert("Sorry, your request failed, please retry later.");
-        console.log("timed out");
       }
     },
     openExam(url) {
@@ -389,7 +383,6 @@ export default {
           exam.combinedSemester = `${exam.semester} ${exam.year}`;
           exam.loading = null;
           exam.disabled = null;
-          exam.viewUrl = null;
         });
 
         return data.exams;
