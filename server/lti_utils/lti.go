@@ -51,8 +51,7 @@ func LTIConfigHandler(w http.ResponseWriter, r *http.Request) {
 				Description:     "AltklausurAusleihe",
 				LaunchUrl:       "https://" + r.Host + "/distributor/lti_launch",
 				SecureLaunchUrl: "https://" + r.Host + "/distributor/lti_launch",
-				// FIXME (christian): add a logo
-				// Icon:            "https://" + r.Host + "/logo192.png",
+				Icon:            "https://" + r.Host + "/favicon.png",
 			},
 		},
 	)
