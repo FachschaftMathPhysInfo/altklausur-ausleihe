@@ -6,7 +6,6 @@
       <v-toolbar-title>{{ this.$route.name }}</v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
 
       <v-text-field
         v-model="search"
@@ -16,6 +15,16 @@
         hide-details
         clearable
       ></v-text-field>
+
+      <v-spacer></v-spacer>
+      <v-btn-toggle v-model="locale" mandatory dense>
+        <v-btn>
+          <v-icon>mdi-sail-boat</v-icon>
+        </v-btn>
+        <v-btn>
+          <v-icon>mdi-eye</v-icon>
+        </v-btn>
+      </v-btn-toggle>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" app temporary>
@@ -62,6 +71,8 @@ export default {
   data: () => ({
     search: "",
     drawer: null,
+    locales: ["en", "de"],
+    locale: "de",
     items: [
       {
         title: "Altklausur ausleihen",
