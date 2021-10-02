@@ -15,23 +15,23 @@ export default new Router({
     },
     {
       path: '/app/',
-      name: 'Application',
+      name: 'router.app',
       component: Application,
       children: [
         {
           path: 'exams',
-          name: 'Ausklausurausleihe',
+          name: 'router.altklausurausleihe',
           component: ExamList
         },
         {
           path: 'impress',
-          name: 'Impress',
+          name: 'router.impress',
           component: Impress
         }
         ,
         {
           path: 'privacy',
-          name: 'Datenschutzerklärung',
+          name: 'router.privacy',
           component: Privacy
         }
       ]

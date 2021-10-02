@@ -3,7 +3,7 @@
     <v-app-bar color="primary" dense dark>
       <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>{{ this.$route.name }}</v-toolbar-title>
+      <v-toolbar-title>{{ $t(this.$route.name) }}</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -19,10 +19,10 @@
       <v-spacer></v-spacer>
       <v-btn-toggle v-model="$i18n.locale" mandatory dense>
         <v-btn value="de">
-          <v-icon>mdi-sail-boat</v-icon>
+          <img src="/de.svg" />
         </v-btn>
         <v-btn value="en">
-          <v-icon>mdi-eye</v-icon>
+          <img src="/en.svg" />
         </v-btn>
       </v-btn-toggle>
     </v-app-bar>
@@ -31,10 +31,10 @@
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title">
-            Altklausurausleihe
+            {{ $t("application.title") }}
           </v-list-item-title>
           <v-list-item-subtitle>
-            deiner Fachschaft MathPhysInfo
+            {{ $t("application.yourFS") }}
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -78,23 +78,27 @@ export default {
         action: "exams",
       },
       {
-        title: "Altklausur einreichen",
+        title: "application.hand_in",
         icon: "mdi-send",
         action:
           "mailto:pruefungsberichte@mathphys.info?subject=Neue Altklausur über die digitale Altklausurausleihe&body=Liebe Fachschaft,%0D%0A%0D%0Aich möchte euch eine neue Altklausur einreichen. Diese wurde im (Sommersemester/Wintersemester) XXXX für das Modul XXXX von der Lehrperson XXXX gestellt.%0D%0A%0D%0AViele Grüße,%0D%0A%0D%0AAnhang nicht vergessen, am liebsten als PDF oder TeX Datei",
       },
       {
-        title: "GitHub Projekt",
+        title: "application.github_project",
         icon: "mdi-github",
         action: "https://github.com/FachschaftMathPhysInfo/altklausur-ausleihe",
         target: "_blank",
       },
       {
-        title: "Datenschutz",
+        title: "application.dataprivacy",
         icon: "mdi-file-document-multiple",
         action: "privacy",
       },
-      { title: "Impressum", icon: "mdi-information", action: "impress" },
+      {
+        title: "application.impress",
+        icon: "mdi-information",
+        action: "impress",
+      },
     ],
     right: null,
   }),

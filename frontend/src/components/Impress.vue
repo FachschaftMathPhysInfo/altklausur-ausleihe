@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div style="max-width: 760px; margin: 0px auto">
+    <div style="max-width: 760px; margin: 0px auto;">
       <v-textarea
         readonly
         no-resize
@@ -13,18 +13,18 @@ altklausuren@mathphys.stura.uni-heidelberg.de"
       >
       </v-textarea>
 
-      Die Fachschaften Mathematik, Physik und Informatik sind Teil der
-      Verfassten Studierendenschaft der Universität Heidelberg – Körperschaft
-      des öffentlichen Rechts.
-      <a href="https://www.stura.uni-heidelberg.de/impressum/" target="_blank"
-        >Ausführliches Impressum hier</a
-      >. Sie wird durch den
+      {{ $t("impress.intro") }}
+      <a
+        href="https://www.stura.uni-heidelberg.de/impressum/"
+        target="_blank"
+        >{{ $t("impress.intro1") }}</a
+      >{{ $t("impress.intro2") }}
       <a
         href="https://www.stura.uni-heidelberg.de/vs-strukturen/referatekonferenz-refkonf/vorsitz/"
         target="_blank"
-        >Vorsitz der Studierendenschaft</a
+        >{{ $t("impress.vorsitz") }}</a
       >
-      gesetzlich vertreten.
+      {{ $t("impress.intro3") }}
     </div>
   </v-container>
 </template>
@@ -33,6 +33,6 @@ altklausuren@mathphys.stura.uni-heidelberg.de"
 export default {
   name: "Impress",
 
-  data: () => ({})
+  data: () => ({}),
 };
 </script>
