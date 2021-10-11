@@ -20,7 +20,7 @@ export default new Router({
       children: [
         {
           path: 'exams',
-          name: 'Ausklausurausleihe',
+          name: 'Altklausurenausleihe',
           component: ExamList
         },
         {

@@ -109,7 +109,7 @@
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
             <div v-if="!item.viewUrl" class="text-center">
-              <h4>Watermarking and Loading Exam ...</h4>
+              <h4>Wasserzeichen wird erstellt und die Klausur geladen ...</h4>
               <v-progress-circular
                 indeterminate
                 color="primary"
