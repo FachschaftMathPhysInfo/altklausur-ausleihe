@@ -1,4 +1,7 @@
 require 'json_api_client'
+require 'fileutils'
+require 'net/http'
+
 module Client
   # this is an "abstract" base class that
   class Base < JsonApiClient::Resource
@@ -67,6 +70,24 @@ profs.each do |prof|
   print(reports)
   unless reps.empty?
     result.push({"prof"=>"#{prof.title} #{prof.givenname} #{prof.surname}","id"=>prof.id,"reports"=>reps})
+    prof_folder = "download/#{prof.id}"
+    FileUtils.mkdir_p prof_folder
+    reps.each do |report|
+
+      uri = URI("https://moozean.mathphys.info/api/download/#{report['id']}/3168")
+      Net::HTTP.start(uri.host, uri.port,
+        :use_ssl => uri.scheme == 'https',
+        :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+
+        request = Net::HTTP::Get.new uri.request_uri
+        request.basic_auth ENV['MOOZEAN_USERNAME'], ENV['MOOZEAN_PASSWORD']
+
+        response = http.request request # Net::HTTPResponse object
+        open("#{prof_folder}/#{report['id']}.pdf", "wb") do |file|
+          file.write(response.body)
+        end
+      end
+    end
   end
 end
 outfile_name = "reports_raw.json"
