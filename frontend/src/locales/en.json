@@ -1,5 +1,5 @@
 {
-  "message": "hello i18n !!",
+  "message": "hello - english mode selected",
   "application": {
     "search_label": "Filter exams, e.g. by lecturers or modules",
     "get_exam": "Get exam",
@@ -35,7 +35,7 @@
     "subject": "Subject",
     "download": "Download"
   },
-  "impress": {
+  "imprint": {
     "intro": "The student representatives of Maths, Physics and Computer Science are part of the composed student body of the university of Heidelberg",
     "intro1": "Detailed imprint here",
     "intro2": ". It is legally represented by the",
