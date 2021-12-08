@@ -4,6 +4,7 @@
 #          FILE: upload.sh
 #
 #         USAGE: ./upload_one.sh <JWT-Token> <meta-data-string> <input-file>
+#  DEPENDENCIES: curl, jq
 #
 #        AUTHOR: Christian Heusel (christian@heusel.eu),
 #  ORGANIZATION: Fachschaft MathPhysInfo
@@ -25,7 +26,7 @@ JWT_TOKEN=$1
 METADATA_STRING=$2
 INPUT_FILENAME=$3
 
-OPERATION_STRING='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": '$METADATA_STRING' } }'
+OPERATION_STRING='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {} }", "variables": { "input": '$METADATA_STRING' } }'
 echo $OPERATION_STRING | jq
 
 set -o nounset                              # Treat unset variables as an error

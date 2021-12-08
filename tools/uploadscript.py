@@ -3,14 +3,14 @@ from datetime import datetime
 import os.path
 
 
-def upload_report(JWT_TOKEN, report, filepath):
+def upload_report(jwt_token, report, filepath):
 
     # Abort if any argument is not given
     if not os.path.isfile(filepath):
         print(f"Error, file \"{filepath}\" not found!")
         return
 
-    exec_cmd = f"./upload_one.sh {JWT_TOKEN} \'{json.dumps(report)}\' {filepath}"
+    exec_cmd = f"./upload_one.sh {jwt_token} \'{json.dumps(report)}\' {filepath}"
     # print(exec_cmd)
     os.system(exec_cmd)
 
@@ -39,10 +39,10 @@ def date2semester(datestring):
 
 def main():
     # Enter the JWT Token
-    JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjEyMCIsImV4cCI6MTYzOTAwNDkwM30.bdGwQQB1XJ5lzpZiuvNxvLLhR85NzV1sysleA-1i0jo"
+    jwt_token = input("Please Enter the JWT Token: ")
 
     # load the inputs
-    with open("./reports_raw.json") as inputfile:
+    with open("./reports_raw.json", encoding="utf-8") as inputfile:
         input_json = json.load(inputfile)
 
     for examiner in input_json:
@@ -60,7 +60,7 @@ def main():
             report.pop("date", None)
             report.pop("id", None)
 
-            upload_report(JWT_TOKEN, report, filepath)
+            upload_report(jwt_token, report, filepath)
             # print(json.dumps(report))
 
 
