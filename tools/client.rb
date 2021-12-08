@@ -69,7 +69,7 @@ profs.each do |prof|
   end
   print(reports)
   unless reps.empty?
-    result.push({"examiner"=>"#{prof.title} #{prof.givenname} #{prof.surname}","id"=>prof.id,"reports"=>reps})
+    result.push({"examiner"=>"#{prof.givenname} #{prof.surname}","id"=>prof.id,"reports"=>reps})
     prof_folder = "download/#{prof.id}"
     FileUtils.mkdir_p prof_folder
     reps.each do |report|
