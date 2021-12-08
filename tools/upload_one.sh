@@ -16,6 +16,7 @@
 if [ "$1" == "" ] || [ $# -ne 3 ]; then
     echo "Wrong amount of arguments!"
     echo "USAGE: ./upload_one.sh <JWT-Token> <meta-data-string> <input-file>"
+    echo "Given:" $@
     exit 0
 fi
 

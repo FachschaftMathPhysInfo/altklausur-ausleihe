@@ -61,7 +61,7 @@ profs.each do |prof|
   while read do
     reports.each do |report|
       unless report.moduls.first.nil?
-        reps.push({"date"=>report["examination-at"],"name"=>report.moduls.first.name,"subject"=>report.subject["name"],"id"=>report["id"]})
+        reps.push({"date"=>report["examination-at"],"moduleName"=>report.moduls.first.name,"subject"=>report.subject["name"],"id"=>report["id"]})
       end
     end
     reports = reports.pages.next
@@ -69,7 +69,7 @@ profs.each do |prof|
   end
   print(reports)
   unless reps.empty?
-    result.push({"prof"=>"#{prof.title} #{prof.givenname} #{prof.surname}","id"=>prof.id,"reports"=>reps})
+    result.push({"examiner"=>"#{prof.title} #{prof.givenname} #{prof.surname}","id"=>prof.id,"reports"=>reps})
     prof_folder = "download/#{prof.id}"
     FileUtils.mkdir_p prof_folder
     reps.each do |report|
@@ -92,4 +92,4 @@ profs.each do |prof|
 end
 outfile_name = "reports_raw.json"
 File.write(outfile_name,result.to_json)
-print("Wrote output to \"#{outfile_name}\"\n!")
+print("Wrote output to \"#{outfile_name}\"!\n")
