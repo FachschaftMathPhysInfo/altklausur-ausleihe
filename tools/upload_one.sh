@@ -25,10 +25,13 @@ JWT_TOKEN=$1
 METADATA_STRING=$2
 INPUT_FILENAME=$3
 
+OPERATION_STRING='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": '$METADATA_STRING' } }'
+echo $OPERATION_STRING | jq
+
 set -o nounset                              # Treat unset variables as an error
 
-curl --silent $TARGET_HOST \
+curl $TARGET_HOST \
     -H 'Cookie: jwt='$JWT_TOKEN \
-    -F operations='{ "query": "mutation createNewExam($input: NewExam!) {createExam(input: $input) {UUID, subject, moduleName, examiners} }", "variables": { "input": '$METADATA_STRING' } }' \
+    -F operations="$OPERATION_STRING" \
     -F map='{ "0": ["variables.input.file"] }' \
     -F 0=@$INPUT_FILENAME
