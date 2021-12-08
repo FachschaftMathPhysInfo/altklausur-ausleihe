@@ -3,16 +3,22 @@ from datetime import datetime
 import os.path
 
 
-def upload_report(JWT_TOKEN, report_metainformation, filepath):
+def upload_report(JWT_TOKEN, report, filepath):
 
     # Abort if any argument is not given
     if not os.path.isfile(filepath):
         print(f"Error, file \"{filepath}\" not found!")
         return
 
-    os.system(
-        f"./upload_one.sh {JWT_TOKEN} \'{json.dumps(report_metainformation)}\' {filepath}"
-    )
+    exec_cmd = f"./upload_one.sh {JWT_TOKEN} \'{json.dumps(report)}\' {filepath}"
+    # print(exec_cmd)
+    os.system(exec_cmd)
+
+
+def norm_subject_name(input_name):
+    for subject in ["Mathe", "Physik", "Info"]:
+        if subject.lower() in input_name.lower():
+            return subject
 
 
 def date2semester(datestring):
@@ -33,7 +39,7 @@ def date2semester(datestring):
 
 def main():
     # Enter the JWT Token
-    JWT_TOKEN = "Testtoken"
+    JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjEyMCIsImV4cCI6MTYzOTAwNDkwM30.bdGwQQB1XJ5lzpZiuvNxvLLhR85NzV1sysleA-1i0jo"
 
     # load the inputs
     with open("./reports_raw.json") as inputfile:
@@ -41,19 +47,21 @@ def main():
 
     for examiner in input_json:
         for report in examiner["reports"]:
-            report_metainformation = report
             semester, year = date2semester(report["date"])
 
-            report_metainformation["year"] = year
-            report_metainformation["semester"] = semester
+            report["year"] = year
+            report["semester"] = semester
+            report["subject"] = norm_subject_name(report["subject"])
+            report["examiners"] = examiner["examiner"]
+            report["file"] = None
 
             filepath = f"./download/{examiner['id']}/{report['id']}.pdf"
 
-            report_metainformation.pop("date", None)
-            report_metainformation.pop("id", None)
+            report.pop("date", None)
+            report.pop("id", None)
 
-            upload_report(JWT_TOKEN, report_metainformation, filepath)
-            # print(json.dumps(report_metainformation))
+            upload_report(JWT_TOKEN, report, filepath)
+            # print(json.dumps(report))
 
 
 if __name__ == "__main__":
