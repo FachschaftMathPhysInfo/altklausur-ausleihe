@@ -83,7 +83,7 @@
         :items-per-page="-1"
         :search="this.$parent.search"
         :hide-default-footer="true"
-        show-expand
+        :show-expand="!isMobile()"
         @item-expanded="getMarkedExamURLFromRow"
       >
         <template v-slot:[`item.subject`]="{ item }">
@@ -119,7 +119,7 @@
             <iframe
               v-if="item.viewUrl"
               :src="item.viewUrl"
-              style="width: 100%; height: 1500px"
+              style="width: 100%; height: 1500px;"
             />
           </td>
         </template>
@@ -351,7 +351,7 @@ export default {
       await new Promise((f) => setTimeout(f, 500));
       await this.$apollo.mutate({
         mutation: gql`
-          mutation ($UUID: String!) {
+          mutation($UUID: String!) {
             requestMarkedExam(StringUUID: $UUID)
           }
         `,
@@ -365,7 +365,7 @@ export default {
       for (let i = 0; i < 5; i++) {
         let result = await this.$apollo.query({
           query: gql`
-            query ($UUID: String!) {
+            query($UUID: String!) {
               getExam(StringUUID: $UUID) {
                 viewUrl
                 downloadUrl
@@ -400,6 +400,11 @@ export default {
       const link = document.createElement("a");
       link.href = url;
       link.click();
+    },
+    isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
     },
   },
   apollo: {
