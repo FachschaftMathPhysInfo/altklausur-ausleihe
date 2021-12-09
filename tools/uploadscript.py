@@ -20,6 +20,8 @@ def norm_subject_name(input_name):
         if subject.lower() in input_name.lower():
             return subject
 
+    return input_name
+
 
 def date2semester(datestring):
     """
