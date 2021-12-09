@@ -6,8 +6,8 @@
           <v-text-field
             v-model="moduleName"
             prepend-inner-icon="mdi-book-open-variant"
-            label="Veranstaltungsname"
-            hint="Auch Abkürzungen und Varianten werden berücksichtigt"
+            :label="$t('examlist.eventname')"
+            :hint="$t('examlist.hint')"
             single-line
             clearable
             @input="filterExams"
@@ -18,7 +18,7 @@
           <v-text-field
             v-model="examiner"
             prepend-inner-icon="mdi-account"
-            label="Prüfende eingrenzen"
+            :label="$t('examlist.filter_lecturers')"
             single-line
             clearable
             @input="filterExams"
@@ -30,7 +30,7 @@
             :items="semesters"
             item-text="name"
             :item-disabled="disableFromSemester"
-            label="ab Semester"
+            :label="$t('examlist.from_semester')"
             clearable
             @change="filterExams"
           ></v-select>
@@ -41,7 +41,7 @@
             :items="semesters"
             item-text="name"
             :item-disabled="disableToSemester"
-            label="bis Semester"
+            :label="$t('examlist.to_semester')"
             clearable
             @change="filterExams"
           ></v-select>
@@ -57,21 +57,25 @@
               <v-icon :color="getSubjectColor('Mathe')" left>
                 mdi-android-studio
               </v-icon>
-              <span class="hidden-sm-and-down">Mathematik</span>
+              <span class="hidden-sm-and-down">{{ $t("examlist.maths") }}</span>
             </v-btn>
 
             <v-btn value="Physik">
               <v-icon :color="getSubjectColor('Physik')" left>
                 mdi-atom
               </v-icon>
-              <span class="hidden-sm-and-down">Physik</span>
+              <span class="hidden-sm-and-down">{{
+                $t("examlist.physics")
+              }}</span>
             </v-btn>
 
             <v-btn value="Info">
               <v-icon :color="getSubjectColor('Info')" left>
                 mdi-laptop
               </v-icon>
-              <span class="hidden-sm-and-down">Informatik</span>
+              <span class="hidden-sm-and-down">{{
+                $t("examlist.computer_science")
+              }}</span>
             </v-btn>
           </v-btn-toggle>
         </v-col>
@@ -102,14 +106,16 @@
             @click="downloadAltklausur(item)"
             rounded
           >
-            <v-icon> mdi-download </v-icon>
-            herunterladen
+            <v-icon>
+              mdi-download
+            </v-icon>
+            {{ $t("examlist.downloaden") }}
           </v-btn>
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
             <div v-if="!item.viewUrl" class="text-center">
-              <h4>Watermarking and Loading Exam ...</h4>
+              <h4>{{ $t("examlist.watermarking") }}</h4>
               <v-progress-circular
                 indeterminate
                 color="primary"
@@ -124,10 +130,7 @@
           </td>
         </template>
         <template v-slot:no-data>
-          <span
-            >Es wurden keine Klausuren passend zu den Suchkriterien
-            gefunden!</span
-          >
+          <span>{{ $t("examlist.no_exams_found") }}</span>
         </template>
       </v-data-table>
       <v-tooltip left>
@@ -145,7 +148,7 @@
             ><v-icon>mdi-help</v-icon></v-btn
           >
         </template>
-        <span>Klicke hier für eine Anleitung</span>
+        <span>{{ $t("examlist.click_for_explanation") }}</span>
       </v-tooltip>
       <v-dialog
         v-model="notAuthenticatedDialog"
@@ -205,7 +208,7 @@ export default {
   name: "ExamList",
   components: {},
   data() {
-    const self = this;
+    // const self = this;
     return {
       notAuthenticatedDialog: false,
       examiner: null,
@@ -215,25 +218,27 @@ export default {
       toSemester: null,
       exams: [],
       originalExams: [],
-      headers: [
+    };
+  },
+  computed: {
+    headers() {
+      return [
         { text: "", value: "data-table-expand" },
         {
-          text: "Veranstaltung",
+          text: this.$t("examlist.module"),
           value: "moduleName",
         },
-        { text: "Prüfende", value: "examiners" },
+        { text: this.$t("examlist.examiner"), value: "examiners" },
         {
           text: "Semester",
           value: "combinedSemester",
           sortable: true,
-          sort: (a, b) => self.semesterBefore(a, b),
+          sort: (a, b) => this.semesterBefore(a, b),
         },
-        { text: "Fach", value: "subject" },
-        { text: "Download", value: "download" },
-      ],
-    };
-  },
-  computed: {
+        { text: this.$t("examlist.subject"), value: "subject" },
+        { text: this.$t("examlist.download"), value: "download" },
+      ];
+    },
     semesters() {
       if (this.exams.length > 0) {
         return this.exams
@@ -363,7 +368,7 @@ export default {
     async getExamURLs(exam, openDownload) {
       // Call to the graphql query, to retrieve URLs of exam PDFs. Repeat 5 times if not successful and then time out
       for (let i = 0; i < 5; i++) {
-        let result = await this.$apollo.query({
+        const result = await this.$apollo.query({
           query: gql`
             query($UUID: String!) {
               getExam(StringUUID: $UUID) {
@@ -393,7 +398,7 @@ export default {
       }
       if (exam.loading) {
         // request failed even after 5 retries
-        alert("Sorry, your request failed, please retry later.");
+        alert(this.$t("examlist.request_failed"));
       }
     },
     openExam(url) {
