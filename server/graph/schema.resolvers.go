@@ -104,7 +104,10 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 
 	_, claims, err := jwtauth.FromContext(ctx)
 	var userInfos lti_utils.LTIUserInfos
-	r.DB.First(&userInfos, claims["ID"])
+	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
+	if err != nil {
+		return nil, err
+	}
 
 	// try to find the entry in cache
 	_, e := r.MinIOClient.StatObject(
@@ -175,12 +178,17 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	}
 
 	_, claims, err := jwtauth.FromContext(ctx)
+	var userInfos lti_utils.LTIUserInfos
+	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
+	if err != nil {
+		return nil, err
+	}
 
 	// try to find the entry in cache
 	objectInfo, e := r.MinIOClient.StatObject(
 		context.Background(),
 		os.Getenv("MINIO_CACHE_BUCKET"),
-		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		utils.GetExamCachePath(userInfos.ID, realUUID),
 		minio.GetObjectOptions{})
 
 	if e != nil {
@@ -199,7 +207,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	presignedViewURL, err := r.MinIOClient.PresignedGetObject(
 		context.Background(),
 		os.Getenv("MINIO_CACHE_BUCKET"),
-		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		utils.GetExamCachePath(userInfos.ID, realUUID),
 		15*time.Minute,
 		reqParams)
 
@@ -218,7 +226,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	presignedDownloadURL, err := r.MinIOClient.PresignedGetObject(
 		context.Background(),
 		os.Getenv("MINIO_CACHE_BUCKET"),
-		utils.GetExamCachePath(claims["ID"].(string), realUUID),
+		utils.GetExamCachePath(userInfos.ID, realUUID),
 		15*time.Minute,
 		reqParams)
 
