@@ -87,7 +87,7 @@
         :items-per-page="-1"
         :search="this.$parent.search"
         :hide-default-footer="true"
-        show-expand
+        :show-expand="!isMobile()"
         @item-expanded="getMarkedExamURLFromRow"
       >
         <template v-slot:[`item.subject`]="{ item }">
@@ -150,8 +150,39 @@
         </template>
         <span>{{ $t("examlist.click_for_explanation") }}</span>
       </v-tooltip>
+      <v-dialog
+        v-model="notAuthenticatedDialog"
+        transition="dialog-bottom-transition"
+        max-width="600"
+      >
+        <template v-slot:default="dialog">
+          <v-card>
+            <v-toolbar color="primary" dark>
+              <v-icon class="pr-3" large>mdi-alert</v-icon>
+              Not authenticated
+            </v-toolbar>
+            <v-card-text>
+              <div class="text pa-6">
+                You are currently not authenticated. Please log in by providing
+                your university credentials into Moodle to use our platform.
+              </div>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn
+                depressed
+                @click="dialog.value = false"
+                color="primary"
+                elevation="2"
+                href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=464679"
+              >
+                Login
+              </v-btn>
+              <v-btn text @click="dialog.value = false">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
     </v-container>
-    {{ examiner }}
   </div>
 </template>
 
@@ -179,6 +210,7 @@ export default {
   data() {
     // const self = this;
     return {
+      notAuthenticatedDialog: false,
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
@@ -220,6 +252,9 @@ export default {
   },
 
   methods: {
+    openNotAuthenticatedDialog() {
+      this.notAuthenticatedDialog = true;
+    },
     help() {
       alert(
         "To be implemented: Open help dialog with very detailed instructions"
@@ -371,10 +406,18 @@ export default {
       link.href = url;
       link.click();
     },
+    isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    },
   },
   apollo: {
     exams: {
       query: EXAMS_QUERY,
+      error() {
+        this.openNotAuthenticatedDialog();
+      },
       update: (data) => {
         data.exams.forEach((exam) => {
           // Set undefined elements to empty strings

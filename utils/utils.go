@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
-	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/adjust/rmq/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -21,7 +20,7 @@ import (
 )
 
 var (
-	connectRetries int = 5
+	connectRetries int = 15
 )
 
 func UploadExam(minioClient *minio.Client, objectName string, fileReader io.Reader, fileSize int64, contentType string) error {
@@ -57,17 +56,16 @@ func InitDB(initialize bool) *gorm.DB {
 	)
 
 	for tries := 0; err != nil && tries <= connectRetries; tries++ {
-		log.Println("Error while connecting to DB:", err)
+		log.Printf("Trying to connect to the DB. Try No. %d of %d with error [%s]", tries, connectRetries, err.Error())
 		db, err = gorm.Open(
 			postgres.Open(databaseConnectionString),
 			&gorm.Config{},
 		)
 
-		if tries >= connectRetries {
-			log.Fatalln("reached maximium amount of connection tries to DB: ", connectRetries)
-		}
-
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
+	}
+	if err != nil {
+		log.Fatalln("reached maximium amount of connection tries to the Database. Aborting now! ")
 	}
 
 	log.Print("connected successfully to the Database")
@@ -80,7 +78,6 @@ func InitDB(initialize bool) *gorm.DB {
 
 	if initialize {
 		db.AutoMigrate(&model.Exam{})
-		db.AutoMigrate(&lti_utils.LTIUserInfos{})
 	}
 
 	return db

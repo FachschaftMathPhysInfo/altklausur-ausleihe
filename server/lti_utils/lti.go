@@ -2,8 +2,8 @@
 package lti_utils
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -94,27 +94,11 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if valid {
-		// see if the user already exists in the database
-		var userInfos LTIUserInfos
-
-		// TODO: Add some more validation for the user data
-		// but since the data is coming from a trusted source (Moodle)
-		// this sanity check could already be sufficient
-		if err := l.DB.First(&userInfos, userInfoFromRequest.ID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-			// create user if not found in DB
-			l.DB.Create(&userInfoFromRequest)
-		} else if err != nil {
-			// report any other errors to the log
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		} else {
-			// update the user data if there are no errors
-			l.DB.Save(&userInfoFromRequest)
-		}
+		// The JWT token carries all the user information!
+		userInfosJSON, _ := json.Marshal(userInfoFromRequest)
 
 		// Create the JWT Token for the User so he can access our application
-		jwtClaims := map[string]interface{}{"ID": userInfoFromRequest.ID}
+		jwtClaims := map[string]interface{}{"user": string(userInfosJSON)}
 		jwtauth.SetExpiryIn(jwtClaims, time.Hour)
 		_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
 		jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
@@ -142,23 +126,11 @@ func (l *LTIConnector) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 		PersonFullName:     "Test Testerson",
 	}
 
-	// see if the user already exists in the database
-	var userInfos LTIUserInfos
-	if err := l.DB.First(&userInfos, userInfoFromRequest.ID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		// create user if not found in DB
-		l.DB.Create(&userInfoFromRequest)
-	} else if err != nil {
-		// report any other errors to the log
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		// update the user data if there are no errors
-		l.DB.Save(&userInfoFromRequest)
-	}
+	// The JWT token carries all the user information!
+	userInfosJSON, _ := json.Marshal(userInfoFromRequest)
 
 	// Create the JWT Token for the User so he can access our application
-	jwtClaims := map[string]interface{}{"ID": userInfoFromRequest.ID}
+	jwtClaims := map[string]interface{}{"user": string(userInfosJSON)}
 	jwtauth.SetExpiryIn(jwtClaims, time.Hour)
 	_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
 	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
