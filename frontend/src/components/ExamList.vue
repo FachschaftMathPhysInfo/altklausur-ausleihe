@@ -173,7 +173,7 @@
                 @click="dialog.value = false"
                 color="primary"
                 elevation="2"
-                href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=464679"
+                href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=547942"
               >
                 Login
               </v-btn>
