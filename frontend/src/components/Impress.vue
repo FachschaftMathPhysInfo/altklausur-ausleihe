@@ -5,10 +5,13 @@
         readonly
         no-resize
         outlined
-        rows="4"
-        value="Fachschaften Mathematik, Physik, Informatik der Verfassten
-Studierendenschaft der Universität Heidelberg Im Neuenheimer Feld 205
-69120 Heidelberg Tel. +49 6221 54-14999 Fax +49 6221 54-14999
+        rows="7"
+        value="Fachschaften Mathematik, Physik, Informatik 
+der Verfassten Studierendenschaft der Universität Heidelberg 
+Im Neuenheimer Feld 205
+69120 Heidelberg 
+Tel. +49 6221 54-14999 
+Fax +49 6221 54-14999
 altklausuren@mathphys.stura.uni-heidelberg.de"
       >
       </v-textarea>
