@@ -15,6 +15,7 @@
     "vue": "^2.6.10",
     "vue-apollo": "^3.0.7",
     "vue-cli-plugin-apollo": "^0.22.2",
+    "vue-cookies": "^1.7.4",
     "vue-i18n": "^8.26.3",
     "vue-router": "^3.1.6",
     "vuetify": "^2.4.9"

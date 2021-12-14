@@ -17,7 +17,12 @@
       ></v-text-field>
 
       <v-spacer></v-spacer>
-      <v-btn-toggle v-model="$i18n.locale" mandatory dense>
+      <v-btn-toggle
+        v-model="$i18n.locale"
+        @change="switchLanguageInCookie()"
+        mandatory
+        dense
+      >
         <v-btn value="de">
           <img src="/de.svg" />
         </v-btn>
@@ -65,6 +70,8 @@
 </template>
 
 <script>
+import Vue from "vue";
+import i18n from "../i18n";
 export default {
   name: "Application",
 
@@ -102,5 +109,19 @@ export default {
     ],
     right: null,
   }),
+  methods: {
+    switchLanguageInCookie: () => {
+      Vue.$cookies.set("language", i18n._vm.locale, "1y");
+    },
+  },
+  mounted: () => {
+    if (Vue.$cookies.get("language")) {
+      // get language from cookie
+      i18n._vm.locale = Vue.$cookies.get("language");
+    } else {
+      // set German as default language if none is set in cookie
+      Vue.$cookies.set("language", "de", "1y");
+    }
+  },
 };
 </script>
