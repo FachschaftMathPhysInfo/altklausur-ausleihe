@@ -233,7 +233,7 @@ export default {
           text: "Semester",
           value: "combinedSemester",
           sortable: true,
-          sort: (a, b) => this.semesterBefore(a, b),
+          sort: (a, b) => this.semesterSort(a, b),
         },
         { text: this.$t("examlist.subject"), value: "subject" },
         { text: this.$t("examlist.download"), value: "download" },
@@ -244,7 +244,7 @@ export default {
         return this.exams
           .filter((exam) => exam.combinedSemester.trim() != "")
           .map((exam) => ({ name: exam.combinedSemester }))
-          .sort((a, b) => this.semesterBefore(a.name, b.name));
+          .sort((a, b) => this.semesterSort(a.name, b.name));
       } else {
         return [];
       }
@@ -267,6 +267,19 @@ export default {
     disableToSemester(semester) {
       if (this.fromSemester == null) return false;
       return this.semesterBefore(semester.name, this.fromSemester);
+    },
+    semesterSort(thisSemester, otherSemester) {
+      // splits semester labels into year (index 1) and season (index 0)
+      const thisSem = thisSemester.split(" ");
+      const otherSem = otherSemester.split(" ");
+      if (thisSem[1] < otherSem[1]) {
+        return 1;
+      } else if (thisSem[1] == otherSem[1]) {
+        if (thisSem[0] < otherSem[0]) {
+          return 1;
+        }
+      }
+      return -1;
     },
     semesterBefore(thisSemester, otherSemester) {
       // splits semester labels into year (index 1) and season (index 0)
