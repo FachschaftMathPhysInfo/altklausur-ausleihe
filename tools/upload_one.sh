@@ -21,7 +21,7 @@ if [ "$1" == "" ] || [ $# -ne 3 ]; then
     exit 0
 fi
 
-TARGET_HOST='https://altklausuren.mathphys.info/query'
+TARGET_HOST="${TARGET_HOST_ENV:-https://altklausuren.mathphys.info/query}"
 JWT_TOKEN=$1
 METADATA_STRING=$2
 INPUT_FILENAME=$3
