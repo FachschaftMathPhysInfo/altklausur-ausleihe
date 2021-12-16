@@ -73,8 +73,6 @@ type ComplexityRoot struct {
 
 type ExamResolver interface {
 	UUID(ctx context.Context, obj *model.Exam) (string, error)
-
-	Hash(ctx context.Context, obj *model.Exam) (string, error)
 }
 type MutationResolver interface {
 	CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error)
@@ -502,14 +500,14 @@ func (ec *executionContext) _Exam_hash(ctx context.Context, field graphql.Collec
 		Object:     "Exam",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Exam().Hash(rctx, obj)
+		return obj.Hash, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2217,19 +2215,10 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "hash":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Exam_hash(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Exam_hash(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "moduleName":
 			out.Values[i] = ec._Exam_moduleName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

@@ -6,9 +6,13 @@ package graph
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
 	"mime"
 	"net/url"
 	"os"
@@ -29,23 +33,40 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 	return obj.UUID.String(), nil
 }
 
-func (r *examResolver) Hash(ctx context.Context, obj *model.Exam) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
 	if input.Semester != nil && !(*input.Semester == "SoSe" || *input.Semester == "WiSe") {
 		return nil, fmt.Errorf("Input \"%s\" is not a valid input for field input.Semester", *input.Semester)
 	}
 
+	// generate the hash of the input file
+	fileHash := sha256.New()
+	if _, err := io.Copy(fileHash, input.File.File); err != nil {
+		log.Fatal(err)
+	}
+	encodedHash := hex.EncodeToString(fileHash.Sum(nil))
+
+	exam := model.Exam{}
+	// check if the exam already exists
+	err := r.DB.Where("hash = ?", encodedHash).Find(&exam).Error
+
 	// map the GraphQL input to the Model
-	exam := model.Exam{
+	exam = model.Exam{
 		Subject:       input.Subject,
 		ModuleName:    input.ModuleName,
 		ModuleAltName: input.ModuleAltName,
 		Year:          input.Year,
 		Examiners:     input.Examiners,
 		Semester:      input.Semester,
+		Hash:          encodedHash,
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		// update the exam in the database and abort
+		r.DB.Save(&exam)
+		if r.DB.Error != nil {
+			return nil, r.DB.Error
+		}
+		return &exam, nil
 	}
 
 	// create the exam in the database
@@ -55,6 +76,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	}
 
 	// check file size
+	fileReader := bufio.NewReader(input.File.File)
 	if input.File.Size < 512 {
 		// TODO: implement DB rollback here!
 		return nil, fmt.Errorf("File is not valid: size of %d too small", input.File.Size)
@@ -62,7 +84,6 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 
 	// check file MIME type
 	// Only the first 512 bytes are used to sniff the content type.
-	fileReader := bufio.NewReader(input.File.File)
 	buffer, err := fileReader.Peek(512)
 	if err != nil {
 		return nil, err
