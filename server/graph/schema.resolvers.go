@@ -5,6 +5,7 @@ package graph
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -38,20 +39,24 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		return nil, fmt.Errorf("Input \"%s\" is not a valid input for field input.Semester", *input.Semester)
 	}
 
+	// we use a TeeReader to hash and copy to the buffer at the same time
+	fileBuf := &bytes.Buffer{}
+	tee := io.TeeReader(input.File.File, fileBuf)
+
 	// generate the hash of the input file
 	fileHash := sha256.New()
-	if _, err := io.Copy(fileHash, input.File.File); err != nil {
+	if _, err := io.Copy(fileHash, tee); err != nil {
 		log.Fatal(err)
 	}
 	encodedHash := hex.EncodeToString(fileHash.Sum(nil))
 
-	exam := model.Exam{}
+	dbExam := model.Exam{}
 	// check if the exam already exists
-	err := r.DB.Where("hash = ?", encodedHash).Find(&exam).Error
+	r.DB.Where("hash = ?", encodedHash).Find(&dbExam)
 
 	// map the GraphQL input to the Model
-	exam = model.Exam{
-		UUID:          exam.UUID,
+	exam := model.Exam{
+		UUID:          dbExam.UUID,
 		Subject:       input.Subject,
 		ModuleName:    input.ModuleName,
 		ModuleAltName: input.ModuleAltName,
@@ -61,7 +66,10 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		Hash:          encodedHash,
 	}
 
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	//
+	// An existing exam was found
+	//
+	if !uuid.Equal(dbExam.UUID, uuid.Nil) {
 		// update the exam in the database and abort
 		r.DB.Save(&exam)
 		if r.DB.Error != nil {
@@ -70,6 +78,10 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		return &exam, nil
 	}
 
+	//
+	// no existing exam was found
+	//
+
 	// create the exam in the database
 	r.DB.Create(&exam)
 	if r.DB.Error != nil {
@@ -77,14 +89,14 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	}
 
 	// check file size
-	fileReader := bufio.NewReader(input.File.File)
-	if input.File.Size < 512 {
+	if input.File.Size < 512 && fileBuf.Len() < 512 {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: size of %d too small", input.File.Size)
+		return nil, fmt.Errorf("File is not valid: size of %d too small, buffer size %d", input.File.Size, fileBuf.Len())
 	}
 
 	// check file MIME type
 	// Only the first 512 bytes are used to sniff the content type.
+	fileReader := bufio.NewReader(fileBuf)
 	buffer, err := fileReader.Peek(512)
 	if err != nil {
 		return nil, err
