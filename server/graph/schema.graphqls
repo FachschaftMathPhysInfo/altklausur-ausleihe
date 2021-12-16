@@ -4,6 +4,7 @@ scalar Upload
 type Exam {
   UUID: String!
   subject: String!
+  hash: String!
   moduleName: String!
   moduleAltName: String
   year: Int

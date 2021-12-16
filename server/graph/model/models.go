@@ -3,6 +3,7 @@
 package model
 
 import (
+	"hash"
 	"strconv"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 type Exam struct {
 	UUID          uuid.UUID `gorm:"type:uuid;primary_key;" json:"ID,omitempty"`
 	Subject       string    `json:"subject"`
+	Hash          hash.Hash `json:"hash"`
 	ModuleName    string    `json:"moduleName"`
 	ModuleAltName *string   `json:"moduleAltName"`
 	Year          *int      `json:"year"`

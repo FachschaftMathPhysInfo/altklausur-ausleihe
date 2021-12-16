@@ -21,12 +21,16 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
 	return obj.UUID.String(), nil
+}
+
+func (r *examResolver) Hash(ctx context.Context, obj *model.Exam) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
