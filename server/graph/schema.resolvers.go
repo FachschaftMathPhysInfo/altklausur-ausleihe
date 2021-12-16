@@ -25,7 +25,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -51,6 +51,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 
 	// map the GraphQL input to the Model
 	exam = model.Exam{
+		UUID:          exam.UUID,
 		Subject:       input.Subject,
 		ModuleName:    input.ModuleName,
 		ModuleAltName: input.ModuleAltName,

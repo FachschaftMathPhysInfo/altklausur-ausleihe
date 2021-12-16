@@ -27,8 +27,11 @@ type Exam struct {
 // taken from
 // https://github.com/FachschaftMathPhysInfo/ostseee/blob/master/server/go/model_base.go
 func (exam *Exam) BeforeCreate(db *gorm.DB) error {
-	uuid := uuid.NewV4()
-	exam.UUID = uuid
+	// Check if the UUID is already set (i.e. db.Save(...))
+	if uuid.Equal(exam.UUID, uuid.Nil) {
+		uuid := uuid.NewV4()
+		exam.UUID = uuid
+	}
 	return nil
 }
 
