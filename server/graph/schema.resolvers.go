@@ -141,6 +141,10 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	}
 
 	_, claims, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var userInfos lti_utils.LTIUserInfos
 	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
 	if err != nil {
@@ -216,6 +220,10 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	}
 
 	_, claims, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var userInfos lti_utils.LTIUserInfos
 	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
 	if err != nil {

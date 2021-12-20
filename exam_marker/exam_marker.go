@@ -195,6 +195,9 @@ func main() {
 	rmqClient := utils.InitRmq()
 
 	tagQueue, err := rmqClient.OpenQueue("tag-queue")
+	if err != nil {
+		log.Fatalln("Error while opening RMQ Queue: ", err)
+	}
 
 	if err = tagQueue.StartConsuming(10, time.Second); err != nil {
 		log.Fatalln(err)

@@ -105,6 +105,7 @@ func InitMinIO() *minio.Client {
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: useSSL,
 	})
+	log.Println(err.Error())
 
 	// try to actually use the connection
 	// otherwise timeouts wont get caught
