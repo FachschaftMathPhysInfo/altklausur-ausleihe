@@ -140,16 +140,8 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		return nil, dbErr
 	}
 
-	_, claims, err := jwtauth.FromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var userInfos lti_utils.LTIUserInfos
-	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
-	if err != nil {
-		return nil, err
-	}
+	// get all the user infos
+	userInfos, err := getUserInfos(&ctx)
 
 	// try to find the entry in cache
 	_, e := r.MinIOClient.StatObject(
@@ -219,16 +211,8 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 		return nil, dbErr
 	}
 
-	_, claims, err := jwtauth.FromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var userInfos lti_utils.LTIUserInfos
-	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
-	if err != nil {
-		return nil, err
-	}
+	// get all the user infos
+	userInfos, err := getUserInfos(&ctx)
 
 	// try to find the entry in cache
 	objectInfo, e := r.MinIOClient.StatObject(
@@ -285,6 +269,25 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 			DownloadURL: presignedDownloadURL.String(),
 		},
 		nil
+}
+
+func getUserInfos(ctxPtr *context.Context) (*lti_utils.LTIUserInfos, error) {
+	if ctxPtr == nil {
+		return nil, fmt.Errorf("WTF, how is the context for this request nil")
+	}
+
+	_, claims, err := jwtauth.FromContext(*ctxPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	var userInfos lti_utils.LTIUserInfos
+	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userInfos, nil
 }
 
 // Exam returns generated.ExamResolver implementation.
