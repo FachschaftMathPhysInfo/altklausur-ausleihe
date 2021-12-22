@@ -127,12 +127,18 @@ func (l *LTIConnector) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The JWT token carries all the user information!
-	userInfosJSON, _ := json.Marshal(userInfoFromRequest)
+	userInfosJSON, err := json.Marshal(userInfoFromRequest)
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create the JWT Token for the User so he can access our application
 	jwtClaims := map[string]interface{}{"user": string(userInfosJSON)}
 	jwtauth.SetExpiryIn(jwtClaims, time.Hour)
-	_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
+	_, tokenString, err := l.TokenAuth.Encode(jwtClaims)
+	if err != nil {
+		log.Println(err)
+	}
 	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
 	http.SetCookie(w, jwtCookie)
 
