@@ -142,6 +142,9 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 
 	// get all the user infos
 	userInfos, err := getUserInfos(&ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// try to find the entry in cache
 	_, e := r.MinIOClient.StatObject(
@@ -213,6 +216,9 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 
 	// get all the user infos
 	userInfos, err := getUserInfos(&ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// try to find the entry in cache
 	objectInfo, e := r.MinIOClient.StatObject(
