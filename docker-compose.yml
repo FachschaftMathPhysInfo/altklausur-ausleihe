@@ -69,6 +69,7 @@ services:
       args:
         SERVER_HTTP: http://localhost:8080/query
         SERVER_WS: ws://localhost:8081/query
+        NGINX_CONFIG_NAME: nginx.conf
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:8080:80"

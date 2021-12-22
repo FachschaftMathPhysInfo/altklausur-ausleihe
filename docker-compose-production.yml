@@ -54,6 +54,7 @@ services:
       args:
         SERVER_HTTP: https://altklausuren.mathphys.info/query
         SERVER_WS: wss://altklausuren.mathphys.info/query
+        NGINX_CONFIG_NAME: nginx-prod.conf
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:3091:80"
