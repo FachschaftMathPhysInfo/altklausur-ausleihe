@@ -158,7 +158,7 @@ func (l *AuthHelper) AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, jwtCookie)
-	w.Write([]byte("Success"))
+	w.Write([]byte(jwtCookie.Value))
 }
 
 func getUserInfos(ctxPtr *context.Context) (*LTIUserInfos, error) {
