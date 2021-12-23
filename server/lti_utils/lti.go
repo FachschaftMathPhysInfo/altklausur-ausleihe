@@ -2,8 +2,10 @@
 package lti_utils
 
 import (
+	"context"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -40,6 +42,7 @@ type LTIUserInfos struct {
 	PersonPrimaryEmail string
 	PersonFamilyName   string
 	PersonFullName     string
+	IsAdmin            bool
 }
 
 func LTIConfigHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,17 +94,15 @@ func (l *AuthHelper) LTILaunch(w http.ResponseWriter, r *http.Request) {
 		PersonGivenName:    ltiRequest.LTIHeaders.LISPersonGivenName,
 		PersonPrimaryEmail: ltiRequest.LTIHeaders.LISPersonPrimaryEmail,
 		PersonFullName:     ltiRequest.LTIHeaders.LISPersonFullName,
+		IsAdmin:            false,
 	}
 
 	if valid {
 		// The JWT token carries all the user information!
-		userInfosJSON, _ := json.Marshal(userInfoFromRequest)
-
-		// Create the JWT Token for the User so he can access our application
-		jwtClaims := map[string]interface{}{"user": string(userInfosJSON)}
-		jwtauth.SetExpiryIn(jwtClaims, time.Hour)
-		_, tokenString, _ := l.TokenAuth.Encode(jwtClaims)
-		jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
+		jwtCookie, err := l.createJWTCookie(&userInfoFromRequest)
+		if err != nil {
+			log.Println(err)
+		}
 		http.SetCookie(w, jwtCookie)
 
 		http.Redirect(w, r, "https://"+r.Host+"/", http.StatusMovedPermanently)
@@ -127,9 +128,62 @@ func (l *AuthHelper) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The JWT token carries all the user information!
-	userInfosJSON, err := json.Marshal(userInfoFromRequest)
+	jwtCookie, err := l.createJWTCookie(&userInfoFromRequest)
 	if err != nil {
 		log.Println(err)
+	}
+	http.SetCookie(w, jwtCookie)
+
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+func (l *AuthHelper) AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// get the user infos from the JWT Token
+	userInfos, err := getUserInfos(&ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// enable the user to be admin
+	userInfos.IsAdmin = true
+
+	log.Println("User", userInfos, "just authenticated as admin!")
+
+	// re-encode the JWT Token with the secret
+	jwtCookie, err := l.createJWTCookie(userInfos)
+	if err != nil {
+		log.Println(err)
+	}
+
+	http.SetCookie(w, jwtCookie)
+	w.Write([]byte("Success"))
+}
+
+func getUserInfos(ctxPtr *context.Context) (*LTIUserInfos, error) {
+	if ctxPtr == nil {
+		return nil, fmt.Errorf("WTF, how is the context for this request nil")
+	}
+
+	_, claims, err := jwtauth.FromContext(*ctxPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	var userInfos LTIUserInfos
+	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userInfos, nil
+}
+
+func (l *AuthHelper) createJWTCookie(ltiUser *LTIUserInfos) (*http.Cookie, error) {
+	userInfosJSON, err := json.Marshal(ltiUser)
+	if err != nil {
+		return nil, err
 	}
 
 	// Create the JWT Token for the User so he can access our application
@@ -137,10 +191,8 @@ func (l *AuthHelper) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 	jwtauth.SetExpiryIn(jwtClaims, time.Hour)
 	_, tokenString, err := l.TokenAuth.Encode(jwtClaims)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
-	http.SetCookie(w, jwtCookie)
-
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	return jwtCookie, nil
 }

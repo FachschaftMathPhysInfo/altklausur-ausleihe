@@ -94,6 +94,7 @@ func main() {
 		r.Use(jwtauth.Authenticator)
 
 		r.Handle("/query", srv)
+		r.Get("/adminlogin", authHelper.AdminLoginHandler)
 	})
 
 	fmt.Print(
