@@ -42,7 +42,7 @@ func main() {
 	db := utils.InitDB(true)
 	tokenAuth := jwtauth.New("HS256", []byte(os.Getenv("JWT_SECRET_KEY")), nil)
 
-	ltiConnector := lti_utils.LTIConnector{
+	authHelper := lti_utils.AuthHelper{
 		DB:        db,
 		TokenAuth: tokenAuth,
 	}
@@ -78,9 +78,9 @@ func main() {
 	router.Get("/distributor/lti_config", lti_utils.LTIConfigHandler)
 
 	if os.Getenv("DEPLOYMENT_ENV") != "testing" {
-		router.Post("/distributor/lti_launch", ltiConnector.LTILaunch)
+		router.Post("/distributor/lti_launch", authHelper.LTILaunch)
 	} else {
-		router.Post("/distributor/lti_launch", ltiConnector.DummyLTILaunch)
+		router.Post("/distributor/lti_launch", authHelper.DummyLTILaunch)
 	}
 
 	router.Group(func(r chi.Router) {
@@ -94,6 +94,7 @@ func main() {
 		r.Use(jwtauth.Authenticator)
 
 		r.Handle("/query", srv)
+		r.Get("/adminlogin", authHelper.AdminLoginHandler)
 	})
 
 	fmt.Print(
