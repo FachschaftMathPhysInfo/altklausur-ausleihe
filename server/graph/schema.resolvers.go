@@ -35,6 +35,19 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 }
 
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
+	user, err := getUserInfos(&ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// check if the user is an admin
+	if !user.IsAdmin {
+		return nil, fmt.Errorf("You are not an Admin lol, nice try!" +
+			" Please hand in your exam via mail to fachschaft@mathphys.info ..." +
+			" BTW, since you seem to read code, wanna contribute? ;)",
+		)
+	}
+
 	if input.Semester != nil && !(*input.Semester == "SoSe" || *input.Semester == "WiSe") {
 		return nil, fmt.Errorf("Input \"%s\" is not a valid input for field input.Semester", *input.Semester)
 	}
