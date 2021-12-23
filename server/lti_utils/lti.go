@@ -26,7 +26,7 @@ type LTIConfig struct {
 	Blti      string    `xml:"xmlns:blti,attr"`
 }
 
-type LTIConnector struct {
+type AuthHelper struct {
 	DB        *gorm.DB
 	TokenAuth *jwtauth.JWTAuth
 }
@@ -66,7 +66,7 @@ func LTIConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // LTILaunch Performs a search in database  for a course with the given ID and returns a invitation.
-func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
+func (l *AuthHelper) LTILaunch(w http.ResponseWriter, r *http.Request) {
 	// Create a new LTIToolProvider
 	ltiRequest, err := lti.NewLTIToolProvider(r)
 	if err != nil {
@@ -117,7 +117,7 @@ func (l *LTIConnector) LTILaunch(w http.ResponseWriter, r *http.Request) {
 // DummyLTILaunch just returns an invitation
 // You can obtain a JWT Token by executing the following command
 // curl -X POST http://localhost:8081/distributor/lti_launch -I
-func (l *LTIConnector) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
+func (l *AuthHelper) DummyLTILaunch(w http.ResponseWriter, r *http.Request) {
 	userInfoFromRequest := LTIUserInfos{
 		ID:                 "200",
 		PersonFamilyName:   "Testerson",
