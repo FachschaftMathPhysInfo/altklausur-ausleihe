@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v3"
+	render "github.com/brunsgaard/go-pdfium-render"
 	"github.com/minio/minio-go/v7"
 	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
@@ -97,7 +99,6 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	if err = pdfcpu_api.AddWatermarks(input, &tempout, nil, watermarks[0], nil); err != nil {
 		return err
 	}
-
 	for _, watermark := range watermarks[1:] {
 		// swap the two buffers
 		tempin, tempout = tempout, tempin
@@ -108,8 +109,20 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 			return err
 		}
 	}
-
-	io.Copy(output, &tempout)
+	bits := tempout.Bytes()
+	doc, err := render.NewDocument(&bits)
+	pagesbuf := make([]io.Reader, 0)
+	for i := 0; i < doc.GetPageCount(); i++ {
+		img := doc.RenderPage(i, 150)
+		buf := new(bytes.Buffer)
+		png.Encode(buf, img)
+		pagesbuf = append(pagesbuf, bytes.NewReader(buf.Bytes()))
+	}
+	conf := pdfcpu.NewDefaultConfiguration()
+	imp := pdfcpu.DefaultImportConfig()
+	imp.Gray = false
+	pdfcpu_api.ImportImages(nil, output, pagesbuf, imp, conf)
+	//io.Copy(output, &tempout)
 
 	return nil
 }
@@ -189,6 +202,7 @@ func logErrors(errChan <-chan error) {
 }
 
 func main() {
+	render.InitLibrary()
 	minioClient := utils.InitMinIO()
 
 	// get job from queue
