@@ -28,6 +28,9 @@ def date2semester(datestring):
     Sample input: "2020-02-04T23:00:00.000Z"
     returns: (Semester, Year)
     """
+    if not datestring:
+        return (None, None)
+
     date = datetime.strptime(datestring, '%Y-%m-%dT%H:%M:%S.%fZ')
     # November to April
     if date.month <= 4 or 11 <= date.month:
