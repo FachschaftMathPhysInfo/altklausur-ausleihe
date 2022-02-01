@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.14.0
 	github.com/adjust/rmq/v3 v3.0.0
 	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/brunsgaard/go-pdfium-render v0.0.0-20190126055834-b01df5200e99
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/go-chi/chi/v5 v5.0.7
