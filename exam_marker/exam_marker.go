@@ -111,6 +111,9 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	}
 	bits := tempout.Bytes()
 	doc, err := render.NewDocument(&bits)
+	if err != nil {
+		return err
+	}
 	pagesbuf := make([]io.Reader, 0)
 	for i := 0; i < doc.GetPageCount(); i++ {
 		img := doc.RenderPage(i, 150)

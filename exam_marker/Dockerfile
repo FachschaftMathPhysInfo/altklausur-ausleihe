@@ -1,28 +1,28 @@
-FROM golang:1.17.6-bullseye
+FROM golang:1.17-bullseye
+LABEL MAINTAINER "Christian Heusel <christian@heusel.eu>"
 # Specify pdfium version
 ARG PdfiumVersion=4861
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -yqq update
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
 # Install pkg-config, etc.
-RUN  apt-get clean && apt-get install -yqq apt-utils pkg-config  wget
+RUN  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -yqq update \
+     && apt-get clean && apt-get install -yqq apt-utils pkg-config  wget
 
 # Create .pc file for pkg-config
-RUN echo "\n" \
-     "prefix=/home\n" \
+RUN mkdir /go/src/extern && echo "\n" \
+     "prefix=/go/src/extern\n" \
      "Name: pdfium\n" \
      "Description: pdfium\n" \
      "Version: $PdfiumVersion\n" \
      "Requires:\n" \
-     "Libs: -L/home/lib -lpdfium\n" \
-     "Cflags: -I/home/include\n" >  /home/pdfium.pc
+     "Libs: -L/go/src/extern/lib -lpdfium\n" \
+     "Cflags: -I/go/src/extern/include\n" >  /go/src/extern/pdfium.pc
 
 # Download and extract pdfium binary
-RUN cd /home && wget --quiet  https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F4861/pdfium-linux-x64.tgz \
+RUN cd /go/src/extern && wget --quiet  https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F$PdfiumVersion/pdfium-linux-x64.tgz \
 && tar -xf pdfium-linux-x64.tgz && rm pdfium-linux-x64.tgz
 
 # Setting up paths for pkg-config
-ENV LD_LIBRARY_PATH=/home/lib
-ENV PKG_CONFIG_PATH=/home/
+ENV LD_LIBRARY_PATH=/go/src/extern/lib
+ENV PKG_CONFIG_PATH=/go/src/extern/
 
 WORKDIR /go/src
 
@@ -34,7 +34,6 @@ COPY server/lti_utils ./server/lti_utils
 
 COPY exam_marker/exam_marker.go ./exam_marker/exam_marker.go
 COPY utils ./utils
-RUN go get github.com/brunsgaard/go-pdfium-render
 RUN go build -a -o exam_marker.runnable ./exam_marker/exam_marker.go
 
 ENTRYPOINT ["./exam_marker.runnable"]
