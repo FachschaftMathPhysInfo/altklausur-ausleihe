@@ -130,6 +130,9 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	buf2 := new(bytes.Buffer)
 	pdfcpu_api.ImportImages(nil, buf2, pagesbuf, imp, conf)
 	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), pdfcpu.NewDefaultConfiguration())
+	if err != nil {
+		log.Fatalln(err)
+	}
 	keySec, err := nacl.Load("b538ff93d9b028a767c2f8afc05d586936b2bc0ba5c04eddf0b58f381de2a433")
 	if err != nil {
 		log.Fatalln(err)
