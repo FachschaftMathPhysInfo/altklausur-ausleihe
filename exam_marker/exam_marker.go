@@ -36,6 +36,11 @@ const (
 	shouldLog       = false
 )
 
+var (
+	naclPubStr = os.Getenv("NACL_PUB")
+	naclSecStr = os.Getenv("NACL_SEC")
+)
+
 type RMQConsumer struct {
 	name        string
 	count       int
@@ -133,11 +138,11 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	if err != nil {
 		log.Fatalln(err)
 	}
-	keySec, err := nacl.Load(os.Getenv("NACL_SEC"))
+	keySec, err := nacl.Load(naclSecStr)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	pkey, err := nacl.Load(os.Getenv("NACL_PUB"))
+	pkey, err := nacl.Load(naclPubStr)
 	if err != nil {
 		log.Fatalln(err)
 	}
