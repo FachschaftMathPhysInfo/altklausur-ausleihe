@@ -133,11 +133,11 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	if err != nil {
 		log.Fatalln(err)
 	}
-	keySec, err := nacl.Load("b538ff93d9b028a767c2f8afc05d586936b2bc0ba5c04eddf0b58f381de2a433")
+	keySec, err := nacl.Load(os.Getenv("NACL_SEC"))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	pkey, err := nacl.Load("bbf05a8f323315477201cd51176b86ee5267f459d1792b743a792be265c678a2")
+	pkey, err := nacl.Load(os.Getenv("NACL_PUB"))
 	if err != nil {
 		log.Fatalln(err)
 	}
