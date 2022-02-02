@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"image/png"
@@ -18,6 +19,8 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v3"
 	render "github.com/brunsgaard/go-pdfium-render"
+	"github.com/kevinburke/nacl"
+	"github.com/kevinburke/nacl/box"
 	"github.com/minio/minio-go/v7"
 	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
@@ -124,9 +127,32 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	conf := pdfcpu.NewDefaultConfiguration()
 	imp := pdfcpu.DefaultImportConfig()
 	imp.Gray = false
-	pdfcpu_api.ImportImages(nil, output, pagesbuf, imp, conf)
-	//io.Copy(output, &tempout)
+	buf2 := new(bytes.Buffer)
+	pdfcpu_api.ImportImages(nil, buf2, pagesbuf, imp, conf)
+	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), pdfcpu.NewDefaultConfiguration())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	keySec, err := nacl.Load("b538ff93d9b028a767c2f8afc05d586936b2bc0ba5c04eddf0b58f381de2a433")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	pkey, err := nacl.Load("bbf05a8f323315477201cd51176b86ee5267f459d1792b743a792be265c678a2")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for i, r := range ctx.XRefTable.Table {
+		if cast, ok := r.Object.(pdfcpu.StreamDict); ok {
 
+			encrypted := box.EasySeal([]byte(textLeft), keySec, pkey)
+			encrypted2 := box.EasySeal([]byte(textDiagonal), keySec, pkey)
+			cast.Dict.InsertString("ref1", base64.StdEncoding.EncodeToString(encrypted))
+			cast.Dict.InsertString("ref2", base64.StdEncoding.EncodeToString(encrypted2))
+			ctx.XRefTable.Table[i].Object = cast
+		}
+	}
+	ctx.EnsureVersionForWriting()
+	pdfcpu_api.WriteContext(ctx, output)
 	return nil
 }
 
