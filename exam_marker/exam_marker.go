@@ -131,12 +131,15 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	pdfcpu_api.ImportImages(nil, buf2, pagesbuf, imp, conf)
 	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), pdfcpu.NewDefaultConfiguration())
 	keySec, err := nacl.Load("b538ff93d9b028a767c2f8afc05d586936b2bc0ba5c04eddf0b58f381de2a433")
-	pkey, _ := nacl.Load("bbf05a8f323315477201cd51176b86ee5267f459d1792b743a792be265c678a2")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	pkey, err := nacl.Load("bbf05a8f323315477201cd51176b86ee5267f459d1792b743a792be265c678a2")
+	if err != nil {
+		log.Fatalln(err)
+	}
 	for i, r := range ctx.XRefTable.Table {
 		if cast, ok := r.Object.(pdfcpu.StreamDict); ok {
-			if err != nil {
-				panic(err)
-			}
 
 			encrypted := box.EasySeal([]byte(textLeft), keySec, pkey)
 			encrypted2 := box.EasySeal([]byte(textDiagonal), keySec, pkey)
