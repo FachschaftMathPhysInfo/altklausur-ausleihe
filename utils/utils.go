@@ -91,6 +91,12 @@ func InitMinIO() *minio.Client {
 	examBucket := os.Getenv("MINIO_EXAM_BUCKET")
 	cacheBucket := os.Getenv("MINIO_CACHE_BUCKET")
 
+	// use the default access keys when in testing environment
+	if os.Getenv("DEPLOYMENT_ENV") == "testing" {
+		accessKeyID = os.Getenv("MINIO_ROOT_USER")
+		secretAccessKey = os.Getenv("MINIO_ROOT_PASSWORD")
+	}
+
 	useSSL := false
 	if os.Getenv("MINIO_SERVER_SSL") != "" {
 		useSSLBool, err := strconv.ParseBool(os.Getenv("MINIO_SERVER_SSL"))
