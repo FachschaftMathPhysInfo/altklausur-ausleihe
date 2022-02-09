@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +18,9 @@ import (
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v3"
+	render "github.com/brunsgaard/go-pdfium-render"
+	"github.com/kevinburke/nacl"
+	"github.com/kevinburke/nacl/box"
 	"github.com/minio/minio-go/v7"
 	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
@@ -29,6 +34,11 @@ const (
 	reportBatchSize = 10000
 	consumeDuration = time.Millisecond
 	shouldLog       = false
+)
+
+var (
+	naclPubStr = os.Getenv("NACL_PUB")
+	naclSecStr = os.Getenv("NACL_SEC")
 )
 
 type RMQConsumer struct {
@@ -97,7 +107,6 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	if err = pdfcpu_api.AddWatermarks(input, &tempout, nil, watermarks[0], nil); err != nil {
 		return err
 	}
-
 	for _, watermark := range watermarks[1:] {
 		// swap the two buffers
 		tempin, tempout = tempout, tempin
@@ -108,9 +117,47 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 			return err
 		}
 	}
+	bits := tempout.Bytes()
+	doc, err := render.NewDocument(&bits)
+	if err != nil {
+		return err
+	}
+	pagesbuf := make([]io.Reader, 0)
+	for i := 0; i < doc.GetPageCount(); i++ {
+		img := doc.RenderPage(i, 150)
+		buf := new(bytes.Buffer)
+		png.Encode(buf, img)
+		pagesbuf = append(pagesbuf, bytes.NewReader(buf.Bytes()))
+	}
+	conf := pdfcpu.NewDefaultConfiguration()
+	imp := pdfcpu.DefaultImportConfig()
+	imp.Gray = false
+	buf2 := new(bytes.Buffer)
+	pdfcpu_api.ImportImages(nil, buf2, pagesbuf, imp, conf)
+	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), pdfcpu.NewDefaultConfiguration())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	keySec, err := nacl.Load(naclSecStr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	pkey, err := nacl.Load(naclPubStr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for i, r := range ctx.XRefTable.Table {
+		if cast, ok := r.Object.(pdfcpu.StreamDict); ok {
 
-	io.Copy(output, &tempout)
-
+			encrypted := box.EasySeal([]byte(textLeft), keySec, pkey)
+			encrypted2 := box.EasySeal([]byte(textDiagonal), keySec, pkey)
+			cast.Dict.InsertString("ref1", base64.StdEncoding.EncodeToString(encrypted))
+			cast.Dict.InsertString("ref2", base64.StdEncoding.EncodeToString(encrypted2))
+			ctx.XRefTable.Table[i].Object = cast
+		}
+	}
+	ctx.EnsureVersionForWriting()
+	pdfcpu_api.WriteContext(ctx, output)
 	return nil
 }
 
@@ -189,12 +236,16 @@ func logErrors(errChan <-chan error) {
 }
 
 func main() {
+	render.InitLibrary()
 	minioClient := utils.InitMinIO()
 
 	// get job from queue
 	rmqClient := utils.InitRmq()
 
 	tagQueue, err := rmqClient.OpenQueue("tag-queue")
+	if err != nil {
+		log.Fatalln("Error while opening RMQ Queue: ", err)
+	}
 
 	if err = tagQueue.StartConsuming(10, time.Second); err != nil {
 		log.Fatalln(err)

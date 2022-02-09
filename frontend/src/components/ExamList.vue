@@ -6,8 +6,8 @@
           <v-text-field
             v-model="moduleName"
             prepend-inner-icon="mdi-book-open-variant"
-            label="Veranstaltungsname"
-            hint="Auch Abkürzungen und Varianten werden berücksichtigt"
+            :label="$t('examlist.eventname')"
+            :hint="$t('examlist.hint')"
             single-line
             clearable
             @input="filterExams"
@@ -18,7 +18,7 @@
           <v-text-field
             v-model="examiner"
             prepend-inner-icon="mdi-account"
-            label="Prüfende eingrenzen"
+            :label="$t('examlist.filter_lecturers')"
             single-line
             clearable
             @input="filterExams"
@@ -30,7 +30,7 @@
             :items="semesters"
             item-text="name"
             :item-disabled="disableFromSemester"
-            label="ab Semester"
+            :label="$t('examlist.from_semester')"
             clearable
             @change="filterExams"
           ></v-select>
@@ -41,7 +41,7 @@
             :items="semesters"
             item-text="name"
             :item-disabled="disableToSemester"
-            label="bis Semester"
+            :label="$t('examlist.to_semester')"
             clearable
             @change="filterExams"
           ></v-select>
@@ -57,21 +57,25 @@
               <v-icon :color="getSubjectColor('Mathe')" left>
                 mdi-android-studio
               </v-icon>
-              <span class="hidden-sm-and-down">Mathematik</span>
+              <span class="hidden-sm-and-down">{{ $t("examlist.maths") }}</span>
             </v-btn>
 
             <v-btn value="Physik">
               <v-icon :color="getSubjectColor('Physik')" left>
                 mdi-atom
               </v-icon>
-              <span class="hidden-sm-and-down">Physik</span>
+              <span class="hidden-sm-and-down">{{
+                $t("examlist.physics")
+              }}</span>
             </v-btn>
 
             <v-btn value="Info">
               <v-icon :color="getSubjectColor('Info')" left>
                 mdi-laptop
               </v-icon>
-              <span class="hidden-sm-and-down">Informatik</span>
+              <span class="hidden-sm-and-down">{{
+                $t("examlist.computer_science")
+              }}</span>
             </v-btn>
           </v-btn-toggle>
         </v-col>
@@ -83,7 +87,7 @@
         :items-per-page="-1"
         :search="this.$parent.search"
         :hide-default-footer="true"
-        show-expand
+        :show-expand="!isMobile()"
         @item-expanded="getMarkedExamURLFromRow"
       >
         <template v-slot:[`item.subject`]="{ item }">
@@ -105,13 +109,13 @@
             <v-icon>
               mdi-download
             </v-icon>
-            herunterladen
+            {{ $t("examlist.downloaden") }}
           </v-btn>
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td :colspan="headers.length">
             <div v-if="!item.viewUrl" class="text-center">
-              <h4>Watermarking and Loading Exam ...</h4>
+              <h4>{{ $t("examlist.watermarking") }}</h4>
               <v-progress-circular
                 indeterminate
                 color="primary"
@@ -126,10 +130,7 @@
           </td>
         </template>
         <template v-slot:no-data>
-          <span
-            >Es wurden keine Klausuren passend zu den Suchkriterien
-            gefunden!</span
-          >
+          <span>{{ $t("examlist.no_exams_found") }}</span>
         </template>
       </v-data-table>
       <v-tooltip left>
@@ -147,10 +148,41 @@
             ><v-icon>mdi-help</v-icon></v-btn
           >
         </template>
-        <span>Klicke hier für eine Anleitung</span>
+        <span>{{ $t("examlist.click_for_explanation") }}</span>
       </v-tooltip>
+      <v-dialog
+        v-model="notAuthenticatedDialog"
+        transition="dialog-bottom-transition"
+        max-width="600"
+      >
+        <template v-slot:default="dialog">
+          <v-card>
+            <v-toolbar color="primary" dark>
+              <v-icon class="pr-3" large>mdi-alert</v-icon>
+              Not authenticated
+            </v-toolbar>
+            <v-card-text>
+              <div class="text pa-6">
+                You are currently not authenticated. Please log in by providing
+                your university credentials into Moodle to use our platform.
+              </div>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn
+                depressed
+                @click="dialog.value = false"
+                color="primary"
+                elevation="2"
+                href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=547942"
+              >
+                Login
+              </v-btn>
+              <v-btn text @click="dialog.value = false">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
     </v-container>
-    {{ examiner }}
   </div>
 </template>
 
@@ -176,8 +208,9 @@ export default {
   name: "ExamList",
   components: {},
   data() {
-    const self = this;
+    // const self = this;
     return {
+      notAuthenticatedDialog: false,
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
@@ -185,31 +218,33 @@ export default {
       toSemester: null,
       exams: [],
       originalExams: [],
-      headers: [
+    };
+  },
+  computed: {
+    headers() {
+      return [
         { text: "", value: "data-table-expand" },
         {
-          text: "Veranstaltung",
+          text: this.$t("examlist.module"),
           value: "moduleName",
         },
-        { text: "Prüfende", value: "examiners" },
+        { text: this.$t("examlist.examiner"), value: "examiners" },
         {
           text: "Semester",
           value: "combinedSemester",
           sortable: true,
-          sort: (a, b) => self.semesterBefore(a, b),
+          sort: (a, b) => this.semesterSort(a, b),
         },
-        { text: "Fach", value: "subject" },
-        { text: "Download", value: "download" },
-      ],
-    };
-  },
-  computed: {
+        { text: this.$t("examlist.subject"), value: "subject" },
+        { text: this.$t("examlist.download"), value: "download" },
+      ];
+    },
     semesters() {
       if (this.exams.length > 0) {
         return this.exams
           .filter((exam) => exam.combinedSemester.trim() != "")
           .map((exam) => ({ name: exam.combinedSemester }))
-          .sort((a, b) => this.semesterBefore(a.name, b.name));
+          .sort((a, b) => this.semesterSort(a.name, b.name));
       } else {
         return [];
       }
@@ -217,6 +252,9 @@ export default {
   },
 
   methods: {
+    openNotAuthenticatedDialog() {
+      this.notAuthenticatedDialog = true;
+    },
     help() {
       alert(
         "To be implemented: Open help dialog with very detailed instructions"
@@ -229,6 +267,19 @@ export default {
     disableToSemester(semester) {
       if (this.fromSemester == null) return false;
       return this.semesterBefore(semester.name, this.fromSemester);
+    },
+    semesterSort(thisSemester, otherSemester) {
+      // splits semester labels into year (index 1) and season (index 0)
+      const thisSem = thisSemester.split(" ");
+      const otherSem = otherSemester.split(" ");
+      if (thisSem[1] < otherSem[1]) {
+        return 1;
+      } else if (thisSem[1] == otherSem[1]) {
+        if (thisSem[0] < otherSem[0]) {
+          return 1;
+        }
+      }
+      return -1;
     },
     semesterBefore(thisSemester, otherSemester) {
       // splits semester labels into year (index 1) and season (index 0)
@@ -292,7 +343,6 @@ export default {
     },
     async downloadAltklausur(exam) {
       // download the exam in a two step process: 1. watermark 2. get URLs
-      console.log("download Altklausur");
       if (!exam.downloadUrl) {
         exam.loading = true;
         exam.disabled = true;
@@ -302,7 +352,6 @@ export default {
 
         exam.loading = false;
         exam.disabled = false;
-        console.log("done");
       } else {
         // simply open exam if it has been processed already
         this.openExam(exam.downloadUrl);
@@ -310,9 +359,7 @@ export default {
     },
     async getMarkedExamURLFromRow(row) {
       // retrieve urls from backend when exam row is opened
-      console.log("get exam from row");
       if (!row.item.viewUrl) {
-        console.log("in if");
         await this.watermarkExam(row.item.UUID);
         await this.getExamURLs(row.item, false);
       }
@@ -334,7 +381,7 @@ export default {
     async getExamURLs(exam, openDownload) {
       // Call to the graphql query, to retrieve URLs of exam PDFs. Repeat 5 times if not successful and then time out
       for (let i = 0; i < 5; i++) {
-        let result = await this.$apollo.query({
+        const result = await this.$apollo.query({
           query: gql`
             query($UUID: String!) {
               getExam(StringUUID: $UUID) {
@@ -352,11 +399,10 @@ export default {
         if (result.data.getExam == null) {
           // watermarked result isn't ready yet => wait a moment and retry
           await new Promise((f) => setTimeout(f, 1000));
-          console.log("downloaded failed");
         } else {
           exam.viewUrl = result.data.getExam.viewUrl;
           exam.downloadUrl = result.data.getExam.downloadUrl;
-          console.log("downloaded successfully");
+          this.$forceUpdate();
           if (openDownload) {
             this.openExam(exam.downloadUrl);
           }
@@ -365,8 +411,7 @@ export default {
       }
       if (exam.loading) {
         // request failed even after 5 retries
-        alert("Sorry, your request failed, please retry later.");
-        console.log("timed out");
+        alert(this.$t("examlist.request_failed"));
       }
     },
     openExam(url) {
@@ -374,10 +419,18 @@ export default {
       link.href = url;
       link.click();
     },
+    isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    },
   },
   apollo: {
     exams: {
       query: EXAMS_QUERY,
+      error() {
+        this.openNotAuthenticatedDialog();
+      },
       update: (data) => {
         data.exams.forEach((exam) => {
           // Set undefined elements to empty strings
@@ -389,7 +442,6 @@ export default {
           exam.combinedSemester = `${exam.semester} ${exam.year}`;
           exam.loading = null;
           exam.disabled = null;
-          exam.viewUrl = null;
         });
 
         return data.exams;

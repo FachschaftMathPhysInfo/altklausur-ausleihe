@@ -17,7 +17,7 @@ services:
       - backend-internal
 
   storage:
-    image: quay.io/minio/minio:RELEASE.2021-09-09T21-37-07Z
+    image: quay.io/minio/minio:RELEASE.2022-02-01T18-00-14Z
     command: server --console-address ":9001" /data
     ports:
       - "9000:9000"
@@ -69,6 +69,7 @@ services:
       args:
         SERVER_HTTP: http://localhost:8080/query
         SERVER_WS: ws://localhost:8081/query
+        NGINX_CONFIG_NAME: nginx.conf
     image: "altklausur_ausleihe-frontend:latest"
     ports:
       - "127.0.0.1:8080:80"

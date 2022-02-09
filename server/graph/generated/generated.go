@@ -46,6 +46,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Exam struct {
 		Examiners     func(childComplexity int) int
+		Hash          func(childComplexity int) int
 		ModuleAltName func(childComplexity int) int
 		ModuleName    func(childComplexity int) int
 		Semester      func(childComplexity int) int
@@ -103,6 +104,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Exam.Examiners(childComplexity), true
+
+	case "Exam.hash":
+		if e.complexity.Exam.Hash == nil {
+			break
+		}
+
+		return e.complexity.Exam.Hash(childComplexity), true
 
 	case "Exam.moduleAltName":
 		if e.complexity.Exam.ModuleAltName == nil {
@@ -273,6 +281,7 @@ scalar Upload
 type Exam {
   UUID: String!
   subject: String!
+  hash: String!
   moduleName: String!
   moduleAltName: String
   year: Int
@@ -464,6 +473,41 @@ func (ec *executionContext) _Exam_subject(ctx context.Context, field graphql.Col
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Subject, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Exam_hash(ctx context.Context, field graphql.CollectedField, obj *model.Exam) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Exam",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Hash, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2167,6 +2211,11 @@ func (ec *executionContext) _Exam(ctx context.Context, sel ast.SelectionSet, obj
 			})
 		case "subject":
 			out.Values[i] = ec._Exam_subject(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "hash":
+			out.Values[i] = ec._Exam_hash(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}

@@ -3,29 +3,43 @@
     <v-app-bar color="primary" dense dark>
       <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>{{ this.$route.name }}</v-toolbar-title>
+      <v-toolbar-title>{{ $t(this.$route.name) }}</v-toolbar-title>
 
-      <v-spacer></v-spacer>
       <v-spacer></v-spacer>
 
       <v-text-field
         v-model="search"
         prepend-inner-icon="mdi-magnify"
-        label="Filter Altklausuren, z.B. nach Prüfenden oder Veranstaltungen"
+        :label="$t('application.search_label')"
         single-line
         hide-details
         clearable
       ></v-text-field>
+
+      <v-spacer></v-spacer>
+      <v-btn-toggle
+        v-model="$i18n.locale"
+        @change="switchLanguageInCookie()"
+        mandatory
+        dense
+      >
+        <v-btn value="de">
+          <img src="/de.svg" />
+        </v-btn>
+        <v-btn value="en">
+          <img src="/en.svg" />
+        </v-btn>
+      </v-btn-toggle>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title">
-            Altklausurausleihe
+            {{ $t("application.title") }}
           </v-list-item-title>
           <v-list-item-subtitle>
-            deiner Fachschaft MathPhysInfo
+            {{ $t("application.yourFS") }}
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -45,7 +59,7 @@
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -56,6 +70,8 @@
 </template>
 
 <script>
+import Vue from "vue";
+import i18n from "../i18n";
 export default {
   name: "Application",
 
@@ -64,30 +80,48 @@ export default {
     drawer: null,
     items: [
       {
-        title: "Altklausur ausleihen",
+        title: "application.get_exam",
         icon: "mdi-file-document",
         action: "exams",
       },
       {
-        title: "Altklausur einreichen",
+        title: "application.hand_in",
         icon: "mdi-send",
         action:
           "mailto:pruefungsberichte@mathphys.info?subject=Neue Altklausur über die digitale Altklausurausleihe&body=Liebe Fachschaft,%0D%0A%0D%0Aich möchte euch eine neue Altklausur einreichen. Diese wurde im (Sommersemester/Wintersemester) XXXX für das Modul XXXX von der Lehrperson XXXX gestellt.%0D%0A%0D%0AViele Grüße,%0D%0A%0D%0AAnhang nicht vergessen, am liebsten als PDF oder TeX Datei",
       },
       {
-        title: "GitHub Projekt",
+        title: "application.github_project",
         icon: "mdi-github",
         action: "https://github.com/FachschaftMathPhysInfo/altklausur-ausleihe",
         target: "_blank",
       },
       {
-        title: "Datenschutz",
+        title: "application.dataprivacy",
         icon: "mdi-file-document-multiple",
         action: "privacy",
       },
-      { title: "Impressum", icon: "mdi-information", action: "impress" },
+      {
+        title: "application.impress",
+        icon: "mdi-information",
+        action: "impress",
+      },
     ],
     right: null,
   }),
+  methods: {
+    switchLanguageInCookie: () => {
+      Vue.$cookies.set("language", i18n._vm.locale, "1y");
+    },
+  },
+  mounted: () => {
+    if (Vue.$cookies.get("language")) {
+      // get language from cookie
+      i18n._vm.locale = Vue.$cookies.get("language");
+    } else {
+      // set German as default language if none is set in cookie
+      Vue.$cookies.set("language", "de", "1y");
+    }
+  },
 };
 </script>
