@@ -73,19 +73,24 @@ profs.each do |prof|
     prof_folder = "download/#{prof.id}"
     FileUtils.mkdir_p prof_folder
     reps.each do |report|
+      dowload_destination = "#{prof_folder}/#{report['id']}.pdf"
+      if not File.file?(dowload_destination)
+        uri = URI("https://moozean.mathphys.info/api/download/#{report['id']}/3168")
+        Net::HTTP.start(uri.host, uri.port,
+          :use_ssl => uri.scheme == 'https',
+          :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
 
-      uri = URI("https://moozean.mathphys.info/api/download/#{report['id']}/3168")
-      Net::HTTP.start(uri.host, uri.port,
-        :use_ssl => uri.scheme == 'https',
-        :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+          request = Net::HTTP::Get.new uri.request_uri
+          request.basic_auth ENV['MOOZEAN_USERNAME'], ENV['MOOZEAN_PASSWORD']
 
-        request = Net::HTTP::Get.new uri.request_uri
-        request.basic_auth ENV['MOOZEAN_USERNAME'], ENV['MOOZEAN_PASSWORD']
-
-        response = http.request request # Net::HTTPResponse object
-        open("#{prof_folder}/#{report['id']}.pdf", "wb") do |file|
-          file.write(response.body)
+          response = http.request request # Net::HTTPResponse object
+          open(dowload_destination, "wb") do |file|
+            file.write(response.body)
+          end
         end
+        print("Downloaded '#{dowload_destination}'!\n")
+      else
+        print("'#{dowload_destination}' already exists, not downloading!\n")
       end
     end
   end
