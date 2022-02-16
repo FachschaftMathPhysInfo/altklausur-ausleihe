@@ -8,7 +8,8 @@
     "dataprivacy": "Datenschutz",
     "impress": "Impressum",
     "title": "Altklausurausleihe",
-    "yourFS": "deiner Fachschaft MathPhysInfo"
+    "yourFS": "deiner Fachschaft MathPhysInfo",
+    "toggle_darkmode": "Darkmode umschalten"
   },
   "router": {
     "app": "Applikation",

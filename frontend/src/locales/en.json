@@ -8,7 +8,8 @@
     "dataprivacy": "Data Privacy",
     "impress": "Impress",
     "title": "Previous exams",
-    "yourFS": "by your Fachschaft MathPhysInfo"
+    "yourFS": "by your Fachschaft MathPhysInfo",
+    "toggle_darkmode": "toggle dark mode"
   },
   "router": {
     "app": "Application",
