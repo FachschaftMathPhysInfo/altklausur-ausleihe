@@ -78,10 +78,6 @@
   "help": {
     "questions_and_answers": [
       {
-        "question": "Wie finde ich die richtigen Altklausuren von meiner Dozentin/meinem Dozenten oder meinem Fach?",
-        "answer": "Du kannst nach Altklausuren filtern, indem du den Namen der Vorlesung oder der Dozierenden eingibst. Aber du kannst auch nach dem Fach oder Semester suchen. Nachdem du grob gefiltert hast \u00fcber die Suchleiste am oberen Bildschirmrand, kannst du die Suche weiter verfeinern, indem du den Namen der Dozierenden oder des Moduls eingibst. Au\u00dferdem kannst du nach Fach oder Semester filtern. Zus\u00e4tzlich kannst du nach Semestern, Dozierenden, F\u00e4chern und Modulen sortieren."
-      },
-      {
         "question": "How to find the right exams of my lecturer/subject?",
         "answer": "You can filter the exams by typing in the name of a lecturer or module. But you can also search by subjects or semesters. After filtering with the search bar at the top of the page you may further adjust your search and filter by parameters such as subject or semester specifically. Furthermore, you can sort the results by lecturers, modules, subjects or semesters."
       },
