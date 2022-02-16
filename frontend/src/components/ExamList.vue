@@ -194,42 +194,12 @@
               <v-icon class="pr-3" large>mdi-help</v-icon>
               {{ $t("help.help") }}
             </v-toolbar>
-            <v-card-text class="pa-6">
+            <v-card-text class="pa-6" v-for='(item, i) in $t("help.questions_and_answers")' v-bind:key="i">
               <div class="text-h6 pa-2">
-                {{ $t("help.question1") }}
+                {{ i+1 }}. {{ item.question }}
               </div>
               <div class="text pa-2">
-                {{ $t("help.answer1") }}
-              </div>
-              <div class="text-h6 pa-2">
-                {{ $t("help.question2") }}
-              </div>
-              <div class="text pa-2">
-                {{ $t("help.answer2") }}
-              </div>
-              <div class="text-h6 pa-2">
-                {{ $t("help.question3") }}
-              </div>
-              <div class="text pa-2">
-                {{ $t("help.answer3") }}
-              </div>
-              <div class="text-h6 pa-2">
-                {{ $t("help.question4") }}
-              </div>
-              <div class="text pa-2">
-                {{ $t("help.answer4") }}
-              </div>
-              <div class="text-h6 pa-2">
-                {{ $t("help.question5") }}
-              </div>
-              <div class="text pa-2">
-                {{ $t("help.answer5") }}
-              </div>
-              <div class="text-h6 pa-2">
-                {{ $t("help.question6") }}
-              </div>
-              <div class="text pa-2">
-                {{ $t("help.answer6") }}
+                {{ item.answer }}
               </div>
             </v-card-text>
             <v-card-actions class="justify-end">
