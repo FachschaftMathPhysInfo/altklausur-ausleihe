@@ -129,7 +129,7 @@ export default {
       Vue.$cookies.set("language", i18n._vm.locale, "1y");
     },
   },
-  mounted: () => {
+  mounted() {
     if (Vue.$cookies.get("language")) {
       // get language from cookie
       i18n._vm.locale = Vue.$cookies.get("language");
