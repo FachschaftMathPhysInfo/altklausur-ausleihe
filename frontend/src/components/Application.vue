@@ -37,11 +37,13 @@
         @change="switchLanguageInCookie()"
         mandatory
         dense
+        background-color="transparent"
+        borderless
       >
-        <v-btn value="de">
+        <v-btn value="de" icon>
           <img src="/de.svg" />
         </v-btn>
-        <v-btn value="en">
+        <v-btn value="en" icon>
           <img src="/en.svg" />
         </v-btn>
       </v-btn-toggle>
