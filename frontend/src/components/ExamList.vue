@@ -316,9 +316,6 @@ export default {
     },
     help() {
       this.helpDialog = true;
-      // alert(
-      //   "To be implemented: Open help dialog with very detailed instructions"
-      // );
     },
     disableFromSemester(semester) {
       if (this.toSemester == null) return false;
