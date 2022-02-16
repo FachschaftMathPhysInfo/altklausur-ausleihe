@@ -17,6 +17,21 @@
       ></v-text-field>
 
       <v-spacer></v-spacer>
+
+      <v-tooltip bottom style="margin-right: 12px;">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            v-bind="attrs"
+            v-on="on"
+            text
+            v-on:click="$vuetify.theme.dark = !$vuetify.theme.dark"
+          >
+            <v-icon>mdi-theme-light-dark</v-icon>
+          </v-btn>
+        </template>
+        <span>{{ $t("application.toggle_darkmode") }}</span>
+      </v-tooltip>
+
       <v-btn-toggle
         v-model="$i18n.locale"
         @change="switchLanguageInCookie()"
@@ -122,6 +137,23 @@ export default {
       // set German as default language if none is set in cookie
       Vue.$cookies.set("language", "de", "1y");
     }
+
+    // Dark theme if set in user preferences
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      // dark mode
+      this.$vuetify.theme.dark = true;
+      alert("Dark");
+    }
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        this.$vuetify.theme.dark = e.matches;
+        alert(e.matches);
+      });
   },
 };
 </script>
