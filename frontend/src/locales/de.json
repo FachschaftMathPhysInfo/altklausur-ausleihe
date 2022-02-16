@@ -28,7 +28,7 @@
     "downloaden": "herunterladen",
     "watermarking": "Wasserzeichen wird hinzugefügt und Altklausur geladen ...",
     "no_exams_found": "Es wurden keine Klausuren passend zu den Suchkriterien gefunden!",
-    "click_for_explanation": "Klicke hier für eine Anleitung",
+    "click_for_explanation": "Klicke hier für Hilfe",
     "request_failed": "Entschldigung, deine Anfrage ist leider fehlgeschlagen, versuche es später erneut.",
     "module": "Veranstaltung",
     "examiner": "Prüfende",
@@ -74,5 +74,27 @@
     "list5": "Die E-Mail-Adresse des Nutzers, die von der Universität Heidelberg im Rahmen der Immatrikulation vergeben wurde",
     "list6": "Session: Dieser Cookie muss erlaubt sein, damit der Login bei den Zugriffen von Seite zu Seite erhalten bleibt. Beim Abmelden oder beim Beenden des Webbrowsers wird der Cookie automatisch gelöscht.",
     "list7": "UID: Dieses Cookie speichert ausschließlich nach Aktivierung der entsprechenden Checkbox durch den Benutzer den Anmeldenamen im Webbrowser und bleibt auch nach dem Abmelden erhalten."
+  },
+  "help": {
+    "question1": "Wie finde ich die richtigen Altklausuren von meiner Dozentin/meinem Dozenten oder meinem Fach?",
+    "question2": "Warum gibt es keine Altklausur zu meinem Modul?",
+    "question3": "Wieso ist ein Wasserzeichen auf der Altklausur?",
+    "question4": "Weshalb gibt es dieses System erst jetzt und nicht schon früher?",
+    "question5": "Darf ich die Dokumente weiterverteilen?",
+    "question6": "Wie kann ich Altklausuren beisteuern?",
+    "answer1": "Du kannst nach Altklausuren filtern, indem du den Namen der Vorlesung oder der Dozierenden eingibst. Aber du kannst auch nach dem Fach oder Semester suchen. Nachdem du grob gefiltert hast über die Suchleiste am oberen Bildschirmrand, kannst du die Suche weiter verfeinern, indem du den Namen der Dozierenden oder des Moduls eingibst. Außerdem kannst du nach Fach oder Semester filtern. Zusätzlich kannst du nach Semestern, Dozierenden, Fächern und Modulen sortieren.",
+    "answer2": "Es kann mehrere Gründe geben, weshalb es hier keine Altklausur zu deinem Modul gibt. Ein Grund kann sein, dass wir einfach keine Altklausur zu diesem Modul haben. In diesem Fall kannst du deine Dozierenden gerne fragen, ob sie ihre Altklausur zur Verfügung stellen. Ein anderer Grund kann sein, dass wir - obwohl wir eine Altklausur deiner Dozierenden haben - diese nicht online stellen dürfen, weil die Dozierenden der Veröffentlichung nicht zugestimmt haben. In diesem Fall kannst du zu uns in den Fachschaftsraum kommen und die offline Version der Altklausur ausleihen. Außerdem kannst du deine Dozierenden nett fragen, ob sie ihre Zustimmung für die Veröffentlichung geben könnten.",
+    "answer3": "Die Altklausuren sind mit Wasserzeichen versehen, weil sie nur für den persönlichen Gebrauch vorgesehen sind.  Wir bitten dich darum, die Altklausuren nicht weiterzuverbreiten oder irgendwo hochzuladen. Für den Fall dass jemand eine Altklausur veröffentlicht, lässt sich über das Wasserzeichen nachvollziehen, wer die Altklausur verbreitet hat.",
+    "answer4": "Bisher waren Altklausuren nur offline verfügbar in unserem Fachschaftsbüro. Dies ist immernoch der Fall. Allerdings hat uns die Coronapandemie inspiriert, diesen hilfreichen Service der Fachschaft auch online für unsere Studierenden anzubieten. Aus rechtlichen Gründen musste jedoch erst die Einwilligung der jeweiligen Dozierenden eingeholt werden. Außerdem musste diese Plattform erst einmal entwickelt werden, was auch etwas Zeit in Anspruch genommen hat.",
+    "answer5": "Bitte verbreite die Altklausuren nicht und lade sie auch nicht hoch. Für den Fall, dass jemand Altklausuren hochlädt, lässt sich dies über das Wasserzeichen nachvollziehen. Die Dozierenden haben ihre Einwilligung als Autoren gegeben unter der Voraussetzung, dass nur ihre Studierenden auf diese zugreifen können. Bitte respektiere die Urheberschaftsrechte der Dozierenden und ihre großzügige Unterstützung in Form von der Bereitstellung ihrer Altklausuren, indem du die Regeln einhältst.",
+    "answer6": "Wenn du eine Altklausur hast, die bisher weder in diesem System aufgelistet ist und auch nicht im Fachschaftsraum verfügbar ist, dann würden wir dich nett bitten, diese bei uns einzureichen. Dies geht über den Knopf im Menü auf der linken Seite, über den du uns eine Email senden kannst, oder du kommst einfach in den Fachschaftsraum. Idealerweise reichst du eine PDF Datei ein, oder noch besser eine TeX Datei. Außerdem wäre es hilfreich, wenn du das Semester, die Veranstaltung und die Dozierenden nennen könntest, sodass wir die Altklausur in unsere Datenbank eintragen können.",
+    "help": "Hilfe",
+    "close": "Schließen"
+  },
+  "auth": {
+    "close": "Schließen",
+    "not_authenticated": "Nicht angemeldet",
+    "login": "Anmelden",
+    "text": "Du bist aktuell nicht angemeldet. Bitte melde dich an, indem du dich über Moodle mit deinem Universitätsaccount authentifizierst, um auf diese Plattform zuzugreifen."
   }
 }

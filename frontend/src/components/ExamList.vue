@@ -159,12 +159,11 @@
           <v-card>
             <v-toolbar color="primary" dark>
               <v-icon class="pr-3" large>mdi-alert</v-icon>
-              Not authenticated
+              {{ $t("auth.not_authenticated") }}
             </v-toolbar>
             <v-card-text>
               <div class="text pa-6">
-                You are currently not authenticated. Please log in by providing
-                your university credentials into Moodle to use our platform.
+                {{ $t("auth.text") }}
               </div>
             </v-card-text>
             <v-card-actions class="justify-end">
@@ -175,9 +174,68 @@
                 elevation="2"
                 href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=547942"
               >
-                Login
+                {{ $t("auth.login") }}
               </v-btn>
-              <v-btn text @click="dialog.value = false">Close</v-btn>
+              <v-btn text @click="dialog.value = false">{{
+                $t("auth.close")
+              }}</v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
+      <v-dialog
+        v-model="helpDialog"
+        transition="dialog-bottom-transition"
+        max-width="900"
+      >
+        <template v-slot:default="dialog">
+          <v-card>
+            <v-toolbar color="primary" dark>
+              <v-icon class="pr-3" large>mdi-help</v-icon>
+              {{ $t("help.help") }}
+            </v-toolbar>
+            <v-card-text class="pa-6">
+              <div class="text-h6 pa-2">
+                {{ $t("help.question1") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer1") }}
+              </div>
+              <div class="text-h6 pa-2">
+                {{ $t("help.question2") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer2") }}
+              </div>
+              <div class="text-h6 pa-2">
+                {{ $t("help.question3") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer3") }}
+              </div>
+              <div class="text-h6 pa-2">
+                {{ $t("help.question4") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer4") }}
+              </div>
+              <div class="text-h6 pa-2">
+                {{ $t("help.question5") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer5") }}
+              </div>
+              <div class="text-h6 pa-2">
+                {{ $t("help.question6") }}
+              </div>
+              <div class="text pa-2">
+                {{ $t("help.answer6") }}
+              </div>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn text @click="dialog.value = false">{{
+                $t("help.close")
+              }}</v-btn>
             </v-card-actions>
           </v-card>
         </template>
@@ -211,6 +269,7 @@ export default {
     // const self = this;
     return {
       notAuthenticatedDialog: false,
+      helpDialog: false,
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
@@ -256,9 +315,10 @@ export default {
       this.notAuthenticatedDialog = true;
     },
     help() {
-      alert(
-        "To be implemented: Open help dialog with very detailed instructions"
-      );
+      this.helpDialog = true;
+      // alert(
+      //   "To be implemented: Open help dialog with very detailed instructions"
+      // );
     },
     disableFromSemester(semester) {
       if (this.toSemester == null) return false;
