@@ -28,7 +28,7 @@
     "downloaden": "download",
     "watermarking": "Watermarking and loading exam ...",
     "no_exams_found": "No matching exams were found!",
-    "click_for_explanation": "Click for explanation!",
+    "click_for_explanation": "Click for help!",
     "request_failed": "Sorry, your request failed, please retry later.",
     "module": "Module",
     "examiner": "Examiner",
@@ -74,5 +74,41 @@
     "list5": "The user's e-mail address, which was assigned by Heidelberg University as part of the enrollment process",
     "list6": "Session: This cookie must be allowed so that the login is preserved when accessing from page to page. When you log out or exit the web browser, the cookie is automatically deleted.",
     "list7": "UID: This cookie stores the login name in the web browser exclusively after activation of the corresponding checkbox by the user and remains even after logging out."
+  },
+  "help": {
+    "questions_and_answers": [
+      {
+        "question": "How to find the right exams of my lecturer/subject?",
+        "answer": "You can filter the exams by typing in the name of a lecturer or module. But you can also search by subjects or semesters. After filtering with the search bar at the top of the page you may further adjust your search and filter by parameters such as subject or semester specifically. Furthermore, you can sort the results by lecturers, modules, subjects or semesters."
+      },
+      {
+        "question": "Why are there no exams for my module?",
+        "answer": "There may be several reasons why you cannot find a previous exam for your module. One reason could be that we don't have any previous exam from this module. In this case you could ask your lecturer to hand in a previous exam of that module. Another reason might be that although we have a previous exam of this module the lecturer has not agreed yet to publish the exam online. In this case you may come to our office and get the offline version or kindly ask your lecturer to give his or her consent to publishing the exam. "
+      },
+      {
+        "question": "Why is there a watermark on the exams?",
+        "answer": "The exams are watermarked because they are intended for personal use only. Please don't redistribute or upload the exams. In case someone publishes exams, the watermark may be used to trace the original publisher."
+      },
+      {
+        "question": "Why does this system exist now and not earlier?",
+        "answer": "So far, previous exams were only available offline in our office. This still is the case. However, the COVID pandemic has inspired us to provide this useful service online for our students. Due to legal reasons, the consent of the lecturers needed to be acquired first. Furthermore, the technical development of this platform also needed some time."
+      },
+      {
+        "question": "May I redistribute the documents?",
+        "answer": "Please don't redistribute or upload the exams. In case someone publishes exams, the watermark may be used to trace the original publisher. The lecturers gave their consent as the authors to publish their exams under the premise that only their students can access them. Please do respect the authorship of the lecturers and their generous support and therefore adhere to the rules."
+      },
+      {
+        "question": "How can I contribute new previous exams?",
+        "answer": "If you have a previous exam that is not listed in this platform nor available offline in our office we would kindly ask you to submit it to us. You may use the button in the menu on the left to send us an email or simply bring it to our office. Ideally you provide us with a PDF, or even better with a TeX file. Additionally, please name the semester, module and lecturer so that we can add it to our database."
+      }
+    ],
+    "help": "Help",
+    "close": "Close"
+  },
+  "auth": {
+    "close": "Close",
+    "not_authenticated": "Not authenticated",
+    "login": "Login",
+    "text": "You are currently not authenticated. Please log in by providing your university credentials into Moodle to use our platform."
   }
 }

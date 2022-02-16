@@ -159,12 +159,11 @@
           <v-card>
             <v-toolbar color="primary" dark>
               <v-icon class="pr-3" large>mdi-alert</v-icon>
-              Not authenticated
+              {{ $t("auth.not_authenticated") }}
             </v-toolbar>
             <v-card-text>
               <div class="text pa-6">
-                You are currently not authenticated. Please log in by providing
-                your university credentials into Moodle to use our platform.
+                {{ $t("auth.text") }}
               </div>
             </v-card-text>
             <v-card-actions class="justify-end">
@@ -175,9 +174,38 @@
                 elevation="2"
                 href="https://moodle.uni-heidelberg.de/mod/lti/view.php?id=547942"
               >
-                Login
+                {{ $t("auth.login") }}
               </v-btn>
-              <v-btn text @click="dialog.value = false">Close</v-btn>
+              <v-btn text @click="dialog.value = false">{{
+                $t("auth.close")
+              }}</v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
+      <v-dialog
+        v-model="helpDialog"
+        transition="dialog-bottom-transition"
+        max-width="900"
+      >
+        <template v-slot:default="dialog">
+          <v-card>
+            <v-toolbar color="primary" dark>
+              <v-icon class="pr-3" large>mdi-help</v-icon>
+              {{ $t("help.help") }}
+            </v-toolbar>
+            <v-card-text class="pa-6" v-for='(item, i) in $t("help.questions_and_answers")' v-bind:key="i">
+              <div class="text-h6 pa-2">
+                {{ i+1 }}. {{ item.question }}
+              </div>
+              <div class="text pa-2">
+                {{ item.answer }}
+              </div>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn text @click="dialog.value = false">{{
+                $t("help.close")
+              }}</v-btn>
             </v-card-actions>
           </v-card>
         </template>
@@ -211,6 +239,7 @@ export default {
     // const self = this;
     return {
       notAuthenticatedDialog: false,
+      helpDialog: false,
       examiner: null,
       moduleName: null,
       subjects: ["Mathe", "Physik", "Info"],
@@ -256,9 +285,7 @@ export default {
       this.notAuthenticatedDialog = true;
     },
     help() {
-      alert(
-        "To be implemented: Open help dialog with very detailed instructions"
-      );
+      this.helpDialog = true;
     },
     disableFromSemester(semester) {
       if (this.toSemester == null) return false;
