@@ -145,14 +145,12 @@ export default {
     ) {
       // dark mode
       this.$vuetify.theme.dark = true;
-      alert("Dark");
     }
 
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .addEventListener("change", (e) => {
         this.$vuetify.theme.dark = e.matches;
-        alert(e.matches);
       });
   },
 };
