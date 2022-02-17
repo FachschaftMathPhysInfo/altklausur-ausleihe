@@ -17,16 +17,33 @@
       ></v-text-field>
 
       <v-spacer></v-spacer>
+
+      <v-tooltip bottom style="margin-right: 12px;">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            v-bind="attrs"
+            v-on="on"
+            text
+            v-on:click="$vuetify.theme.dark = !$vuetify.theme.dark"
+          >
+            <v-icon>mdi-theme-light-dark</v-icon>
+          </v-btn>
+        </template>
+        <span>{{ $t("application.toggle_darkmode") }}</span>
+      </v-tooltip>
+
       <v-btn-toggle
         v-model="$i18n.locale"
         @change="switchLanguageInCookie()"
         mandatory
         dense
+        background-color="transparent"
+        borderless
       >
-        <v-btn value="de">
+        <v-btn value="de" icon>
           <img src="/de.svg" />
         </v-btn>
-        <v-btn value="en">
+        <v-btn value="en" icon>
           <img src="/en.svg" />
         </v-btn>
       </v-btn-toggle>
@@ -114,7 +131,7 @@ export default {
       Vue.$cookies.set("language", i18n._vm.locale, "1y");
     },
   },
-  mounted: () => {
+  mounted() {
     if (Vue.$cookies.get("language")) {
       // get language from cookie
       i18n._vm.locale = Vue.$cookies.get("language");
@@ -122,6 +139,21 @@ export default {
       // set German as default language if none is set in cookie
       Vue.$cookies.set("language", "de", "1y");
     }
+
+    // Dark theme if set in user preferences
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      // dark mode
+      this.$vuetify.theme.dark = true;
+    }
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        this.$vuetify.theme.dark = e.matches;
+      });
   },
 };
 </script>
