@@ -15,8 +15,10 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
+	chiprometheus "github.com/edjumacator/chi-prometheus"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 )
 
@@ -29,6 +31,9 @@ func main() {
 	}
 
 	router := chi.NewRouter()
+	m := chiprometheus.NewMiddleware("altklausur_web_service")
+
+	router.Use(m)
 	// Add CORS middleware around every request
 	// See https://github.com/rs/cors for full option listing
 	router.Use(cors.New(cors.Options{
@@ -96,7 +101,7 @@ func main() {
 		r.Handle("/query", srv)
 		r.Get("/adminlogin", authHelper.AdminLoginHandler)
 	})
-
+	router.Handle("/metrics", promhttp.Handler())
 	fmt.Print(
 		"==========================================\n",
 		"Started the backend listening on Port "+port+"\n",
