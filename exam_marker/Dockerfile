@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Specify pdfium version
-ARG PdfiumVersion=4861
+ARG PdfiumVersion=5215
 # Install pkg-config, etc.
 RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && \
     apt-get clean && \
