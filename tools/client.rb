@@ -45,9 +45,7 @@ read = true
 profs = []
 while read do
   examinators.each do |examinator|
-    unless examinator.title.nil?
-      profs.push(examinator)
-    end
+    profs.push(examinator)
   end
   examinators = examinators.pages.next
   read = !(examinators.nil?)

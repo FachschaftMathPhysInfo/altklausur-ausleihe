@@ -23,6 +23,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
+	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
@@ -104,7 +105,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	// check file size
 	if input.File.Size < 512 && fileBuf.Len() < 512 {
 		// TODO: implement DB rollback here!
-		return nil, fmt.Errorf("File is not valid: size of %d too small, buffer size %d", input.File.Size, fileBuf.Len())
+		return nil, fmt.Errorf("File is not valid: size of %s too small, buffer size %s", humanize.Bytes(uint64(input.File.Size)), humanize.Bytes(uint64(fileBuf.Len())))
 	}
 
 	// check file MIME type
