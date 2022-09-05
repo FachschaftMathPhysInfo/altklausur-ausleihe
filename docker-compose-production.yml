@@ -4,6 +4,7 @@ version: '3.0'
 services:
   db:
     image: postgres:13.0
+    restart: always
     env_file:
       - env_files/postgres-credentials.env
     volumes:
@@ -21,6 +22,7 @@ services:
       dockerfile: server/Dockerfile
       context: .
     image: "altklausur_ausleihe-backend:latest"
+    restart: always
     ports:
       - "127.0.0.1:3090:8081"
     env_file:
@@ -38,6 +40,7 @@ services:
       dockerfile: exam_marker/Dockerfile
       context: .
     image: "altklausur_ausleihe-exam_marker:latest"
+    restart: always
     env_file:
       - env_files/postgres-credentials.env
       - env_files/minio.env
@@ -56,6 +59,7 @@ services:
         SERVER_WS: wss://altklausuren.mathphys.info/query
         NGINX_CONFIG_NAME: nginx-prod.conf
     image: "altklausur_ausleihe-frontend:latest"
+    restart: always
     ports:
       - "127.0.0.1:3091:80"
     networks:
