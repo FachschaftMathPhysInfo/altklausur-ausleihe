@@ -2,13 +2,13 @@
 #===============================================================================
 #
 #          FILE: test_upload.sh
-# 
+#
 #         USAGE: ./test_upload.sh <input-file>
-# 
-#        AUTHOR: Christian Heusel (christian@heusel.eu), 
+#
+#        AUTHOR: Christian Heusel (christian@heusel.eu),
 #  ORGANIZATION: Fachschaft MathPhysInfo
 #       CREATED: 12/16/2021 15:00
-# 
+#
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
