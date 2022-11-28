@@ -27,14 +27,16 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
+// UUID is the resolver for the UUID field.
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
 	return obj.UUID.String(), nil
 }
 
+// CreateExam is the resolver for the createExam field.
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
 	user, err := getUserInfos(&ctx)
 	if err != nil {
@@ -140,6 +142,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	return &exam, nil
 }
 
+// RequestMarkedExam is the resolver for the requestMarkedExam field.
 func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID string) (*string, error) {
 	// check if we got a valid uuid and also prepare the DB search
 	realUUID, err := uuid.FromString(stringUUID)
@@ -203,6 +206,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	return &stringUUID, nil
 }
 
+// Exams is the resolver for the exams field.
 func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	var exam []*model.Exam
 	r.DB.Find(&exam)
@@ -214,6 +218,7 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
+// GetExam is the resolver for the getExam field.
 func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.PresignedReturn, error) {
 	// check if we got a valid uuid and also prepare the DB search
 	realUUID, err := uuid.FromString(stringUUID)
@@ -291,6 +296,25 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 		nil
 }
 
+// Exam returns generated.ExamResolver implementation.
+func (r *Resolver) Exam() generated.ExamResolver { return &examResolver{r} }
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type examResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func getUserInfos(ctxPtr *context.Context) (*lti_utils.LTIUserInfos, error) {
 	if ctxPtr == nil {
 		return nil, fmt.Errorf("WTF, how is the context for this request nil")
@@ -309,16 +333,3 @@ func getUserInfos(ctxPtr *context.Context) (*lti_utils.LTIUserInfos, error) {
 
 	return &userInfos, nil
 }
-
-// Exam returns generated.ExamResolver implementation.
-func (r *Resolver) Exam() generated.ExamResolver { return &examResolver{r} }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type examResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
