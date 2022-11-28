@@ -25,7 +25,6 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
-	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
 	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
@@ -38,7 +37,7 @@ func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error
 
 // CreateExam is the resolver for the createExam field.
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-	user, err := getUserInfos(&ctx)
+	user, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +157,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	}
 
 	// get all the user infos
-	userInfos, err := getUserInfos(&ctx)
+	userInfos, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +233,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	}
 
 	// get all the user infos
-	userInfos, err := getUserInfos(&ctx)
+	userInfos, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -308,28 +307,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 type examResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func getUserInfos(ctxPtr *context.Context) (*lti_utils.LTIUserInfos, error) {
-	if ctxPtr == nil {
-		return nil, fmt.Errorf("WTF, how is the context for this request nil")
-	}
-
-	_, claims, err := jwtauth.FromContext(*ctxPtr)
-	if err != nil {
-		return nil, err
-	}
-
-	var userInfos lti_utils.LTIUserInfos
-	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
-	if err != nil {
-		return nil, err
-	}
-
-	return &userInfos, nil
-}
