@@ -188,7 +188,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		utils.RMQMarkerTask{
 			ExamUUID:     realUUID,
 			UserID:       userInfos.ID,
-			TextLeft:     userInfos.PersonFullName,
+			TextLeft:     userInfos.PersonFamilyName + " - " + userInfos.PersonFamilyName,
 			TextDiagonal: userInfos.PersonPrimaryEmail,
 		},
 	)

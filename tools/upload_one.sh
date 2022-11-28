@@ -31,7 +31,7 @@ echo $OPERATION_STRING | jq
 
 set -o nounset                               # Treat unset variables as an error
 
-curl $TARGET_HOST \
+curl --silent $TARGET_HOST \
     -H 'Cookie: jwt='"$JWT_TOKEN" \
     -F operations="$OPERATION_STRING" \
     -F map='{ "0": ["variables.input.file"] }' \
