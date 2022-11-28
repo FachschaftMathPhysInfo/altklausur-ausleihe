@@ -25,18 +25,19 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
-	jwtauth "github.com/go-chi/jwtauth/v5"
 	minio "github.com/minio/minio-go/v7"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
+// UUID is the resolver for the UUID field.
 func (r *examResolver) UUID(ctx context.Context, obj *model.Exam) (string, error) {
 	return obj.UUID.String(), nil
 }
 
+// CreateExam is the resolver for the createExam field.
 func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) (*model.Exam, error) {
-	user, err := getUserInfos(&ctx)
+	user, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +141,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	return &exam, nil
 }
 
+// RequestMarkedExam is the resolver for the requestMarkedExam field.
 func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID string) (*string, error) {
 	// check if we got a valid uuid and also prepare the DB search
 	realUUID, err := uuid.FromString(stringUUID)
@@ -155,7 +157,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	}
 
 	// get all the user infos
-	userInfos, err := getUserInfos(&ctx)
+	userInfos, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +188,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		utils.RMQMarkerTask{
 			ExamUUID:     realUUID,
 			UserID:       userInfos.ID,
-			TextLeft:     userInfos.PersonFullName,
+			TextLeft:     userInfos.PersonFamilyName + " - " + userInfos.PersonFamilyName,
 			TextDiagonal: userInfos.PersonPrimaryEmail,
 		},
 	)
@@ -203,6 +205,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	return &stringUUID, nil
 }
 
+// Exams is the resolver for the exams field.
 func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	var exam []*model.Exam
 	r.DB.Find(&exam)
@@ -214,6 +217,7 @@ func (r *queryResolver) Exams(ctx context.Context) ([]*model.Exam, error) {
 	return exam, nil
 }
 
+// GetExam is the resolver for the getExam field.
 func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.PresignedReturn, error) {
 	// check if we got a valid uuid and also prepare the DB search
 	realUUID, err := uuid.FromString(stringUUID)
@@ -229,7 +233,7 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 	}
 
 	// get all the user infos
-	userInfos, err := getUserInfos(&ctx)
+	userInfos, err := lti_utils.GetUserInfosFromContext(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -289,25 +293,6 @@ func (r *queryResolver) GetExam(ctx context.Context, stringUUID string) (*model.
 			DownloadURL: presignedDownloadURL.String(),
 		},
 		nil
-}
-
-func getUserInfos(ctxPtr *context.Context) (*lti_utils.LTIUserInfos, error) {
-	if ctxPtr == nil {
-		return nil, fmt.Errorf("WTF, how is the context for this request nil")
-	}
-
-	_, claims, err := jwtauth.FromContext(*ctxPtr)
-	if err != nil {
-		return nil, err
-	}
-
-	var userInfos lti_utils.LTIUserInfos
-	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
-	if err != nil {
-		return nil, err
-	}
-
-	return &userInfos, nil
 }
 
 // Exam returns generated.ExamResolver implementation.

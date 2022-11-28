@@ -196,3 +196,22 @@ func (l *AuthHelper) createJWTCookie(ltiUser *LTIUserInfos) (*http.Cookie, error
 	jwtCookie := &http.Cookie{Name: "jwt", Value: tokenString, HttpOnly: false, Path: "/"}
 	return jwtCookie, nil
 }
+
+func GetUserInfosFromContext(ctxPtr *context.Context) (*LTIUserInfos, error) {
+	if ctxPtr == nil {
+		return nil, fmt.Errorf("WTF, how is the context for this request nil")
+	}
+
+	_, claims, err := jwtauth.FromContext(*ctxPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	var userInfos LTIUserInfos
+	err = json.Unmarshal([]byte(claims["user"].(string)), &userInfos)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userInfos, nil
+}
