@@ -1,4 +1,4 @@
-FROM golang:1.19-bullseye
+FROM golang:1.19-bullseye AS build
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
@@ -11,5 +11,8 @@ COPY server/lti_utils ./server/lti_utils
 COPY server/server.go server/dummylogin.html ./server/
 COPY utils ./utils
 
-RUN go build -a -o graphQLServer.runnable server/server.go
-ENTRYPOINT ["./graphQLServer.runnable"]
+RUN CGO_ENABLED=0 go build -a -o graphql-server server/server.go
+
+FROM gcr.io/distroless/static-debian11
+COPY --from=build /go/src/graphql-server /
+ENTRYPOINT ["/graphql-server"]
