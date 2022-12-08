@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,9 @@ import (
 )
 
 const defaultPort = "8081"
+
+//go:embed dummylogin.html
+var templateDummylogin string
 
 func main() {
 	port := os.Getenv("PORT")
@@ -73,9 +77,8 @@ func main() {
 	if os.Getenv("DEPLOYMENT_ENV") == "testing" {
 		router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-
 		router.Get("/testlogin", func(w http.ResponseWriter, r *http.Request) {
-			tmpl := template.Must(template.ParseFiles("server/dummylogin.html"))
+			tmpl := template.Must(template.New("dummylogin.html").Parse(templateDummylogin))
 			tmpl.Execute(w, nil)
 		})
 	}
