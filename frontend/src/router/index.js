@@ -1,4 +1,6 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+import App from './App.vue'
+
 import Router from 'vue-router'
 // import LandingPage from '@/components/LandingPage'
 import ExamListComponent from '@/components/ExamList'
@@ -6,9 +8,8 @@ import ApplicationComponent from '@/components/Application'
 import ImpressComponent from '@/components/Impress'
 import PrivacyComponent from '@/components/Privacy'
 
-Vue.use(Router)
 
-export default new Router({
+const router = Router.createRouter({
   routes: [{
       path: '/',
       redirect: '/app/exams'
@@ -36,7 +37,8 @@ export default new Router({
         }
       ]
     },
-    
   ],
   mode: 'history'
 })
+
+createApp(App).use(router)

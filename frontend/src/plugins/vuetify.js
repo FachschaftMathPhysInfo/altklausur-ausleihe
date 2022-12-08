@@ -12,21 +12,18 @@ const vuetify = createVuetify({
   directives,
 })
 
-createApp(App).use(vuetify).mount('#app')
-
-export default new vuetify({
-    theme: {
-        themes: {
-          light: {
-            primary: '#990000',
-            secondary: '#b0bec5',
-            accent: '#8c9eff',
-            error: '#b71c1c',
-          },
-          dark: {
-            primary: "#590d08",
-          },
-        },
+createApp(App).use(vuetify, {
+  theme: {
+    themes: {
+      light: {
+        primary: '#990000',
+        secondary: '#b0bec5',
+        accent: '#8c9eff',
+        error: '#b71c1c',
       },
-});
-
+      dark: {
+        primary: "#590d08",
+      },
+    },
+  },
+}).mount('#app')
