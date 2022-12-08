@@ -27,7 +27,7 @@
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.45",
-    "babel-eslint": "^10.1.0",
+    "@babel/eslint-parser": "^7.5.4",
     "eslint": "^8.29.0",
     "eslint-plugin-vue": "^9.8.0",
     "prettier": "^2.8.1",
@@ -57,7 +57,9 @@
       "prefer-template": "warn"
     },
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@babel/eslint-parser",
+      "ecmaVersion": 8,
+      "requireConfigFile": false
     }
   },
   "browserslist": [
