@@ -11,7 +11,7 @@
   "dependencies": {
     "@vue/compat": "^3.2.45",
     "core-js": "^3.26.1",
-    "graphql": "^16.6.0",
+    "graphql": "^15.5.1",
     "graphql-tag": "^2.12.6",
     "vue": "^3.2.45",
     "vue-apollo": "^3.1.0",
@@ -22,12 +22,12 @@
     "vuetify": "^3.0.4"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.5.4",
     "@intlify/vue-i18n-loader": "^4.2.0",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.45",
-    "@babel/eslint-parser": "^7.5.4",
     "eslint": "^8.29.0",
     "eslint-plugin-vue": "^9.8.0",
     "prettier": "^2.8.1",
