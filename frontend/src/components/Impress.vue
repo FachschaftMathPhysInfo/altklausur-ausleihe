@@ -34,7 +34,7 @@ altklausuren@mathphys.stura.uni-heidelberg.de"
 
 <script>
 export default {
-  name: "Impress",
+  name: "ImpressComponent",
 
   data: () => ({}),
 };

@@ -99,7 +99,7 @@ https://www.baden-wuerttemberg.datenschutz.de"
 
 <script>
 export default {
-  name: "Privacy",
+  name: "PrivacyComponent",
 
   data: () => ({})
 };

@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 // import LandingPage from '@/components/LandingPage'
-import ExamList from '@/components/ExamList'
-import Application from '@/components/Application'
-import Impress from '@/components/Impress'
-import Privacy from '@/components/Privacy'
+import ExamListComponent from '@/components/ExamList'
+import ApplicationComponent from '@/components/Application'
+import ImpressComponent from '@/components/Impress'
+import PrivacyComponent from '@/components/Privacy'
 
 Vue.use(Router)
 
@@ -16,23 +16,23 @@ export default new Router({
     {
       path: '/app/',
       name: 'router.app',
-      component: Application,
+      component: ApplicationComponent,
       children: [
         {
           path: 'exams',
           name: 'router.altklausurausleihe',
-          component: ExamList
+          component: ExamListComponent
         },
         {
           path: 'impress',
           name: 'router.impress',
-          component: Impress
+          component: ImpressComponent
         }
         ,
         {
           path: 'privacy',
           name: 'router.privacy',
-          component: Privacy
+          component: PrivacyComponent
         }
       ]
     },

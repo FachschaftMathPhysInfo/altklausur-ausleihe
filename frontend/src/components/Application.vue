@@ -90,7 +90,7 @@
 import Vue from "vue";
 import i18n from "../i18n";
 export default {
-  name: "Application",
+  name: "ApplicationComponent",
 
   data: () => ({
     search: "",

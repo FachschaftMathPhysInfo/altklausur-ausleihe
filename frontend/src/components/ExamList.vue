@@ -236,7 +236,7 @@ const EXAMS_QUERY = gql`
 `;
 
 export default {
-  name: "ExamList",
+  name: "ExamListComponent",
   components: {},
   data() {
     // const self = this;
