@@ -9,12 +9,13 @@
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""
   },
   "dependencies": {
+    "@apollo/client": "^3.7.2",
+    "@vue/apollo-option": "^4.0.0-alpha.20",
     "@vue/compat": "^3.2.45",
     "core-js": "^3.26.1",
-    "graphql": "^15.5.1",
+    "graphql": "^15.8.0",
     "graphql-tag": "^2.12.6",
     "vue": "^3.2.45",
-    "vue-apollo": "^3.1.0",
     "vue-cli-plugin-apollo": "^0.22.2",
     "vue-cookies": "^1.8.2",
     "vue-i18n": "^9.2.2",
