@@ -46,6 +46,7 @@ services:
     depends_on:
       - db
       - storage
+      - exam_marker
 
   exam_marker:
     build:
