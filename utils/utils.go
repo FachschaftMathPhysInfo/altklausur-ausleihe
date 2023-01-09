@@ -220,9 +220,11 @@ func GetExamCachePath(userID string, examUUID uuid.UUID) string {
 	return userID + "_" + examUUID.String()
 }
 
+// RMQMarkerTask models one of the tasks on the exam queue
 type RMQMarkerTask struct {
 	ExamUUID     uuid.UUID `json:"examuuid"`
 	UserID       string    `json:"userid"`
 	TextLeft     string    `json:"textleft"`
 	TextDiagonal string    `json:"textdiagonal"`
+	SubmitTime   time.Time `json:"submittime"`
 }

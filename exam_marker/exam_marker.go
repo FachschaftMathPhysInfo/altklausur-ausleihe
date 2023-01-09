@@ -43,7 +43,6 @@ var (
 
 type RMQConsumer struct {
 	name        string
-	count       int
 	before      time.Time
 	MinIOClient *minio.Client
 }
@@ -51,7 +50,6 @@ type RMQConsumer struct {
 func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
 	return &RMQConsumer{
 		name:        fmt.Sprintf("consumer%d", tag),
-		count:       0,
 		before:      time.Now(),
 		MinIOClient: minioClient,
 	}
@@ -66,6 +64,8 @@ func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	}
 	log.Printf("%s working on task %q", consumer.name, task.ExamUUID)
 	executeMarkerTask(consumer.MinIOClient, task)
+
+	log.Printf("%s took %v to work on task %q", consumer.name, time.Since(task.SubmitTime), task.ExamUUID)
 
 	if err := delivery.Ack(); err != nil {
 		log.Println(err)

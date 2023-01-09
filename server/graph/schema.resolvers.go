@@ -193,6 +193,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 			UserID:       userInfos.ID,
 			TextLeft:     userInfos.PersonFamilyName + " - " + userInfos.PersonFamilyName,
 			TextDiagonal: userInfos.PersonPrimaryEmail,
+			SubmitTime:   time.Now(),
 		},
 	)
 
