@@ -26,7 +26,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	minio "github.com/minio/minio-go/v7"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -138,6 +138,9 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 		return nil, uploadErr
 	}
 
+	// update the TotalExams metric
+	utils.GetTotalExamsMetric(r.DB)
+
 	return &exam, nil
 }
 
@@ -201,6 +204,8 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	if err := tagQueue.Publish(string(task)); err != nil {
 		return nil, err
 	}
+
+	utils.ExamsMarkedMetric.Inc()
 
 	return &stringUUID, nil
 }
