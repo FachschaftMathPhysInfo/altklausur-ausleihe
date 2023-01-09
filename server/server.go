@@ -35,9 +35,10 @@ func main() {
 	}
 
 	router := chi.NewRouter()
-	m := chiprometheus.NewMiddleware("altklausur_web_service")
 
-	router.Use(m)
+	prometheusMiddleware := chiprometheus.NewMiddleware("altklausur_web_service")
+	router.Use(prometheusMiddleware)
+
 	// Add CORS middleware around every request
 	// See https://github.com/rs/cors for full option listing
 	router.Use(cors.New(cors.Options{
@@ -104,7 +105,12 @@ func main() {
 		r.Handle("/query", srv)
 		r.Get("/adminlogin", authHelper.AdminLoginHandler)
 	})
+
+	// set the TotalExams metric initially
+	utils.GetTotalExamsMetric(db)
+
 	router.Handle("/metrics", promhttp.Handler())
+
 	fmt.Print(
 		"==========================================\n",
 		"Started the backend listening on Port "+port+"\n",
