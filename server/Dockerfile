@@ -8,6 +8,7 @@ RUN go mod download
 
 COPY server/graph ./server/graph
 COPY server/lti_utils ./server/lti_utils
+COPY server/prometheus ./server/prometheus
 COPY server/server.go server/dummylogin.html ./server/
 COPY utils ./utils
 

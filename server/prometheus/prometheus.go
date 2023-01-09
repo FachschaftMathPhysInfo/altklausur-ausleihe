@@ -1,4 +1,4 @@
-package utils
+package prometheus
 
 import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"

@@ -15,6 +15,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/prometheus"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	chiprometheus "github.com/edjumacator/chi-prometheus"
 	"github.com/go-chi/chi/v5"
@@ -107,7 +108,7 @@ func main() {
 	})
 
 	// set the TotalExams metric initially
-	utils.UpdateTotalExamsMetric(db)
+	prometheus.UpdateTotalExamsMetric(db)
 
 	router.Handle("/metrics", promhttp.Handler())
 
