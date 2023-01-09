@@ -139,7 +139,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	}
 
 	// update the TotalExams metric
-	utils.GetTotalExamsMetric(r.DB)
+	utils.UpdateTotalExamsMetric(r.DB)
 
 	return &exam, nil
 }

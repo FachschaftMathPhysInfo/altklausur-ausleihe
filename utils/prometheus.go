@@ -21,8 +21,8 @@ var (
 	})
 )
 
-// GetTotalExamsMetric updates the TotalExamsMetric with the current value from the database
-func GetTotalExamsMetric(database *gorm.DB) {
+// UpdateTotalExamsMetric updates the TotalExamsMetric with the current value from the database
+func UpdateTotalExamsMetric(database *gorm.DB) {
 	var count int64
 	database.Model(&model.Exam{}).Count(&count)
 	TotalExamsMetric.Set(float64(count))

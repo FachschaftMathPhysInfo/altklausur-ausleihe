@@ -107,7 +107,7 @@ func main() {
 	})
 
 	// set the TotalExams metric initially
-	utils.GetTotalExamsMetric(db)
+	utils.UpdateTotalExamsMetric(db)
 
 	router.Handle("/metrics", promhttp.Handler())
 
