@@ -10,7 +10,7 @@ import (
 var (
 	// ExamsMarkedMetric is a prometheus metric for the amount of requested exams for watermarking
 	ExamsMarkedMetric = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "altklausur_ausleihe_exams_requested",
+		Name: "altklausur_ausleihe_exams_marked",
 		Help: "The total number of requested exams",
 	})
 
@@ -21,6 +21,7 @@ var (
 	})
 )
 
+// GetTotalExamsMetric updates the TotalExamsMetric with the current value from the database
 func GetTotalExamsMetric(database *gorm.DB) {
 	var count int64
 	database.Model(&model.Exam{}).Count(&count)
