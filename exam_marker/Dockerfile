@@ -38,6 +38,7 @@ COPY server/graph ./server/graph
 COPY server/lti_utils ./server/lti_utils
 
 COPY exam_marker/exam_marker.go ./exam_marker/exam_marker.go
+COPY exam_marker/prometheus ./exam_marker/prometheus
 COPY utils ./utils
 RUN go build -a -o exam_marker.runnable ./exam_marker/exam_marker.go
 
