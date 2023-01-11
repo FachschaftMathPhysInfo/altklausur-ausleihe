@@ -110,6 +110,7 @@ func main() {
 	// set the TotalExams metric initially
 	prometheus.UpdateTotalExamsMetric(db)
 
+
 	router.Handle("/metrics", promhttp.Handler())
 
 	fmt.Print(
