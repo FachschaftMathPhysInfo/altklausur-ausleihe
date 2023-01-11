@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
-	"github.com/adjust/rmq/v3"
+	"github.com/adjust/rmq/v5"
 	render "github.com/brunsgaard/go-pdfium-render"
 	"github.com/kevinburke/nacl"
 	"github.com/kevinburke/nacl/box"
@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	prefetchLimit = 1000
+	prefetchLimit = 10
 	pollDuration  = 100 * time.Millisecond
 	numConsumers  = 5
 
@@ -41,6 +41,7 @@ var (
 	naclSecStr = os.Getenv("NACL_SEC")
 )
 
+// RMQConsumer is a struct that implements the rmq.Consumer Interface
 type RMQConsumer struct {
 	name        string
 	count       int
@@ -48,6 +49,7 @@ type RMQConsumer struct {
 	MinIOClient *minio.Client
 }
 
+// NewRMQConsumer constructs a RMQConsumer with handy defaults
 func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
 	return &RMQConsumer{
 		name:        fmt.Sprintf("consumer%d", tag),
@@ -57,12 +59,17 @@ func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
 	}
 }
 
+// Consume performs the work defined in the delivered task
 func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	// perform task
 	var task utils.RMQMarkerTask
 	if err := json.Unmarshal([]byte(delivery.Payload()), &task); err != nil {
-		// is this the correct error handling?
-		delivery.Reject()
+		log.Println(consumer.name, "Error unpacking json:", err)
+		if err := delivery.Reject(); err != nil {
+			// handle reject error
+			log.Println(consumer.name, "Error rejecting delivery:", err)
+		}
+		return
 	}
 	log.Printf("%s working on task %q", consumer.name, task.ExamUUID)
 	executeMarkerTask(consumer.MinIOClient, task)
@@ -247,7 +254,7 @@ func main() {
 		log.Fatalln("Error while opening RMQ Queue: ", err)
 	}
 
-	if err = tagQueue.StartConsuming(10, time.Second); err != nil {
+	if err = tagQueue.StartConsuming(prefetchLimit, pollDuration); err != nil {
 		log.Fatalln(err)
 	}
 

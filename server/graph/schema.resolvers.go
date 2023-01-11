@@ -201,7 +201,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 	}
 
 	// communicate it to the marker
-	if err := tagQueue.Publish(string(task)); err != nil {
+	if err := tagQueue.PublishBytes(task); err != nil {
 		return nil, err
 	}
 

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
-	"github.com/adjust/rmq/v3"
+	"github.com/adjust/rmq/v5"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"

@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"github.com/adjust/rmq/v3"
+	"github.com/adjust/rmq/v5"
 	"github.com/minio/minio-go/v7"
 	"gorm.io/gorm"
 )
