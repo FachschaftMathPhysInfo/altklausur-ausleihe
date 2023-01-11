@@ -48,6 +48,7 @@ services:
       - env_files/exam_marker.env
     networks:
       - backend-internal
+      - backend
     depends_on:
       - db
       - redis
