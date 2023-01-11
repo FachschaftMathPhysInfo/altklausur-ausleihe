@@ -11,11 +11,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/exam_marker/prometheus"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/adjust/rmq/v5"
 	render "github.com/brunsgaard/go-pdfium-render"
@@ -24,6 +26,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -44,7 +47,6 @@ var (
 // RMQConsumer is a struct that implements the rmq.Consumer Interface
 type RMQConsumer struct {
 	name        string
-	count       int
 	before      time.Time
 	MinIOClient *minio.Client
 }
@@ -53,7 +55,6 @@ type RMQConsumer struct {
 func NewRMQConsumer(minioClient *minio.Client, tag int) *RMQConsumer {
 	return &RMQConsumer{
 		name:        fmt.Sprintf("consumer%d", tag),
-		count:       0,
 		before:      time.Now(),
 		MinIOClient: minioClient,
 	}
@@ -73,6 +74,10 @@ func (consumer *RMQConsumer) Consume(delivery rmq.Delivery) {
 	}
 	log.Printf("%s working on task %q", consumer.name, task.ExamUUID)
 	executeMarkerTask(consumer.MinIOClient, task)
+
+	taskDuration := time.Since(task.SubmitTime)
+	prometheus.WatermarkingTimeHistogram.Observe(float64(taskDuration.Seconds()))
+	log.Printf("%s took %v to work on task %q", consumer.name, taskDuration.Seconds(), task.ExamUUID)
 
 	if err := delivery.Ack(); err != nil {
 		log.Println(err)
@@ -265,6 +270,18 @@ func main() {
 			log.Fatalln(err)
 		}
 	}
+
+	// Expose the registered metrics via HTTP.
+	go func() {
+		port := "8081"
+		http.Handle("/metrics", promhttp.Handler())
+		fmt.Print(
+			"==========================================\n",
+			"Started the exam_marker metrics listening on Port "+port+"\n",
+			"==========================================\n",
+		)
+		log.Fatal(http.ListenAndServe(":"+port, nil))
+	}()
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT)

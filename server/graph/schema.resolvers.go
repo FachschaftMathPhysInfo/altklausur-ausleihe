@@ -22,6 +22,7 @@ import (
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/generated"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/graph/model"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/lti_utils"
+	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/server/prometheus"
 	"github.com/FachschaftMathPhysInfo/altklausur-ausleihe/utils"
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
@@ -139,7 +140,7 @@ func (r *mutationResolver) CreateExam(ctx context.Context, input model.NewExam) 
 	}
 
 	// update the TotalExams metric
-	utils.UpdateTotalExamsMetric(r.DB)
+	prometheus.UpdateTotalExamsMetric(r.DB)
 
 	return &exam, nil
 }
@@ -193,6 +194,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 			UserID:       userInfos.ID,
 			TextLeft:     userInfos.PersonFamilyName + " - " + userInfos.PersonFamilyName,
 			TextDiagonal: userInfos.PersonPrimaryEmail,
+			SubmitTime:   time.Now(),
 		},
 	)
 
@@ -205,7 +207,7 @@ func (r *mutationResolver) RequestMarkedExam(ctx context.Context, stringUUID str
 		return nil, err
 	}
 
-	utils.ExamsMarkedMetric.Inc()
+	prometheus.ExamsMarkedMetric.Inc()
 
 	return &stringUUID, nil
 }
