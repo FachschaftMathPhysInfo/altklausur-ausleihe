@@ -35,6 +35,8 @@ services:
       - backend
     depends_on:
       - db
+      - redis
+      - exam_marker
 
   exam_marker:
     build:
