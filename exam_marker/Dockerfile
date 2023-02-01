@@ -1,4 +1,4 @@
-FROM golang:1.20rc3-bullseye
+FROM golang:1.20-bullseye
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
