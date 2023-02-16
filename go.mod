@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/99designs/gqlgen v0.17.24
-	github.com/adjust/rmq/v5 v5.1.0
+	github.com/adjust/rmq/v5 v5.1.1
 	github.com/brunsgaard/go-pdfium-render v0.0.0-20190126055834-b01df5200e99
 	github.com/dustin/go-humanize v1.0.1
 	github.com/edjumacator/chi-prometheus v0.0.0-20181210190628-e076595e3e86
@@ -13,14 +13,14 @@ require (
 	github.com/go-chi/jwtauth/v5 v5.1.0
 	github.com/henrixapp/go-lti v0.0.2
 	github.com/kevinburke/nacl v0.0.0-20210405173606-cd9060f5f776
-	github.com/minio/minio-go/v7 v7.0.47
+	github.com/minio/minio-go/v7 v7.0.48
 	github.com/pdfcpu/pdfcpu v0.3.13
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rs/cors v1.8.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/vektah/gqlparser/v2 v2.5.1
-	gorm.io/driver/postgres v1.4.6
-	gorm.io/gorm v1.24.3
+	gorm.io/driver/postgres v1.4.7
+	gorm.io/gorm v1.24.5
 )
 
 require (
@@ -44,7 +44,7 @@ require (
 	github.com/hhrutter/tiff v0.0.0-20190829141212-736cae8d0bc7 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/pgx/v5 v5.2.0 // indirect
+	github.com/jackc/pgx/v5 v5.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -73,12 +73,12 @@ require (
 	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/urfave/cli/v2 v2.24.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/image v0.3.0 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/image v0.5.0 // indirect
 	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
