@@ -26,6 +26,8 @@ import (
 	"github.com/minio/minio-go/v7"
 	pdfcpu_api "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -88,16 +90,16 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 	onTop := true
 	update := false
 
-	var watermarks []*pdfcpu.Watermark
+	var watermarks []*model.Watermark
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:20, col: 1 0 0, rot:-90, sc: 0.8 rel, opacity:0.4, off: -260 0", onTop, update, pdfcpu.POINTS)
+	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:20, col: 1 0 0, rot:-90, sc: 0.8 rel, opacity:0.4, off: -260 0", onTop, update, types.POINTS)
 	if err != nil {
 		return err
 	}
 	watermarks = append(watermarks, watermark1)
 
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark2, err := pdfcpu_api.TextWatermark(textDiagonal, "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, pdfcpu.POINTS)
+	watermark2, err := pdfcpu_api.TextWatermark(textDiagonal, "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, types.POINTS)
 	if err != nil {
 		return err
 	}
@@ -141,12 +143,12 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 		png.Encode(buf, img)
 		pagesbuf = append(pagesbuf, bytes.NewReader(buf.Bytes()))
 	}
-	conf := pdfcpu.NewDefaultConfiguration()
+	conf := model.NewDefaultConfiguration()
 	imp := pdfcpu.DefaultImportConfig()
 	imp.Gray = false
 	buf2 := new(bytes.Buffer)
 	pdfcpu_api.ImportImages(nil, buf2, pagesbuf, imp, conf)
-	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), pdfcpu.NewDefaultConfiguration())
+	ctx, err := pdfcpu.Read(bytes.NewReader(buf2.Bytes()), model.NewDefaultConfiguration())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -159,7 +161,7 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 		log.Fatalln(err)
 	}
 	for i, r := range ctx.XRefTable.Table {
-		if cast, ok := r.Object.(pdfcpu.StreamDict); ok {
+		if cast, ok := r.Object.(types.StreamDict); ok {
 
 			encrypted := box.EasySeal([]byte(textLeft), keySec, pkey)
 			encrypted2 := box.EasySeal([]byte(textDiagonal), keySec, pkey)

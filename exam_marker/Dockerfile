@@ -1,4 +1,4 @@
-FROM golang:1.20-bullseye
+FROM golang:1.20.2-bullseye
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
@@ -9,9 +9,9 @@ RUN go mod download
 # Specify pdfium version
 ARG PdfiumVersion=5445
 # Install pkg-config, etc.
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && \
     apt-get clean && \
-    apt-get install -yqq apt-utils pkg-config wget
+    apt-get install -y apt-utils pkg-config wget
 
 # Create .pc file for pkg-config
 RUN mkdir /go/src/extern && echo "\n" \
