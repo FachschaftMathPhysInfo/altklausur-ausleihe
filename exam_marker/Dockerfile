@@ -6,12 +6,13 @@ WORKDIR /go/src
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Specify pdfium version
-ARG PdfiumVersion=5445
 # Install pkg-config, etc.
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && \
     apt-get clean && \
     apt-get install -y apt-utils pkg-config wget
+
+# Specify pdfium version
+ARG PdfiumVersion=5619
 
 # Create .pc file for pkg-config
 RUN mkdir /go/src/extern && echo "\n" \
