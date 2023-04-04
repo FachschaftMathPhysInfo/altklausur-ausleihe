@@ -2,4 +2,4 @@
 
 ## Developing
 
-See [`Development.md`](./Development.md) for more information on how to setup a working test environment.
+See [`DEVELOPING.md`](./DEVELOPING.md) for more information on how to setup a working test environment.
