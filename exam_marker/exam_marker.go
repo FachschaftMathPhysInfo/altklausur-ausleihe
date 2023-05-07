@@ -92,14 +92,14 @@ func applyWatermark(input io.ReadSeeker, output io.Writer, textLeft string, text
 
 	var watermarks []*model.Watermark
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:20, col: 1 0 0, rot:-90, sc: 0.8 rel, opacity:0.4, off: -260 0", onTop, update, types.POINTS)
+	watermark1, err := pdfcpu_api.TextWatermark(textLeft, "font:Courier, points:20, rot:-90, sc: 0.8 rel, opacity:0.4, pos: l,  off: 10 0", onTop, update, types.POINTS)
 	if err != nil {
 		return err
 	}
 	watermarks = append(watermarks, watermark1)
 
 	// Stamp all odd pages of the pdf in red at the right border of the document
-	watermark2, err := pdfcpu_api.TextWatermark(textDiagonal, "font:Helvetica, points:40, col: 1 0 0, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, types.POINTS)
+	watermark2, err := pdfcpu_api.TextWatermark(textDiagonal, "font:Helvetica, points:40, diagonal:1, sc:1 abs, opacity:0.2, pos: c", onTop, update, types.POINTS)
 	if err != nil {
 		return err
 	}
