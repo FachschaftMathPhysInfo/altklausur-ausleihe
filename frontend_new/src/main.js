@@ -14,8 +14,8 @@ loadFonts()
 // internationalization / translation
 const i18n = createI18n({
     allowComposition: true, // you need to specify that!
-    locale: process.env.VUE_APP_I18N_LOCALE || 'de',
-    fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'de',
+    locale: 'de',
+    fallbackLocale: 'de',
     localeDir: 'locales',
     messages: { de, en },
   })
@@ -31,3 +31,9 @@ createApp(App)
   .use(vuetify)
   .use(i18n)
   .mount('#app')
+
+// TODOS:
+// process.env.VARS einfügen
+// SOLVED?: i18n $t in ExamList computed props zum laufen bekommen
+// README schreiben mit commands, npm run dev etc 
+// example https://www.newline.co/@kchan/building-a-graphql-application-with-vue-3-and-apollo--4679b402

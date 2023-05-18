@@ -1,6 +1,94 @@
 <script setup>
-import { ref, computed } from "vue";
-// import { useI18n } from "vue-i18n";
+import { ref, computed, provide } from "vue";
+import { gql } from "@apollo/client/core";
+import {
+  provideApolloClient,
+  useQuery,
+  useResult,
+} from "@vue/apollo-composable";
+import { ApolloClient, InMemoryCache } from "@apollo/client/core";
+import { useI18n } from "vue-i18n";
+
+// fetch all exams
+const EXAMS_QUERY = gql`
+  query {
+    exams {
+      UUID
+      subject
+      moduleName
+      moduleAltName
+      year
+      examiners
+      semester
+    }
+  }
+`;
+
+// Name of the localStorage item
+const AUTH_TOKEN = "apollo-token";
+
+// Http endpoint
+const httpEndpoint = "http://localhost:8081/query";
+// const httpEndpoint = 'http://localhost:8081/query'
+
+// ws endpoint
+// const wsEndpoint = SERVER_WS || 'ws://localhost:8081/query'
+// const wsEndpoint = 'ws://localhost:8081/query'
+
+// Config
+const defaultOptions = {
+  // You can use `https` for secure connection (recommended in production)
+  httpEndpoint,
+  // You can use `wss` for secure connection (recommended in production)
+  // Use `null` to disable subscriptions
+  //   wsEndpoint,
+  // LocalStorage token
+  tokenName: AUTH_TOKEN,
+  // Enable Automatic Query persisting with Apollo Engine
+  persisting: false,
+  // Use websockets for everything (no HTTP)
+  // You need to pass a `wsEndpoint` for this to work
+  websocketsOnly: false,
+  // Is being rendered on the server?
+  ssr: false,
+
+  // Override default apollo link
+  // note: don't override httpLink here, specify httpLink options in the
+  // httpLinkOptions property of defaultOptions.
+
+  // Override default cache
+  cache: new InMemoryCache(),
+
+  // Override the way the Authorization header is set
+  // getAuth: (tokenName) => ...
+
+  // Additional ApolloClient options
+  // apollo: { ... }
+
+  // Client local data (see apollo-link-state)
+  // clientState: { resolvers: { ... }, defaults: { ... } }
+};
+const apolloClient = new ApolloClient(defaultOptions);
+
+provideApolloClient(apolloClient);
+
+const { result, loading, error } = useQuery(EXAMS_QUERY);
+
+const repositories = useResult(result, [], (data) => {
+  data.exams.forEach((exam) => {
+    // Set undefined elements to empty strings
+    Object.keys(exam).forEach((key) => {
+      exam[key] = exam[key] ? exam[key] : "";
+    });
+
+    // combine year and semester to combined semester
+    exam.combinedSemester = `${exam.semester} ${exam.year}`;
+    exam.loading = null;
+    exam.disabled = null;
+  });
+
+  return data.exams;
+});
 
 // UI
 const notAuthenticatedDialog = ref(false);
@@ -15,15 +103,15 @@ const toSemester = ref(null);
 const exams = ref([]);
 const originalExams = ref([]);
 
+const i18n = useI18n();
 const headers = computed(() => {
   return [
     { text: "", value: "data-table-expand" },
     {
-      //   text: $t("examlist.module"),
-      text: "Modul Name",
+      text: i18n.t("examlist.module"),
       value: "moduleName",
     },
-    // { text: $t("examlist.examiner"), value: "examiners" },
+    { text: i18n.t("examlist.examiner"), value: "examiners" },
     { text: "Prüfer", value: "examiners" },
     {
       text: "Semester",
@@ -31,9 +119,9 @@ const headers = computed(() => {
       sortable: true,
       sort: (a, b) => this.semesterSort(a, b),
     },
-    // { text: $t("examlist.subject"), value: "subject" },
+    { text: i18n.t("examlist.subject"), value: "subject" },
     { text: "Fach", value: "subject" },
-    // { text: $t("examlist.download"), value: "download" },
+    { text: i18n.t("examlist.download"), value: "download" },
     { text: "download", value: "download" },
   ];
 });
