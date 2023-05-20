@@ -22,3 +22,7 @@
    ```
 4. Visit http://localhost:8080 to see the project
 5. For the test instance you can go to http://localhost:8080/testlogin to obtain a valid JWT token
+
+## Uploading exams
+
+See the documentation in [`./tools/README.md`](./tools/README.md).

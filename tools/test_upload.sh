@@ -23,7 +23,9 @@ fi
 
 TARGET_HOST='http://localhost:8080/query'
 # TARGET_HOST='https://altklausuren.mathphys.info/query'
-JWT_TOKEN="YOUR.JWT.TOKEN"
 INPUT_FILENAME=$1
 
-TARGET_HOST_ENV=$TARGET_HOST ./upload_one.sh $JWT_TOKEN '{ "subject": "Info", "moduleName": "Betriebssysteme und Netzwerke", "moduleAltName": "IBN, BeNe", "year": 2021, "semester": "SoSe", "examiners": "Helene Fischer", "file": null }' $INPUT_FILENAME
+TARGET_HOST_ENV=$TARGET_HOST ./upload_one.sh \
+    $JWT_TOKEN \
+    '{ "subject": "Info", "moduleName": "Betriebssysteme und Netzwerke", "moduleAltName": "IBN, BeNe", "year": 2021, "semester": "SoSe", "examiners": "Helene Fischer", "file": null }' \
+    $INPUT_FILENAME

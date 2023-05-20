@@ -16,3 +16,16 @@
       ```
 5. Redeem an Admintoken at https://altklausuren.mathphys.info/adminlogin
 6. `$ python uploadscript.py`
+
+## Upload exams in the dev setup
+
+1. Login as regular user http://localhost:8080/testlogin
+2. Redeem an Admintoken at http://localhost:8080/adminlogin
+3. Export it to the environment:
+   ```
+   $ export JWT_TOKEN="..."
+   ```
+3. execute the `test_upload.sh` helper to upload a pdf:
+   ```
+   $ ./test_upload.sh ../server/Test.pdf
+   ```
