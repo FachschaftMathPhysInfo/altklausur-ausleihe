@@ -100,35 +100,34 @@ const moduleName = ref(null);
 const subjects = ["Mathe", "Physik", "Info"];
 const fromSemester = ref(null);
 const toSemester = ref(null);
-const exams = ref([]);
+// const exams = ref([]);
 const originalExams = ref([]);
 
 const i18n = useI18n();
+
 const headers = computed(() => {
   return [
-    { text: "", value: "data-table-expand" },
+    { title: "", key: "data-table-expand" },
     {
-      text: i18n.t("examlist.module"),
-      value: "moduleName",
+      title: i18n.t("examlist.module"),
+      key: "moduleName",
     },
-    { text: i18n.t("examlist.examiner"), value: "examiners" },
-    { text: "Prüfer", value: "examiners" },
+    { title: i18n.t("examlist.examiner"), key: "examiners" },
     {
-      text: "Semester",
-      value: "combinedSemester",
+      title: "Semester",
+      key: "combinedSemester",
       sortable: true,
       sort: (a, b) => this.semesterSort(a, b),
     },
-    { text: i18n.t("examlist.subject"), value: "subject" },
-    { text: "Fach", value: "subject" },
-    { text: i18n.t("examlist.download"), value: "download" },
-    { text: "download", value: "download" },
+    { title: i18n.t("examlist.subject"), key: "subject" },
+
+    { title: i18n.t("examlist.download"), key: "download" },
   ];
 });
 
 const semesters = computed(() => {
-  if (this.exams.length > 0) {
-    return this.exams
+  if (exams.length > 0) {
+    return exams
       .filter((exam) => exam.combinedSemester.trim() != "")
       .map((exam) => ({ name: exam.combinedSemester }))
       .sort((a, b) => this.semesterSort(a.name, b.name));
@@ -321,7 +320,7 @@ function isMobile() {
 <template>
   <div>
     <v-container>
-      <v-row v-if="this.$parent.search">
+      <!-- v-row v-if="this.$parent.search">
         <v-col sm="2">
           <v-text-field
             v-model="moduleName"
@@ -399,13 +398,23 @@ function isMobile() {
             </v-btn>
           </v-btn-toggle>
         </v-col>
-      </v-row>
+      </v-row> -->
+      <!-- :search="this.$parent.search" -->
+
+      <!-- <v-data-table
+        :items-per-page="-1"
+        :headers="headers"
+        :items="exams"
+        item-value="name"
+      ></v-data-table> -->
+
+      <p v-if="loading">Loding...</p>
+      <p>Error: {{ error }}</p>
       <v-data-table
         :headers="headers"
         :items="exams"
         item-key="UUID"
         :items-per-page="-1"
-        :search="this.$parent.search"
         :hide-default-footer="true"
         :show-expand="!isMobile()"
         @item-expanded="getMarkedExamURLFromRow"
@@ -447,6 +456,7 @@ function isMobile() {
             />
           </td>
         </template>
+
         <template v-slot:no-data>
           <span>{{ $t("examlist.no_exams_found") }}</span>
         </template>
