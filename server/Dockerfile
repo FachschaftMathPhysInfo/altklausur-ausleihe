@@ -1,4 +1,4 @@
-FROM golang:1.20.6-bullseye AS build
+FROM golang:1.21.0-bullseye AS build
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
