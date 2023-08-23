@@ -68,7 +68,7 @@ services:
 
   frontend:
     build:
-      context: frontend
+      context: frontend_new
       args:
         SERVER_HTTP: http://localhost:8080/query
         SERVER_WS: ws://localhost:8081/query
