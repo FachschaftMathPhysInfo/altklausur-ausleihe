@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && \
     apt-get install -y apt-utils pkg-config wget
 
 # Specify pdfium version
-ARG PdfiumVersion=5619
+ARG PdfiumVersion=6531
 
 # Create .pc file for pkg-config
 RUN mkdir /go/src/extern && echo "\n" \
