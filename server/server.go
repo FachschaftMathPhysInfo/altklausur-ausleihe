@@ -101,7 +101,7 @@ func main() {
 		// the provided authenticator middleware, but you can write your
 		// own very easily, look at the Authenticator method in jwtauth.go
 		// and tweak it, its not scary.
-		r.Use(jwtauth.Authenticator)
+		r.Use(jwtauth.Authenticator(tokenAuth))
 
 		r.Handle("/query", srv)
 		r.Get("/adminlogin", authHelper.AdminLoginHandler)
@@ -109,7 +109,6 @@ func main() {
 
 	// set the TotalExams metric initially
 	prometheus.UpdateTotalExamsMetric(db)
-
 
 	router.Handle("/metrics", promhttp.Handler())
 
