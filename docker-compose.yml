@@ -17,7 +17,7 @@ services:
       - backend-internal
 
   storage:
-    image: quay.io/minio/minio:RELEASE.2022-09-01T23-53-36Z
+    image: quay.io/minio/minio:RELEASE.2024-06-13T22-53-53Z
     command: server --console-address ":9001" /data
     ports:
       - "9000:9000"
