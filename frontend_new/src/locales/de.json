@@ -1,0 +1,115 @@
+{
+  "message": "hallo internationalisierung !!",
+  "application": {
+    "search_label": "Filter Altklausuren, z.B. nach Prüfenden oder Veranstaltungen",
+    "get_exam": "Altklausur ausleihen",
+    "hand_in": "Altklausur einreichen",
+    "github_project": "GitHub Projekt",
+    "dataprivacy": "Datenschutz",
+    "impress": "Impressum",
+    "title": "Altklausurausleihe",
+    "yourFS": "deiner Fachschaft MathPhysInfo",
+    "toggle_darkmode": "Darkmode umschalten"
+  },
+  "router": {
+    "app": "Applikation",
+    "altklausurausleihe": "Ausklausurausleihe",
+    "privacy": "Datenschutzerklärung",
+    "impress": "Impressum"
+  },
+  "examlist": {
+    "eventname": "Veranstaltungsname",
+    "hint": "Auch Abkürzungen und Varianten werden berücksichtigt",
+    "filter_lecturers": "Prüfende eingrenzen",
+    "from_semester": "ab Semester",
+    "to_semester": "bis Semester",
+    "maths": "Mathematik",
+    "physics": "Physik",
+    "computer_science": "Informatik",
+    "downloaden": "herunterladen",
+    "watermarking": "Wasserzeichen wird hinzugefügt und Altklausur geladen ...",
+    "no_exams_found": "Es wurden keine Klausuren passend zu den Suchkriterien gefunden!",
+    "click_for_explanation": "Klicke hier für Hilfe",
+    "request_failed": "Entschldigung, deine Anfrage ist leider fehlgeschlagen, versuche es später erneut.",
+    "module": "Veranstaltung",
+    "examiner": "Prüfende",
+    "subject": "Fach",
+    "download": "Download"
+  },
+  "impress": {
+    "intro": "Die Fachschaften Mathematik, Physik und Informatik sind Teil der Verfassten Studierendenschaft der Universität Heidelberg – Körperschaft des öffentlichen Rechts.",
+    "intro1": "Ausführliches Impressum hier",
+    "intro2": ". Sie wird durch den",
+    "vorsitz": "Vorsitz der Studierendenschaft",
+    "intro3": "gesetzlich vertreten."
+  },
+  "privacy": {
+    "intro": "Einführung",
+    "content": "Inhalt der Datenschutzerklärung",
+    "header1": "I. Verantwortlich für die Datenverarbeitung und Datenschutzbeauftragte:",
+    "header2": "II. Zweck der Datenverarbeitung",
+    "header3": "III. Verarbeitete Daten",
+    "header4": "IV. Dauer der Speicherung/Löschung",
+    "header5": "V. Beschwerderecht bei der zuständigen Aufsichtsbehörde",
+    "subheader1": "Verbindungsdaten",
+    "subheader2": "Zugangsdaten ",
+    "subheader3": "Inhaltsdaten",
+    "subheader4": "Nutzungsdaten",
+    "subheader5": "Verwendung",
+    "text1": "Altklausuren.mathphys.info ist eine Plattform, auf der Klausuraufgaben aus vergangenen Semestern für Studierende der Universität Heidelberg bereitgestellt werden. Damit wir diesen Service anbieten können, müssen wir personenbezogenen Daten unserer Nutzer speichern und verarbeiten. In unserer Datenschutzerklärung erläutern wir, auf welche Weise wir Ihre Daten nutzen, welche Rechte Sie haben und wer Ihre Ansprechpartner sind.",
+    "text2": "Die Altklausuren und Prüfungsberichte auf der Plattform (altklausuren.mathphys.info) werden zur Ergänzung der wissenschaftlichen Aus- und Weiterbildung an der Universität Heidelberg bereitgestellt. Durch die Anmeldung mithilfe der Uni-ID wird sichergestellt, dass der Benutzer an der Universität eingeschrieben ist und daher ein Zugriffsrecht besitzt. Die weiteren erhobenen Daten dienen der Personalisierung der bereitgestellten Altklausuren und Prüfungsberichte. Dadurch soll verhindert werden, dass der Benutzer ohne die Einverständniserklärung des betroffenen Dozierenden urheberrechtlich geschütztes Material weitergibt.",
+    "text3": "Wir verarbeiten personenbezogene Daten grundsätzlich nur, wenn dies für die Bereitstellung des Angebotes erforderlich ist (Art. 6 Abs. (1) b) DSGVO). Die Verarbeitung Ihrer Daten ist zur Nutzung der Plattform notwendig. Ohne diese Möglichkeit der Verarbeitung Ihrer Daten kann eine Nutzung nicht erfolgen.",
+    "text4": "Bei der Nutzung von altklausuren.mathphys.info werden folgende Daten erhoben:",
+    "text5": "Die Speicherung von Verbindungsdaten, insbesondere der IP-Adresse, durch das System ist notwendig, um eine Auslieferung der Webseite an den Rechner der Nutzer/innen zu ermöglichen. Hierfür muss die IP-Adresse der Nutzer/innen für die Dauer der Sitzung gespeichert bleiben. Die Verbindungsdaten werden ebenfalls in Logfiles gespeichert. Die Daten dienen uns zur Optimierung der Webseite und zur Sicherstellung der Sicherheit unserer informationstechnischen Systeme.",
+    "text6": "Folgende Daten wurden vom Universitätsrechenzentrum der Universität Heidelberg bereits gespeichert und werden bei der Anmeldung automatisch in die Datenbank übertragen:",
+    "text7": "Erläuterung zu Funktionen auf der Plattform: Im Rahmen der Nutzung unseres Dienstes werden Inhalte auf der Plattform in Form von PDF-Dateien bereitgestellt. Nach der Anmeldung kann der Benutzer in der Datenbank nach Prüfungsberichten und Altklausuren suchen. Um eine urheberrechtswidrige Weitergabe der Prüfungsberichte und Altklausuren zu erschweren, wird bei der Einsicht und beim Download von Altklausuren die Uni-ID des Benutzers über die gesamten Seiten verteilt aufgedruckt. Die Daten auf der Webseite können von Dozierenden und Studierenden der Fakultät für Mathematik und Informatik sowie der Fakultät für Physik und Astronomie der Universität Heidelberg eingesehen werden. Die Fachschaft MathPhysInfo beauftragt einzelne Studierende mit der Administration, Systemverwaltung und Weiterentwicklung der Website. Nur diese Personen haben auf die vorstehend genannten Daten Zugriff. Sie verarbeiten diese Daten jedoch nur, soweit dies erforderlich ist, um den ordnungsgemäßen Betrieb der Lernplattform sicherzustellen. ",
+    "text8": "Der Zugriff auf die Inhaltsdaten wird in so genannten Logfiles protokolliert, z.B. zu welcher Zeit welche Nutzer/innen auf welche Klausuren zugreift. Diese Daten sind nur den Administratoren der Plattform zugänglich, nicht jedoch anderen Nutzer/innen. Sie dienen ausschließlich der technischen Optimierung und werden nicht an andere Personen weitergegeben. Die Daten in den Logfiles werden nach 10 Tagen gelöscht.",
+    "text9": "Die Verwendung technischer Cookies dient dazu, die Nutzung der Website für den Benutzer zu vereinfachen. Einige Funktionen können ohne den Einsatz von Cookies nicht angeboten werden. Es werden folgende Cookies eingesetzt: ",
+    "text10": "Verbindungsdaten in den Logfiles des Webservers werden nach 10 Tagen automatisiert gelöscht. Nutzungsdaten werden 10 Tage nach Beendigung des Nutzungsvorgangs automatisiert gelöscht. Jederzeit können Benutzer mittels einer formlosen E-Mail an den Support (root@mathphys.stura.uni-heidelberg.de) weitere Auskunft erhalten.",
+    "text11": "Im Falle eines Verstoßes gegen gesetzliche Bestimmungen zum Schutz der über Sie gespeicherten Daten können Sie sich an die zuständige Aufsichtsbehörde wenden. Die zuständige Aufsichtsbehörde ist",
+    "text12": "Bitte sprechen Sie zuerst den Verantwortlichen bzw. den Datenschutzbeauftragten der Fakultät an. In den meisten Fällen lassen sich dadurch Fragen klären und Beschwerden lösen.",
+    "list1": "Der Anmeldename des Benutzers. Dieser entspricht der Uni-ID bzw. Projekt-ID.",
+    "list2": "Das Kennwort der Uni-ID bzw. Projekt-ID wird überprüft, aber nicht gespeichert.",
+    "list3": "Der Nachname des Benutzers",
+    "list4": "Der Vorname des Benutzers",
+    "list5": "Die E-Mail-Adresse des Nutzers, die von der Universität Heidelberg im Rahmen der Immatrikulation vergeben wurde",
+    "list6": "Session: Dieser Cookie muss erlaubt sein, damit der Login bei den Zugriffen von Seite zu Seite erhalten bleibt. Beim Abmelden oder beim Beenden des Webbrowsers wird der Cookie automatisch gelöscht.",
+    "list7": "UID: Dieses Cookie speichert ausschließlich nach Aktivierung der entsprechenden Checkbox durch den Benutzer den Anmeldenamen im Webbrowser und bleibt auch nach dem Abmelden erhalten."
+  },
+  "help": {
+    "questions_and_answers": [
+      {
+        "question": "Wie finde ich die richtigen Altklausuren von meiner Dozentin/meinem Dozenten oder meinem Fach?",
+        "answer": "Du kannst nach Altklausuren filtern, indem du den Namen der Vorlesung oder der Dozierenden eingibst. Aber du kannst auch nach dem Fach oder Semester suchen. Nachdem du grob gefiltert hast über die Suchleiste am oberen Bildschirmrand, kannst du die Suche weiter verfeinern, indem du den Namen der Dozierenden oder des Moduls eingibst. Außerdem kannst du nach Fach oder Semester filtern. Zusätzlich kannst du nach Semestern, Dozierenden, Fächern und Modulen sortieren."
+      },
+      {
+        "question": "Warum gibt es keine Altklausur zu meinem Modul?",
+        "answer": "Es kann mehrere Gründe geben, weshalb es hier keine Altklausur zu deinem Modul gibt. Ein Grund kann sein, dass wir einfach keine Altklausur zu diesem Modul haben. In diesem Fall kannst du deine Dozierenden gerne fragen, ob sie ihre Altklausur zur Verfügung stellen. Ein anderer Grund kann sein, dass wir - obwohl wir eine Altklausur deiner Dozierenden haben - diese nicht online stellen dürfen, weil die Dozierenden der Veröffentlichung nicht zugestimmt haben. In diesem Fall kannst du zu uns in den Fachschaftsraum kommen und die offline Version der Altklausur ausleihen. Außerdem kannst du deine Dozierenden nett fragen, ob sie ihre Zustimmung für die Veröffentlichung geben könnten."
+      },
+      {
+        "question": "Wieso ist ein Wasserzeichen auf der Altklausur?",
+        "answer": "Die Altklausuren sind mit Wasserzeichen versehen, weil sie nur für den persönlichen Gebrauch vorgesehen sind.  Wir bitten dich darum, die Altklausuren nicht weiterzuverbreiten oder irgendwo hochzuladen. Für den Fall dass jemand eine Altklausur veröffentlicht, lässt sich über das Wasserzeichen nachvollziehen, wer die Altklausur verbreitet hat."
+      },
+      {
+        "question": "Weshalb gibt es dieses System erst jetzt und nicht schon früher?",
+        "answer": "Bisher waren Altklausuren nur offline verfügbar in unserem Fachschaftsbüro. Dies ist immernoch der Fall. Allerdings hat uns die Coronapandemie inspiriert, diesen hilfreichen Service der Fachschaft auch online für unsere Studierenden anzubieten. Aus rechtlichen Gründen musste jedoch erst die Einwilligung der jeweiligen Dozierenden eingeholt werden. Außerdem musste diese Plattform erst einmal entwickelt werden, was auch etwas Zeit in Anspruch genommen hat."
+      },
+      {
+        "question": "Darf ich die Dokumente weiterverteilen?",
+        "answer": "Bitte verbreite die Altklausuren nicht und lade sie auch nicht hoch. Für den Fall, dass jemand Altklausuren hochlädt, lässt sich dies über das Wasserzeichen nachvollziehen. Die Dozierenden haben ihre Einwilligung als Autoren gegeben unter der Voraussetzung, dass nur ihre Studierenden auf diese zugreifen können. Bitte respektiere die Urheberschaftsrechte der Dozierenden und ihre großzügige Unterstützung in Form von der Bereitstellung ihrer Altklausuren, indem du die Regeln einhältst."
+      },
+      {
+        "question": "Wie kann ich Altklausuren beisteuern?",
+        "answer": "Wenn du eine Altklausur hast, die bisher weder in diesem System aufgelistet ist und auch nicht im Fachschaftsraum verfügbar ist, dann würden wir dich nett bitten, diese bei uns einzureichen. Dies geht über den Knopf im Menü auf der linken Seite, über den du uns eine Email senden kannst, oder du kommst einfach in den Fachschaftsraum. Idealerweise reichst du eine PDF Datei ein, oder noch besser eine TeX Datei. Außerdem wäre es hilfreich, wenn du das Semester, die Veranstaltung und die Dozierenden nennen könntest, sodass wir die Altklausur in unsere Datenbank eintragen können."
+      }
+    ],
+    "help": "Hilfe",
+    "close": "Schließen"
+  },
+  "auth": {
+    "close": "Schließen",
+    "not_authenticated": "Nicht angemeldet",
+    "login": "Anmelden",
+    "text": "Du bist aktuell nicht angemeldet. Bitte melde dich an, indem du dich über Moodle mit deinem Universitätsaccount authentifizierst, um auf diese Plattform zuzugreifen."
+  }
+}
