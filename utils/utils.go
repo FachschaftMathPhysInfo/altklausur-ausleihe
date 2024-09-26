@@ -137,10 +137,17 @@ func InitMinIO() *minio.Client {
 	config := lifecycle.NewConfiguration()
 	config.Rules = []lifecycle.Rule{
 		{
-			ID:     cacheBucket,
+			ID:     cacheBucket + "-expiration",
 			Status: "Enabled",
 			Expiration: lifecycle.Expiration{
 				Days: 1,
+			},
+		},
+		{
+			ID:     cacheBucket + "-deletion",
+			Status: "Enabled",
+			Expiration: lifecycle.Expiration{
+				DeleteMarker: true,
 			},
 		},
 	}
