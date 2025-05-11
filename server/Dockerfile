@@ -1,4 +1,4 @@
-FROM golang:1.22.4-bullseye AS build
+FROM golang:1.24.3-bookworm AS build
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
@@ -14,6 +14,6 @@ COPY utils ./utils
 
 RUN CGO_ENABLED=0 go build -a -o graphql-server server/server.go
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian12
 COPY --from=build /go/src/graphql-server /
 ENTRYPOINT ["/graphql-server"]

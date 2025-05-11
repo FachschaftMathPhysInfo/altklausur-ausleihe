@@ -1,4 +1,4 @@
-FROM golang:1.22.4-bullseye
+FROM golang:1.24.3-bookworm
 MAINTAINER Christian Heusel <christian@heusel.eu>
 
 WORKDIR /go/src
@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && \
     apt-get install -y apt-utils pkg-config wget
 
 # Specify pdfium version
-ARG PdfiumVersion=6531
+ARG PdfiumVersion=7162
 
 # Create .pc file for pkg-config
 RUN mkdir /go/src/extern && echo "\n" \
