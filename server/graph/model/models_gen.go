@@ -2,7 +2,13 @@
 
 package model
 
+type Mutation struct {
+}
+
 type PresignedReturn struct {
 	ViewURL     string `json:"viewUrl"`
 	DownloadURL string `json:"downloadUrl"`
+}
+
+type Query struct {
 }
